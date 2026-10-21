@@ -1,0 +1,19 @@
+# Local Python environments and caches
+.venv/
+.conda-env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Credentials
+.env
+.env.*
+!.env.example
+api.txt
+
+# Temporary files
+*.tmp
+*.log

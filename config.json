@@ -1,0 +1,27 @@
+{
+  "_comment": "草案：字段与默认值由三人在 D1 契约评审后确认，不含任何 Key",
+  "seed": null,
+  "window_seconds": 60,
+  "log": {
+    "total_rows_approx": 50000,
+    "dga_ratio": 0.05
+  },
+  "threshold_candidates": {
+    "H_quantile": [0.99],
+    "F_quantile": [0.99],
+    "I_quantile": [0.01]
+  },
+  "model": {
+    "name": "GLM-4-Flash",
+    "base_url": "",
+    "timeout_seconds": 30,
+    "max_retries": 3,
+    "temperature": 0
+  },
+  "budget": {
+    "max_unique_requests": 800
+  },
+  "paths": {
+    "psl_snapshot": "data/raw/public_suffix_list.dat"
+  }
+}
