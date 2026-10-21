@@ -274,7 +274,7 @@ python -m pip check
 
 ### 7.2 接口契约与同步点
 
-- **D1 三人共同定死三个 schema** 并作为契约文件入库：日志列（2.2 定义的 `event_id, timestamp, client_ip, qname, qtype, label, source, algorithm, split`）、`features.csv` 列、`llm_cache.jsonl` 字段；之后改格式必须全员同意。
+- **D1 三人共同定死三个 schema** 并作为契约文件入库：草案已建在根目录 `SCHEMA.md`（覆盖日志列、splits、dga_domains、features.csv、llm_cache.jsonl 的字段级定义），D1 评审定稿后将状态改为"v1 已定稿"；之后改格式必须全员同意，变更规则见 SCHEMA.md 第 6 节。
 - **D3 晚**：A 先交固定 seed 的 500 行小样本，B 不必等待 5 万行全量即可开工特征；全量日志 D5 前补齐。
 - **D6 检查点**：B 与组长共同过阈值候选和验证集混淆矩阵。
 - **D9**：B 协助测试改判表的"行为告警不放行"逻辑。
