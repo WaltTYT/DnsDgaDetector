@@ -4,16 +4,16 @@ DNS 异常查询检测的规则 + LLM 混合方案，实施范围见 [plan.md](p
 
 ## 开发环境
 
-- Conda 环境：`D:\study\conda-envs\dns-dga`
+- Conda 环境：`D:\study\miniconda\envs\dns-dga`（命名环境 `dns-dga`）
 - Python：3.11.17
 - 核心依赖：dnspython、requests、tldextract、NumPy、pandas、Matplotlib、pytest
 
-`D:\study\miniconda\envs` 当前需要管理员写入权限，所以将项目环境单独放在 D 盘可写目录。通过完整路径激活，无需修改 Conda 全局配置。
+项目环境统一存放在 Miniconda 默认环境目录。`D:\study\miniconda\envs` 对普通用户不可写，创建/删除/重建环境需在管理员终端执行；激活与日常使用不受影响。
 
 环境已创建并通过依赖检查，以及 DNS 报文处理、离线后缀解析、数据计算和图表生成验证。直接依赖版本见 `requirements.txt`。请在自己的终端执行下面的激活命令。
 
 ```powershell
-conda activate D:\study\conda-envs\dns-dga
+conda activate dns-dga
 Set-Location D:\study\AgentWorkPlace\CodexWorkPlace\DnsDgaDetector
 python -c "import sys; print(sys.executable)"
 python -m pip check
@@ -22,18 +22,18 @@ python -m pip check
 也可直接使用解释器，无需激活：
 
 ```powershell
-& "D:\study\conda-envs\dns-dga\python.exe" --version
+& "D:\study\miniconda\envs\dns-dga\python.exe" --version
 ```
 
 ## 从配置重建环境
 
-以下命令用于目标环境尚不存在时，在项目目录中执行。缓存路径设置仅影响当前 PowerShell 会话。
+以下命令用于目标环境尚不存在时，在项目目录中执行。缓存路径设置仅影响当前 PowerShell 会话。缓存目录 `D:\study\miniconda\.cache` 已授予当前用户写权限，普通终端即可执行；`conda env create` 需写入 `envs` 目录，仍建议用**管理员终端**。
 
 ```powershell
 Set-Location D:\study\AgentWorkPlace\CodexWorkPlace\DnsDgaDetector
-$env:CONDA_PKGS_DIRS = 'D:\study\conda-envs\.pkgs'
-$env:PIP_CACHE_DIR = 'D:\study\conda-envs\.pip-cache'
-conda env create --prefix D:\study\conda-envs\dns-dga --file environment.yml
+$env:CONDA_PKGS_DIRS = 'D:\study\miniconda\.cache\pkgs'
+$env:PIP_CACHE_DIR = 'D:\study\miniconda\.cache\pip'
+conda env create -n dns-dga --file environment.yml
 ```
 
 `environment.yml` 固定 Python 版本，并通过 `requirements.txt` 安装直接依赖。间接依赖由 pip 解析；复建后运行 `python -m pip check` 检查兼容性。

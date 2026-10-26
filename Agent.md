@@ -10,7 +10,7 @@
 
 | 技术 | 版本 | 用途 |
 |---|---|---|
-| Python | 3.11.17 | 运行环境（conda：`D:\study\conda-envs\dns-dga`） |
+| Python | 3.11.17 | 运行环境（conda：`D:\study\miniconda\envs\dns-dga`） |
 | dnspython | 2.9.0 | DNS 查询与报文解码（教材原理复现） |
 | tldextract | 5.4.0 | 公共后缀/可注册域解析（必须离线，禁止联网更新 PSL） |
 | numpy / pandas | 2.4.6 / 3.0.6 | 特征统计与数据处理 |
@@ -93,7 +93,7 @@ DnsDgaDetector/
 ## 6. 测试指南
 
 ```powershell
-& "D:\study\conda-envs\dns-dga\python.exe" -m pytest tests/ -v
+& "D:\study\miniconda\envs\dns-dga\python.exe" -m pytest tests/ -v
 ```
 
 - `test_features.py`（组员B）、`test_decisions.py`、`test_evaluate.py`（组长）
@@ -102,7 +102,7 @@ DnsDgaDetector/
 ## 7. 部署 / 运行
 
 ```powershell
-conda activate D:\study\conda-envs\dns-dga
+conda activate dns-dga
 python run_all.py            # 参数与在线/离线模式待实现（D11）
 ```
 
@@ -134,7 +134,7 @@ python run_all.py            # 参数与在线/离线模式待实现（D11）
 
 ## 9. 已知约束
 
-- conda 环境放在 `D:\study\conda-envs\dns-dga`（`D:\study\miniconda\envs` 需管理员权限，勿改回）
+- conda 环境统一放在 `D:\study\miniconda\envs\dns-dga`（`D:\study\miniconda\envs` 对普通用户不可写：创建/删除/重建环境需管理员终端，激活与使用不受影响）
 - 日志总量约 50,000 行、LLM 唯一请求预算约 800，超出须按固定 seed 分层抽样且全方案共用缩小后的测试集
 - 时间不足砍项顺序见 plan.md 六（核心链路不可砍）
 - `report/实习报告.docx` 不建占位，D13 由 Markdown 转换生成

@@ -163,18 +163,18 @@ DnsDgaDetector/
 
 **D3 检查点**：相同 seed 可重建相同输入；各集合注册域不重叠；标签无冲突、时间可解析且排序正确；数据包含难负样本和难正样本，而非要求两类肉眼可分。
 
-**D1 环境方案**：本机使用 Miniconda，`conda.exe` 位于 `D:\study\miniconda\Scripts\conda.exe`，检查时版本为 `26.5.3`。由于 `D:\study\miniconda\envs` 对普通用户不可写，项目环境固定放在 `D:\study\conda-envs\dns-dga`，Conda 与 pip 安装缓存也放在 D 盘。目标环境尚不存在时，在项目根目录执行以下复建命令；若已经安装，则只需激活与验证，无需重复创建。
+**D1 环境方案**：本机使用 Miniconda，`conda.exe` 位于 `D:\study\miniconda\Scripts\conda.exe`，检查时版本为 `26.5.3`。项目环境统一存放在默认环境目录 `D:\study\miniconda\envs\dns-dga`（命名环境 `dns-dga`）；该目录对普通用户不可写，创建/删除/重建环境需在管理员终端执行，激活与日常使用不受影响。Conda 与 pip 安装缓存统一放在 `D:\study\miniconda\.cache`（已授予当前用户写权限，普通终端可写）。目标环境尚不存在时，在项目根目录以管理员终端执行以下复建命令；若已经安装，则只需激活与验证，无需重复创建。
 
 ```powershell
-$env:CONDA_PKGS_DIRS = 'D:\study\conda-envs\.pkgs'
-$env:PIP_CACHE_DIR = 'D:\study\conda-envs\.pip-cache'
-conda env create --prefix D:\study\conda-envs\dns-dga --file environment.yml
-conda activate D:\study\conda-envs\dns-dga
+$env:CONDA_PKGS_DIRS = 'D:\study\miniconda\.cache\pkgs'
+$env:PIP_CACHE_DIR = 'D:\study\miniconda\.cache\pip'
+conda env create -n dns-dga --file environment.yml
+conda activate dns-dga
 python --version
 python -m pip check
 ```
 
-不方便激活时可执行 `conda run --prefix D:\study\conda-envs\dns-dga python -m pip check`。直接依赖及已验证版本记录在 `requirements.txt`，间接依赖由 pip 解析，复建后需再次检查兼容性。复建说明与验证结果维护在 `README.md`；环境安装不代表真实 DNS 抓包或模型 API 冒烟测试已完成。
+不方便激活时可执行 `conda run -n dns-dga python -m pip check`。直接依赖及已验证版本记录在 `requirements.txt`，间接依赖由 pip 解析，复建后需再次检查兼容性。复建说明与验证结果维护在 `README.md`；环境安装不代表真实 DNS 抓包或模型 API 冒烟测试已完成。
 
 ### 阶段2：教材原理复现 + 特征工程（D4–D6）
 
