@@ -1,7 +1,7 @@
 """评估：两方案混淆矩阵与指标对比。
 
 负责人：组长（D10–D12）
-参考：plan.md 2.2 双口径、阶段4 指标定义
+参考：docs/specs/project-roadmap.md 2.2 双口径、阶段4 指标定义
 
 待实现要点：
 - 主口径：聚合样本 (client_ip, window_start, qname) 上计算 TP/FP/FN/TN

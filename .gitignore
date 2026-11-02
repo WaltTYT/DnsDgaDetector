@@ -17,3 +17,23 @@ api.txt
 # Temporary files
 *.tmp
 *.log
+
+# Local copy of 360netlab/DGA examples pending dataset-level rights review
+data/raw/snapshots/360netlab_dga/
+data/raw/public_dga__360netlab_dga.csv
+
+# Mendeley source is local-only pending upstream rights review and exceeds GitHub's file limit
+data/raw/snapshots/mendeley/dga_legit.csv
+
+# Mendeley-derived samples remain local until upstream redistribution rights are confirmed
+data/raw/hard_negative__mendeley_legit_subdomains.txt
+data/raw/public_dga__mendeley.csv
+data/raw/mendeley_selection_evidence.csv
+
+# Full upstream snapshot is retained locally; the curated CC BY input is tracked
+data/raw/snapshots/majestic/majestic_million.csv
+
+# Generated outputs contain Mendeley-derived samples and remain local pending rights review
+data/normal_domains.txt
+data/splits.csv
+data/dns_log.csv

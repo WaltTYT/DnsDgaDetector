@@ -1,10 +1,32 @@
 {
-  "_comment": "草案：字段与默认值由三人在 D1 契约评审后确认，不含任何 Key",
-  "seed": null,
+  "_comment": "非敏感运行参数；不含任何 API Key",
+  "seed": 20261101,
   "window_seconds": 60,
   "log": {
     "total_rows_approx": 50000,
-    "dga_ratio": 0.05
+    "dga_ratio": 0.05,
+    "simulation_start_utc": "2026-11-01T00:00:00.000Z",
+    "split_period_hours": 24,
+    "client_pool_size": 100,
+    "active_client_fraction": 0.20,
+    "active_event_fraction": 0.50,
+    "normal_behavior_ratio": {
+      "routine": 0.80,
+      "burst": 0.20
+    },
+    "dga_behavior_ratio": {
+      "high_frequency": 0.40,
+      "low_frequency": 0.35,
+      "word_digit": 0.25
+    },
+    "mixed_window_fraction": 0.20,
+    "qtype_weights": {
+      "A": 0.80,
+      "AAAA": 0.15,
+      "CNAME": 0.03,
+      "TXT": 0.01,
+      "NS": 0.01
+    }
   },
   "threshold_candidates": {
     "H_quantile": [0.99],
@@ -13,10 +35,11 @@
   },
   "model": {
     "name": "GLM-4-Flash",
-    "base_url": "",
+    "base_url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
     "timeout_seconds": 30,
     "max_retries": 3,
-    "temperature": 0
+    "temperature": 0,
+    "max_tokens": 32
   },
   "budget": {
     "max_unique_requests": 800

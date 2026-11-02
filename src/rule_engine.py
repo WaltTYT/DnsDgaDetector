@@ -1,7 +1,7 @@
 """规则检测引擎。
 
 负责人：组员B（D6）
-参考：plan.md 2.3 规则定义
+参考：docs/specs/project-roadmap.md 2.3 规则定义
 
 待实现要点：
 - E = 熵规则命中；B = 频率规则命中 OR 间隔规则命中

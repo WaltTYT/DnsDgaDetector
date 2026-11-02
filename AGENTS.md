@@ -1,16 +1,16 @@
-# Agent.md — DNS DGA Detector 项目 Agent 工作规范
+# AGENTS.md — DNS DGA Detector 项目 Agent 工作规范
 
 ## 1. 项目概述
 
 - **项目名称**：DnsDgaDetector（DNS 异常查询检测的规则 + LLM 混合方案）
 - **性质**：网络技术综合实习课程项目（谢希仁《计算机网络》第8版 第6章 应用层），3 人团队，14 天周期
-- **总纲**：所有任务、验收要点、分工与实验约定以 [plan.md](plan.md) 为唯一权威来源
+- **总纲**：所有任务、验收要点、分工与实验约定以 [项目路线图](docs/specs/project-roadmap.md) 为唯一权威来源
 
 **技术栈**：
 
 | 技术 | 版本 | 用途 |
 |---|---|---|
-| Python | 3.11.17 | 运行环境（conda：`D:\study\miniconda\envs\dns-dga`） |
+| Python | 3.11.17 | 运行环境（Conda 环境名：`dns-dga`；Miniconda 示例安装目录：`%LOCALAPPDATA%\Miniconda3`，按用户本机路径调整） |
 | dnspython | 2.9.0 | DNS 查询与报文解码（教材原理复现） |
 | tldextract | 5.4.0 | 公共后缀/可注册域解析（必须离线，禁止联网更新 PSL） |
 | numpy / pandas | 2.4.6 / 3.0.6 | 特征统计与数据处理 |
@@ -25,6 +25,8 @@
 
 ### 2.1 基本原则
 
+- **文档位置约定**：设计文档（包括技术方案、数据契约）统一放在 `docs/plans/`；实现计划、阶段路线和任务拆解统一放在 `docs/specs/`。
+- **根目录文件约定**：`README.md` 保持为项目入口，`AGENTS.md` 保持为 Agent 工作规范；依赖清单及构建工具约定的配置文件（如 `requirements.txt`、`environment.yml`）保留在根目录。
 - 每一次执行任务时，都必须先检查用户配置和项目记忆中的偏好设置
 - 按要求执行，不多不少
 - 除非绝对必要，否则绝不创建文件；优先编辑现有文件，而非创建新文件
@@ -35,16 +37,16 @@
 
 ### 2.2 项目特有规则（重要）
 
-- **骨架文件保护**：`src/`、`tests/`、`run_all.py` 当前仅含 docstring 规格说明，实现代码由三位分工负责人自行编写（见 plan.md 7.1）。除非用户明确要求代写某个模块，否则 Agent 不得填充实现代码，也不得删改 docstring 中的规格要点
-- **接口契约**：`data/dns_log.csv`、`data/splits.csv`、`data/dga_domains.csv`、`results/features.csv` 的表头是三人评审的契约，修改前必须获得用户确认
+- **骨架文件保护**：`src/`、`tests/`、`run_all.py` 当前仅含 docstring 规格说明，实现代码由三位分工负责人自行编写（见 `docs/specs/project-roadmap.md` 7.1）。除非用户明确要求代写某个模块，否则 Agent 不得填充实现代码，也不得删改 docstring 中的规格要点
+- **数据契约**：五类共享数据产物以 `docs/plans/data-contracts.md` v1 为准：`data/dns_log.csv`、`data/splits.csv`、`data/dga_domains.csv`、`results/features.csv`、`results/llm_cache.jsonl`。项目维护者负责版本管理；无需逐个组员审批。兼容性破坏变更时升级版本并同步更新生产者、消费者和测试。
 - **数据隔离红线**：任何代码不得让基线阈值拟合或提示模板读取 split=test 的数据；`label/source/algorithm/split` 元数据不得进入特征或 LLM 输入
 - **冻结点**：D7 后规则阈值、提示模板、模型配置冻结，改动需说明理由
 
 ### 2.3 任务开始前 / 执行规则
 
-- 检查可用技能与记忆上下文，确认是否有 plan.md 相关的历史决定
+- 检查可用技能与记忆上下文，确认是否有 `docs/specs/project-roadmap.md` 相关的历史决定
 - 复杂多步骤任务先用 TodoWrite 规划；需求不明确时先向用户提问
-- 实现阶段严格对照 plan.md 对应小节（如 2.3 特征表、2.4 改判表），不自行发明口径
+- 实现阶段严格对照 `docs/specs/project-roadmap.md` 对应小节（如 2.3 特征表、2.4 改判表），不自行发明口径
 - 验证阶段优先运行 `pytest tests/` 与最小样例复算，不承诺未经运行的结果
 
 ### 2.4 代码风格规则
@@ -63,12 +65,18 @@
 
 ```
 DnsDgaDetector/
-├── plan.md              # 总纲（权威来源）
+├── AGENTS.md            # Agent 工作规范
+├── README.md            # 项目入口
+├── docs/
+│   ├── plans/
+│   │   └── data-contracts.md   # 数据契约设计
+│   └── specs/
+│       └── project-roadmap.md  # 项目实施路线与验收约定
 ├── config.json          # 窗口/阈值候选/模型/预算，不含 Key
 ├── run_all.py           # 一键流水线（组长，D11）
 ├── data/                # 域名数据、划分、日志（组员A）
 │   └── raw/             # 榜单、公开 DGA、PSL 快照
-├── src/                 # 九个模块，见 plan.md 7.1 分工
+├── src/                 # 九个模块，见 docs/specs/project-roadmap.md 7.1 分工
 ├── prompts/             # LLM 提示模板（版本化）
 ├── tests/               # pytest 三组测试
 ├── results/             # 基线/特征/缓存/指标/运行清单
@@ -79,8 +87,9 @@ DnsDgaDetector/
 
 | 文件 | 用途 |
 |---|---|
-| `plan.md` | 实验约定、检查要点、分工的唯一权威 |
-| `config.json` | 全部可调参数集中管理（草案，待三人评审） |
+| `docs/specs/project-roadmap.md` | 实验约定、检查要点、分工的唯一权威 |
+| `docs/plans/data-contracts.md` | CSV 与缓存字段的共享数据契约 |
+| `config.json` | 全部可调非敏感参数集中管理，不含 API Key |
 | `requirements.txt` / `environment.yml` | 已验证环境锁定版本，勿随意升级 |
 | `prompts/dga_judge_prompt.md` | 提示模板唯一来源，改动即缓存键失效 |
 
@@ -93,7 +102,9 @@ DnsDgaDetector/
 ## 6. 测试指南
 
 ```powershell
-& "D:\study\miniconda\envs\dns-dga\python.exe" -m pytest tests/ -v
+$installRoot = Join-Path $env:LOCALAPPDATA 'Miniconda3' # 按本机 Miniconda 安装目录调整
+$python = Join-Path $installRoot 'envs\dns-dga\python.exe'
+& $python -m pytest tests/ -v
 ```
 
 - `test_features.py`（组员B）、`test_decisions.py`、`test_evaluate.py`（组长）
@@ -134,16 +145,16 @@ python run_all.py            # 参数与在线/离线模式待实现（D11）
 
 ## 9. 已知约束
 
-- conda 环境统一放在 `D:\study\miniconda\envs\dns-dga`（`D:\study\miniconda\envs` 对普通用户不可写：创建/删除/重建环境需管理员终端，激活与使用不受影响）
+- Conda 环境名统一为 `dns-dga`，具体安装目录由用户本机决定。将 Miniconda 安装在用户可写目录时，环境创建、验证与日常运行均无需管理员权限；命令示例中的 `$installRoot` 应按本机路径调整。
 - 日志总量约 50,000 行、LLM 唯一请求预算约 800，超出须按固定 seed 分层抽样且全方案共用缩小后的测试集
-- 时间不足砍项顺序见 plan.md 六（核心链路不可砍）
+- 时间不足砍项顺序见 `docs/specs/project-roadmap.md` 第六节（核心链路不可砍）
 - `report/实习报告.docx` 不建占位，D13 由 Markdown 转换生成
 
 ## 10. Agent 自检清单
 
 每次任务完成前逐项验证：
 
-- [ ] 已对照 plan.md 对应小节，未自创口径
+- [ ] 已对照 `docs/specs/project-roadmap.md` 对应小节，未自创口径
 - [ ] 未填充分工负责人的实现代码（除非被明确要求）
 - [ ] 未修改契约表头/冻结配置（或已获用户确认）
 - [ ] 无基线/提示读取测试集、无元数据泄漏进特征或 LLM 输入

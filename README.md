@@ -1,45 +1,70 @@
 # DNS DGA Detector
 
-DNS 异常查询检测的规则 + LLM 混合方案，实施范围见 [plan.md](plan.md)。
+DNS 异常查询检测的规则 + LLM 混合方案，实施范围见 [项目路线图](docs/specs/project-roadmap.md)。
+
+## 项目文档
+
+- [项目路线图与实施计划](docs/specs/project-roadmap.md)
+- [D1 设计文档](docs/plans/d1-foundation-design.md)
+- [D1 实现计划](docs/specs/d1-implementation-plan.md)
+- [数据契约 v1](docs/plans/data-contracts.md)
+- [D2 数据准备设计](docs/plans/d2-data-preparation-design.md)
+- [D2 数据准备实现计划](docs/specs/d2-data-preparation-implementation-plan.md)
 
 ## 开发环境
 
-- Conda 环境：`D:\study\miniconda\envs\dns-dga`（命名环境 `dns-dga`）
+- 当前执行机器的 Miniconda：`%LOCALAPPDATA%\Miniconda3`
+- Conda 环境：`%LOCALAPPDATA%\Miniconda3\envs\dns-dga`（命名环境 `dns-dga`）
 - Python：3.11.17
 - 核心依赖：dnspython、requests、tldextract、NumPy、pandas、Matplotlib、pytest
 
-项目环境统一存放在 Miniconda 默认环境目录。`D:\study\miniconda\envs` 对普通用户不可写，创建/删除/重建环境需在管理员终端执行；激活与日常使用不受影响。
+本机环境使用仓库中的 `environment.yml` 和 `requirements.txt` 创建；七项直接依赖已按锁定版本安装，`python -m pip check` 通过。其他组员可以将 Miniconda 安装在自己的用户目录，按各自安装路径调整解释器命令。
 
-环境已创建并通过依赖检查，以及 DNS 报文处理、离线后缀解析、数据计算和图表生成验证。直接依赖版本见 `requirements.txt`。请在自己的终端执行下面的激活命令。
-
-```powershell
-conda activate dns-dga
-Set-Location D:\study\AgentWorkPlace\CodexWorkPlace\DnsDgaDetector
-python -c "import sys; print(sys.executable)"
-python -m pip check
-```
-
-也可直接使用解释器，无需激活：
+若本机尚未创建 `dns-dga`，在仓库根目录的 PowerShell 中执行以下命令。首次使用 defaults channel 时，Conda 可能要求用户查看并接受相应服务条款；不要在未阅读和同意时绕过提示。
 
 ```powershell
-& "D:\study\miniconda\envs\dns-dga\python.exe" --version
+$installRoot = Join-Path $env:LOCALAPPDATA 'Miniconda3'
+$conda = Join-Path $installRoot 'Scripts\conda.exe'
+$env:CONDA_PKGS_DIRS = Join-Path $installRoot '.cache\pkgs'
+$env:PIP_CACHE_DIR = Join-Path $installRoot '.cache\pip'
+New-Item -ItemType Directory -Force $env:CONDA_PKGS_DIRS, $env:PIP_CACHE_DIR | Out-Null
+& $conda env create --file environment.yml
 ```
 
-## 从配置重建环境
-
-以下命令用于目标环境尚不存在时，在项目目录中执行。缓存路径设置仅影响当前 PowerShell 会话。缓存目录 `D:\study\miniconda\.cache` 已授予当前用户写权限，普通终端即可执行；`conda env create` 需写入 `envs` 目录，仍建议用**管理员终端**。
+创建后用项目解释器验证：
 
 ```powershell
-Set-Location D:\study\AgentWorkPlace\CodexWorkPlace\DnsDgaDetector
-$env:CONDA_PKGS_DIRS = 'D:\study\miniconda\.cache\pkgs'
-$env:PIP_CACHE_DIR = 'D:\study\miniconda\.cache\pip'
-conda env create -n dns-dga --file environment.yml
+$python = Join-Path $env:LOCALAPPDATA 'Miniconda3\envs\dns-dga\python.exe'
+& $python --version
+& $python -m pip check
 ```
 
-`environment.yml` 固定 Python 版本，并通过 `requirements.txt` 安装直接依赖。间接依赖由 pip 解析；复建后运行 `python -m pip check` 检查兼容性。
+直接依赖版本以 `requirements.txt` 为准。日常也可直接调用该环境的 `python.exe`，无需修改 PATH 或激活环境。
+
+## D2 数据准备
+
+来源整理输入位于 `data/raw/` 顶层，按来源分别保存；`data/raw/snapshots/` 中的原始快照不由生成器读取。生成流程只使用本地文件和固定 PSL，不下载数据、不发 DNS 查询。运行前应查看 [`data/sources.md`](data/sources.md) 的许可、标签口径和筛选说明。
+
+```powershell
+$python = Join-Path $env:LOCALAPPDATA 'Miniconda3\envs\dns-dga\python.exe'
+& $python -m src.prepare_data
+```
+
+命令生成 `data/normal_domains.txt`、`data/dga_domains.csv` 和 `data/splits.csv`，并在终端输出 JSON 摘要，包括各来源计数、固定 PSL 下的排除明细、公开 DGA 家族计数、划分比例及输入哈希。手工 DGA 按算法提供数量、唯一数量、碰撞重试数和前三个样本示例。无 eTLD+1 的记录不会进入划分；摘要保留其来源、行号和排除原因。`data/dns_log.csv` 由后续 D3 阶段负责，不会被此命令生成或改写。
+
+Majestic 与 Mendeley 的数据许可和上游来源限制见 [`data/sources.md`](data/sources.md)。尤其是 Mendeley 数据集包含第三方来源，CC BY 4.0 标注不自动授予其上游材料的独立再分发权。许可确认前，Mendeley 派生输入及包含其样本的生成产物仅供本机使用，不得提交或公开分发。公开数据集的 DGA 标签和项目手工生成标签均不构成对域名当前恶意性的独立验证。
 
 ## LLM 接口
 
-实际调用前，在当前 PowerShell 会话中设置 `ZHIPU_API_KEY` 环境变量。不要将密钥写入配置、源码、截图或提交记录。环境安装和本地依赖验证不需要 API Key；模型可用性与免费政策留待 D1 的接口冒烟测试确认。
+官方 HTTP API 端点配置在 `config.json`。真实调用前，在本地为当前用户配置 `ZHIPU_API_KEY`，或在仓库根目录创建仅本机使用的 `api.txt`。不要将密钥写入配置、源码、截图或提交记录。环境创建和单元测试不需要 API Key；依赖检查不代表真实 API 连通性已经验证。
 
-本地便捷方式：将密钥单独粘贴到根目录 `api.txt`（仅一行 Key，该文件已被 `.gitignore` 忽略，切勿提交）。`src/llm_judge.py` 的 `get_api_key()` 会优先读环境变量 `ZHIPU_API_KEY`，未设置时自动回退读取 `api.txt`，无需手动开终端设置。
+`src/llm_judge.py` 的 `get_api_key()` 优先读取环境变量，未设置时回退读取根目录 `api.txt`；该文件已被 `.gitignore` 忽略。配置凭证后，从仓库根目录执行一次真实 JSON 冒烟调用：
+
+```powershell
+$python = Join-Path $env:LOCALAPPDATA 'Miniconda3\envs\dns-dga\python.exe'
+& $python -m src.llm_judge --smoke
+```
+
+冒烟命令最多发送一次请求，不自动重试；只保存脱敏元数据到 `report/evidence/d1_glm_smoke.json`，不保存 Key 或模型原始回复。需成功完成此命令，才能认定当前账号、模型和端点已连通。
+
+本机 D1 实测于 2026-11-01 成功：HTTP 200、JSON 校验通过、耗时 2514 ms。该结果仅证明本次账号与接口连通，不代表检测准确率或后续调用始终可用。

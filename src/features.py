@@ -1,7 +1,7 @@
 """特征计算：域名熵值、窗口频率、查询间隔。
 
 负责人：组员B（D5）
-参考：plan.md 2.2 评估单元、2.3 特征表
+参考：docs/specs/project-roadmap.md 2.2 评估单元、2.3 特征表
 
 待实现要点：
 - 主评估单元 (client_ip, window_start, qname)：UTC 整分钟对齐 60 秒非重叠窗口聚合

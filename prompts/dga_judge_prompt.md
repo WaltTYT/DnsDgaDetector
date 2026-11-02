@@ -13,7 +13,7 @@
 - 没有外部查询证据时，不声称已验证注册信息、信誉或实时解析结果
 - 证据不足返回 uncertain；"有语义"不直接等同于正常
 
-## 输出格式（固定，plan.md 2.4）
+## 输出格式（固定，参见[项目路线图](../docs/specs/project-roadmap.md) 第 2.4 节）
 
 ```json
 {"verdict": "DGA|normal|uncertain", "reason": "一句简短依据"}

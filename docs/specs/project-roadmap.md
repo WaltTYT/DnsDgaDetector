@@ -95,7 +95,7 @@
 
 - `ZHIPU_API_KEY` 优先从环境变量提供，未设置时回退读取根目录 `api.txt`（本地密钥文件，已加入 `.gitignore`，不得提交；代码统一通过 `llm_judge.get_api_key()` 获取，不得各自打开该文件）；模型名、接口地址、超时和并发写入配置。优先实测题目指定的 `GLM-4-Flash`；免费政策、模型可用性和限流以实施时官方说明与账号实测为准，不在计划中假定固定额度或并发。若替换模型，记录原因，并对同一比较组统一模型。
 - 默认串行调用；超时、限流和服务端临时错误使用有上限的指数退避，最多重试 3 次。认证和无效参数错误应明确报错，不反复重试；支持时设置 `temperature=0` 并记录全部生成参数，不承诺输出完全确定。
-- JSON 结果需做枚举与字段校验。缓存键包含规范化输入、模型、提示模板哈希、生成参数和接口标识，保存原始响应、解析结果、耗时与缓存命中状态。缓存与日志不得记录 Key；配置或提示变化后旧缓存不能冒充新结果。
+- JSON 结果需做枚举与字段校验。缓存键包含规范化输入、模型、提示模板哈希、生成参数和接口标识；`llm_cache.jsonl` 只保存成功且通过校验的原始响应、解析结果与耗时。每次运行的缓存命中数和命中率写入指标/运行统计，不作为缓存对象字段。缓存与日志不得记录 Key；配置或提示变化后旧缓存不能冒充新结果。
 - 正式调用前先统计“可复核样本数”和去重后的请求数。主方案每个唯一输入调用一次，基础实验目标控制在约 800 个唯一请求内，另记重试与选做实验；先测 20 个样本估算总耗时。若超预算，按固定 seed 和预先确定的分层规则缩小实验数据，并对所有方案使用同一缩小后的完整测试集，不只挑易判样本。
 - 离线模式绝不请求 API，报告缓存覆盖率；缓存缺失按上表保留告警，不能编造 LLM 结果。正式比较尽量使用完整缓存，否则将未复核比例和降级规则一并展示。
 
@@ -157,24 +157,28 @@ DnsDgaDetector/
 
 | 天 | 任务 | 产出 |
 |---|---|---|
-| D1 | 使用已有 Miniconda 创建独立环境 `dns-dga`，选用 Python 3.11 与 pip；安装并验证 `dnspython requests tldextract numpy pandas matplotlib pytest`，锁定实际版本；完成一次模型 JSON 冒烟调用，确认 Key、模型 ID、免费政策、接口与延迟；建立配置和忽略规则 | 可复用 Conda 环境、模型调用记录、初始配置 |
+| D1 | 使用用户可写位置的 Miniconda 创建独立环境 `dns-dga`，选用 Python 3.11 与 pip；安装并验证 `dnspython requests tldextract numpy pandas matplotlib pytest`，锁定实际版本；由账号负责人在本机配置凭证并完成一次模型 JSON 冒烟调用，确认 Key、模型 ID、免费政策、接口与延迟；建立配置和忽略规则；制定并冻结五类数据契约 v1 | 可复用 Conda 环境、模型调用记录、初始配置、数据契约 v1 |
 | D2 | 获取正常榜单、公开 DGA 数据及 PSL；补充有依据的难负样本；先完成三种手工 DGA 生成逻辑，再去重、检查冲突、按注册域分组划分；记录来源和哈希 | `sources.md`、域名数据、`splits.csv`、`gen_dga.py` |
 | D3 | 按已固定划分生成独立日志，覆盖合法突发、低频 DGA 与词根拼接 DGA；核对日志行、域名、聚合样本三个层次的数量和类别比例 | `gen_log.py`、`dns_log.csv`、数据统计表 |
 
 **D3 检查点**：相同 seed 可重建相同输入；各集合注册域不重叠；标签无冲突、时间可解析且排序正确；数据包含难负样本和难正样本，而非要求两类肉眼可分。
 
-**D1 环境方案**：本机使用 Miniconda，`conda.exe` 位于 `D:\study\miniconda\Scripts\conda.exe`，检查时版本为 `26.5.3`。项目环境统一存放在默认环境目录 `D:\study\miniconda\envs\dns-dga`（命名环境 `dns-dga`）；该目录对普通用户不可写，创建/删除/重建环境需在管理员终端执行，激活与日常使用不受影响。Conda 与 pip 安装缓存统一放在 `D:\study\miniconda\.cache`（已授予当前用户写权限，普通终端可写）。目标环境尚不存在时，在项目根目录以管理员终端执行以下复建命令；若已经安装，则只需激活与验证，无需重复创建。
+**D1 环境方案**：当前执行机器的 Miniconda 安装在 `%LOCALAPPDATA%\Miniconda3`，项目环境名为 `dns-dga`，由仓库中的 `environment.yml` 与 `requirements.txt` 定义。其他组员可使用各自用户可写的 Miniconda 安装目录；文档命令不依赖管理员权限，也不要求所有组员使用同一绝对路径。仅在目标环境不存在时创建；已经存在时直接使用其解释器验证。首次使用 defaults channel 时，若出现服务条款提示，应由操作者阅读并决定是否接受，不得绕过提示。
 
 ```powershell
-$env:CONDA_PKGS_DIRS = 'D:\study\miniconda\.cache\pkgs'
-$env:PIP_CACHE_DIR = 'D:\study\miniconda\.cache\pip'
-conda env create -n dns-dga --file environment.yml
-conda activate dns-dga
-python --version
-python -m pip check
+$installRoot = Join-Path $env:LOCALAPPDATA 'Miniconda3'
+$conda = Join-Path $installRoot 'Scripts\conda.exe'
+$env:CONDA_PKGS_DIRS = Join-Path $installRoot '.cache\pkgs'
+$env:PIP_CACHE_DIR = Join-Path $installRoot '.cache\pip'
+New-Item -ItemType Directory -Force $env:CONDA_PKGS_DIRS, $env:PIP_CACHE_DIR | Out-Null
+& $conda env create --file environment.yml # 仅在 dns-dga 尚不存在时执行
+
+$python = Join-Path $installRoot 'envs\dns-dga\python.exe'
+& $python --version
+& $python -m pip check
 ```
 
-不方便激活时可执行 `conda run -n dns-dga python -m pip check`。直接依赖及已验证版本记录在 `requirements.txt`，间接依赖由 pip 解析，复建后需再次检查兼容性。复建说明与验证结果维护在 `README.md`；环境安装不代表真实 DNS 抓包或模型 API 冒烟测试已完成。
+命令中的 `$installRoot` 可按组员本机安装位置调整。直接依赖及已验证版本记录在 `requirements.txt`，间接依赖由 pip 解析，创建后需再次检查兼容性。复建说明与本机验证结果维护在 `README.md`；环境安装不代表真实 DNS 抓包或模型 API 冒烟测试已完成。
 
 ### 阶段2：教材原理复现 + 特征工程（D4–D6）
 
@@ -270,11 +274,11 @@ python -m pip check
 
 **能力微调**：`dns_demo.py` + 抓包最独立、代码量最小，适合编程较弱的成员；若 B 偏弱，将 `rule_engine.py` 收回给组长，B 只保留 `dns_demo.py` 与 `baseline.py` 统计部分。
 
-**API 账号**：用共享智谱账号注册（D1 由 A 完成冒烟调用），Key 不绑定个人账号。
+**API 账号**：使用团队确定的智谱账号，由账号负责人保管凭证；执行真实冒烟调用时由负责人在运行机器本地配置 Key。不得把 Key 写入仓库、截图或共享记录；其他组员的本机密钥配置不属于当前机器环境说明的范围。
 
 ### 7.2 接口契约与同步点
 
-- **D1 三人共同定死三个 schema** 并作为契约文件入库：草案已建在根目录 `SCHEMA.md`（覆盖日志列、splits、dga_domains、features.csv、llm_cache.jsonl 的字段级定义），D1 评审定稿后将状态改为"v1 已定稿"；之后改格式必须全员同意，变更规则见 SCHEMA.md 第 6 节。
+- **D1 制定并冻结五类数据契约 v1**：见 [data-contracts.md](../plans/data-contracts.md)，覆盖 `dns_log.csv`、`splits.csv`、`dga_domains.csv`、`features.csv`、`llm_cache.jsonl` 的字段级定义。项目维护者负责版本管理；兼容性破坏变更时升级版本并同步更新生产者、消费者和测试，不要求逐个组员审批。
 - **D3 晚**：A 先交固定 seed 的 500 行小样本，B 不必等待 5 万行全量即可开工特征；全量日志 D5 前补齐。
 - **D6 检查点**：B 与组长共同过阈值候选和验证集混淆矩阵。
 - **D9**：B 协助测试改判表的"行为告警不放行"逻辑。

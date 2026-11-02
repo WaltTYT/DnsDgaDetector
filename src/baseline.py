@@ -1,7 +1,7 @@
 """基线拟合：仅用训练集正常数据统计阈值。
 
 负责人：组员B（D5）
-参考：plan.md 2.3 基线与规则
+参考：docs/specs/project-roadmap.md 2.3 基线与规则
 
 待实现要点：
 - 只读 split=train 且 label=0 的数据，禁止触碰验证/测试集
