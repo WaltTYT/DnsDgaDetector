@@ -5,11 +5,27 @@ DNS 异常查询检测的规则 + LLM 混合方案，实施范围见 [项目路�
 ## 项目文档
 
 - [项目路线图与实施计划](docs/specs/project-roadmap.md)
+- [数据契约 v2](docs/plans/data-contracts.md)
 - [D1 设计文档](docs/plans/d1-foundation-design.md)
 - [D1 实现计划](docs/specs/d1-implementation-plan.md)
-- [数据契约 v1](docs/plans/data-contracts.md)
 - [D2 数据准备设计](docs/plans/d2-data-preparation-design.md)
 - [D2 数据准备实现计划](docs/specs/d2-data-preparation-implementation-plan.md)
+- [D3 DNS 查询日志设计](docs/plans/d3-dns-query-log-design.md)
+- [D3 DNS 查询日志实现计划](docs/specs/d3-dns-query-log-implementation-plan.md)
+- [D4–D6 设计（教材复现、特征、规则）](docs/plans/d4-d6-design.md)
+- [D4–D6 实施计划](docs/specs/d4-d6-implementation-plan.md)
+- [D7 提示模板与阈值冻结设计](docs/plans/d7-prompt-and-freeze-design.md)
+- [D7 实现计划](docs/specs/d7-prompt-and-freeze-implementation-plan.md)
+- [D8 LLM 语义改判设计](docs/plans/d8-llm-judge-design.md)
+- [D8 实现计划](docs/specs/d8-llm-judge-implementation-plan.md)
+- [D9 混合方案评估设计](docs/plans/d9-hybrid-evaluation-design.md)
+- [D9 实现计划](docs/specs/d9-hybrid-evaluation-implementation-plan.md)
+- [审查问题修复实现计划](docs/specs/review-findings-fix-implementation-plan.md)
+- [D1–D9 交接文档](docs/plans/d1-d9-handover.md)
+
+## 参考资料
+
+- [课本原文：第 6 章 应用层（DNS 与文件传送协议）](docs/课本原文-第6章-应用层-DNS与FTP.md)
 
 ## 开发环境
 
