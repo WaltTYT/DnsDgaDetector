@@ -4,7 +4,7 @@
 
 **Goal:** 定稿可复用的 LLM 判定提示模板（严格 JSON 三态输出），并在验证集混淆矩阵评审后冻结全部实验参数。
 
-**Architecture:** `prompts/dga_judge_prompt.md` 是唯一模板载体，渲染变量仅 `{qname}`、`{registrable_label}`；模板头部记录版本与 `prompt_template_hash`，供 D8 缓存失效判定。冻结检查点复用 D6 `rule_engine.evaluate_candidates` 的输出，三人确认后把阈值、模型参数、seed 快照写入 `results/run_manifest.json`。
+**Architecture:** `prompts/dga_judge_prompt.md` 是唯一模板载体，渲染变量仅 `{{qname}}`、`{{registrable_label}}`（字面量替换渲染，禁止 str.format，避免与输出 JSON 花括号冲突）；头部元数据区记录版本与 `template_hash`（正文=首个 `---` 之后全部内容，UTF-8 SHA-256 全量 64 位，与契约 §5 一致），供 D8 缓存失效判定。冻结检查点复用 D6 `rule_engine.evaluate_candidates` 的输出，三人确认后把阈值、模型参数、seed 快照写入 `results/run_manifest.json`。
 
 **Tech Stack:** Windows PowerShell、Python 3.11.17、标准库 `hashlib`、`json`、`pathlib`；不新增依赖。
 
@@ -30,9 +30,9 @@
 
 | 名称 | 签名/字段 | 责任 |
 |---|---|---|
-| 模板变量 | `{qname}`, `{registrable_label}` | 仅这两个占位符；禁止出现真值/来源/算法/split |
-| 输出 JSON | `{"verdict":"DGA\|normal\|uncertain","reason":"≤40字"}` | 唯一允许的响应形态；`max_tokens=32` |
-| `template_hash()` | `(path: Path) -> str` | sha256 前 12 位，写入模板头部与 D8 缓存条目 |
+| 模板变量 | `{{qname}}`, `{{registrable_label}}` | 仅这两个占位符，字面量替换渲染；禁止出现真值/来源/算法/split |
+| 输出 JSON | `{"verdict":"DGA\|normal\|uncertain","reason":"≤20字"}` | 唯一允许的响应形态；`max_tokens=32` |
+| `template_hash()` | `(path: Path) -> str` | 正文（首个 `---` 之后）UTF-8 SHA-256 全量 64 位，写入模板头部与 D8 缓存条目 |
 
 ## 验证环境
 
@@ -43,20 +43,20 @@ if (-not (Test-Path $python)) { throw "Python not found: $python" }
 
 ## Task 1：输出格式与变量契约
 
-- [ ] 在模板文件先写"输出格式"节：三态枚举、reason 长度上限、仅输出一个 JSON 对象、禁止围栏外文本；标注该节为 D8 解析器的强约束来源。
-- [ ] 明确渲染规则：`{qname}` 为契约 §1 规范化后的域名，`{registrable_label}` 来自 D5 `extract_label`；两变量之外零输入。
+- [x] 在模板文件先写"输出格式"节：三态枚举、reason 长度上限、仅输出一个 JSON 对象、禁止围栏外文本；标注该节为 D8 解析器的强约束来源。
+- [x] 明确渲染规则：`{{qname}}` 为契约 §1 规范化后的域名，`{{registrable_label}}` 来自 D5 `extract_label`；两变量之外零输入，字面量替换渲染。
 
 ## Task 2：模板正文与 few-shot
 
-- [ ] 写系统角色（DNS 安全分析师）与任务定义（仅凭词形语义判断是否为算法生成域名，行为证据不可见）。
-- [ ] 判定标准三条：随机拼接/无语义组合→DGA；真实词/已知服务→normal；拿不准→uncertain。
-- [ ] few-shot 4 例：2 个明显 DGA、1 个真实词组合正常、1 个难负样本（CDN 哈希子域 → uncertain），全部自造。
-- [ ] 用 `& $python -c` 渲染 2 个测试域名，人工检查最终 prompt 无元数据泄漏。
+- [x] 写系统角色（DNS 安全分析师）与任务定义（仅凭词形语义判断是否为算法生成域名，行为证据不可见）。
+- [x] 判定标准三条：随机拼接/无语义组合→DGA；真实词/已知服务→normal；拿不准→uncertain。
+- [x] few-shot 4 例：2 个明显 DGA、1 个真实词组合正常、1 个难负样本（CDN 哈希子域 → uncertain），全部自造。
+- [x] 渲染 2 个测试域名（脚本字面量替换），人工检查最终 prompt 无元数据泄漏、无残留占位符。
 
 ## Task 3：版本与失效机制
 
-- [ ] 实现 `template_hash()` 并在模板头部记录 `version: v1` 与 hash 值；说明改模板必须升版本、旧 hash 缓存自动失效（契约 §6.2）。
-- [ ] 运行 `& $python -m pytest tests/ -q` 确认无回归（本任务不新增测试文件）。
+- [x] 模板头部记录 `version: v1` 与正文 SHA-256 全量 hash（首个 `---` 之后内容，UTF-8）；写明改模板必须升版本、旧 hash 缓存自动失效（契约 §6.2）；hash 不含头部，自引用无环，写入后二次计算验证一致。
+- [x] 运行 `& $python -m pytest tests/ -q` 确认无回归（274 passed，本任务不新增测试文件）。
 
 ## Task 4：冻结检查点（数据到位后）
 

@@ -37,7 +37,7 @@
 |---|---|---|
 | `VerdictResult` | `verdict, reason, fail_reason, latency_ms, cache_hit, raw_response` | 单次判定结果值对象；`verdict ∈ {DGA, normal, uncertain}`，`fail_reason ∈ {None, timeout, rate_limit, server_error, format_error, no_cache}` |
 | `select_judgeable` | `(features_df: pd.DataFrame) -> pd.DataFrame` | 取 `E==1 AND B==0`，按规范化 `qname` 去重（保留首条聚合键）；输入表头先过契约 §4 校验 |
-| `build_prompt` | `(qname: str, registrable_label: str, template: str) -> str` | 渲染 D7 模板；断言渲染结果不含元数据字段名 |
+| `build_prompt` | `(qname: str, registrable_label: str, template: str) -> str` | 字面量替换 `{{qname}}`/`{{registrable_label}}`（禁止 str.format）；断言渲染结果不含 `source=`/`algorithm=`/`split=` 且无残留占位符；未知 `{{...}}` 报错 |
 | `cache_key` | `(qname, registrable_label, model, template_hash, params, endpoint) -> str` | sha256；params 取 `config.json.model` 全部生成参数 |
 | `parse_verdict` | `(raw_text: str) -> tuple[str, str]` | 容忍代码围栏与首尾空白；枚举校验失败抛 `ValueError`；reason 截断至 120 字 |
 | `call_llm` | `(prompt: str, cfg: dict) -> tuple[str, int]` | 单次 HTTP（timeout、无自动重试）；返回原始文本与延迟 ms；429/5xx/超时抛分类异常 |
@@ -63,28 +63,28 @@ if (-not (Test-Path $python)) { throw "Python not found: $python" }
 
 ## Task 1：筛选与渲染（纯函数，先测后写）
 
-- [ ] 写测试：`E=1,B=0` 才入选；`B=1` 即使 `E=1` 不送审（行为告警不放行）；同 qname 多聚合键去重保留首条；表头不符契约报错。
-- [ ] 写测试：`build_prompt` 输出含 qname 与 registrable_label、不含 `label/source/algorithm/split` 字样；未知占位符报错。
-- [ ] 运行 `& $python -m pytest tests/test_llm_judge.py -q` 确认失败来自接口未定义。
-- [ ] 实现 `select_judgeable`、`build_prompt`；重跑通过。
+- [x] 写测试：`E=1,B=0` 才入选；`B=1` 即使 `E=1` 不送审（行为告警不放行）；同 qname 多聚合键去重保留首条；表头不符契约报错。
+- [x] 写测试：`build_prompt` 输出含 qname 与 registrable_label、不含 `label/source/algorithm/split` 字样；未知占位符报错。
+- [x] 运行 `& $python -m pytest tests/test_llm_judge.py -q` 确认失败来自接口未定义。
+- [x] 实现 `select_judgeable`、`build_prompt`；重跑通过。
 
 ## Task 2：解析与缓存键
 
-- [ ] 测试 `parse_verdict`：合法三态、带围栏、多余空白、缺字段、非法枚举、超长 reason；非法一律抛错。
-- [ ] 测试 `cache_key`：六要素任一变化即不同；相同输入稳定。
-- [ ] 实现两函数；重跑通过。
+- [x] 测试 `parse_verdict`：合法三态、带围栏、多余空白、缺字段、非法枚举、超长 reason；非法一律抛错。
+- [x] 测试 `cache_key`：六要素任一变化即不同；相同输入稳定。
+- [x] 实现两函数；重跑通过。
 
 ## Task 3：调用编排与失败兜底（mock HTTP）
 
-- [ ] 测试 `judge_domain` online：monkeypatch `call_llm` 成功/超时/429/5xx/坏 JSON 五路径，断言 `VerdictResult` 的 verdict 与 fail_reason 映射、退避序列（注入 clock）、最终失败保留 uncertain。
-- [ ] 测试缓存命中不发请求；`offline` 未命中返回 `no_cache` 且零网络调用（socket 封锁自检）。
-- [ ] 实现 `call_llm`、`load_cache`、`append_cache`、`judge_domain`；重跑通过。
+- [x] 测试 `judge_domain` online：monkeypatch `call_llm` 成功/超时/429/5xx/坏 JSON 五路径，断言 `VerdictResult` 的 verdict 与 fail_reason 映射、退避序列（注入 clock）、最终失败保留 uncertain。
+- [x] 测试缓存命中不发请求；`offline` 未命中返回 `no_cache` 且零网络调用（socket 封锁自检）。
+- [x] 实现 `call_llm`、`load_cache`、`append_cache`、`judge_domain`；重跑通过。
 
 ## Task 4：预算守卫与端到端摘要
 
-- [ ] 测试 `budget_guard`：≤800 全放行；超限分层抽样确定性（同 seed 两次一致）、规则 dict 完整。
-- [ ] 测试 `run_judging` 端到端（tmp_path 造 features.csv + mock 调用）：摘要计数与逐条结果可复算；受限列不出现在任何输出。
-- [ ] 实现 `run_judging`、`main`（保留 `--smoke`）；`& $python -m pytest tests/ -q` 全套无回归。
+- [x] 测试 `budget_guard`：≤800 全放行；超限分层抽样确定性（同 seed 两次一致）、规则 dict 完整。
+- [x] 测试 `run_judging` 端到端（tmp_path 造 features.csv + mock 调用）：摘要计数与逐条结果可复算；受限列不出现在任何输出。
+- [x] 实现 `run_judging`、`main`（保留 `--smoke`）；`& $python -m pytest tests/ -q` 全套无回归。
 
 ## Task 5：真实批量改判（数据到位后）
 

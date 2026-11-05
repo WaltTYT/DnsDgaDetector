@@ -58,26 +58,26 @@ if (-not (Test-Path $python)) { throw "Python not found: $python" }
 
 ## Task 1：手算基准与写回公式（先测后写）
 
-- [ ] 在 `tests/test_evaluate.py` 用 8 行手算 fixture（覆盖 E/B/verdict 全组合：含 B=1 不放行、uncertain 保留、fail 保留、normal 撤回、na 未送审）断言 `apply_hybrid` 三列逐值正确、列序符合契约。
-- [ ] 断言 `hybrid` 公式与契约逐字一致：任何 `B=1` 行 hybrid=1，无论 verdict。
-- [ ] 运行 `& $python -m pytest tests/test_evaluate.py -q` 确认失败来自接口未定义；实现后重跑通过。
+- [x] 在 `tests/test_evaluate.py` 用 8 行手算 fixture（覆盖 E/B/verdict 全组合：含 B=1 不放行、uncertain 保留、fail 保留、normal 撤回、na 未送审）断言 `apply_hybrid` 三列逐值正确、列序符合契约。
+- [x] 断言 `hybrid` 公式与契约逐字一致：任何 `B=1` 行 hybrid=1，无论 verdict。
+- [x] 运行 `& $python -m pytest tests/test_evaluate.py -q` 确认失败来自接口未定义；实现后重跑通过。
 
 ## Task 2：指标与改判明细
 
-- [ ] 测试 `compute_metrics`：fixture 混淆矩阵手算 TP/FP/FN/TN/fpr/fnr/precision/recall 全对；空分母记 None。
-- [ ] 测试 `reversal_detail` 四类计数与样本摘录上限。
-- [ ] 实现两函数；重跑通过。
+- [x] 测试 `compute_metrics`：fixture 混淆矩阵手算 TP/FP/FN/TN/fpr/fnr/precision/recall 全对；空分母记 None。
+- [x] 测试 `reversal_detail` 四类计数与样本摘录上限。
+- [x] 实现两函数；重跑通过。
 
 ## Task 3：子集关系断言
 
-- [ ] 测试 `assert_subset_property`：正常 fixture 通过；人为构造 hybrid FP 超出 rule FP 的反例必须抛 AssertionError 并给出聚合键。
-- [ ] 实现并测试 test/val 双 split 调用路径；重跑通过。
+- [x] 测试 `assert_subset_property`：正常 fixture 通过；人为构造 hybrid FP 超出 rule FP 的反例必须抛 AssertionError 并给出聚合键。
+- [x] 实现并测试 test/val 双 split 调用路径；重跑通过。
 
 ## Task 4：端到端与输出文件
 
-- [ ] 测试 `evaluate_all`（tmp_path 造 features.csv + llm_cache.jsonl）：metrics.json 字段完整、比率与计数可互相推出；manifest 评估段哈希与输入一致；stdout 仅 JSON。
-- [ ] 测试唯一域名口径 `unique_domain_metrics` 与聚合口径在 fixture 上的折叠正确性。
-- [ ] 实现 `unique_domain_metrics`、`evaluate_all`、`main`；`& $python -m pytest tests/ -q` 全套无回归。
+- [x] 测试 `evaluate_all`（tmp_path 造 features.csv + llm_cache.jsonl）：metrics.json 字段完整、比率与计数可互相推出；manifest 评估段哈希与输入一致；stdout 仅 JSON。
+- [x] 测试唯一域名口径 `unique_domain_metrics` 与聚合口径在 fixture 上的折叠正确性。
+- [x] 实现 `unique_domain_metrics`、`evaluate_all`、`main`；`& $python -m pytest tests/ -q` 全套无回归。
 
 ## Task 5：真实数据评估（数据与 D8 结果到位后）
 
