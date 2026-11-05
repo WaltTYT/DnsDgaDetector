@@ -96,7 +96,7 @@ if (-not (Test-Path $python)) { throw "Python not found: $python" }
 - [x] 为 `read_split_records` 写测试：接受且只接受 `domain,label,source,algorithm,split` 固定表头；测试重复域名、非规范化域名、标签/来源/算法语义错误、未知 split、空 split-label 池和缺失 `word_digit` 池均会失败。
 - [x] 测试按固定本地 PSL 拒绝同一 eTLD+1 跨 split；用临时 PSL 覆盖普通后缀和 PRIVATE 规则，并 monkeypatch socket 网络入口为立即抛错，证明解析不依赖网络。
 - [x] 实现 `read_split_records(path)` 与 `validate_domain_pools(records, psl_path)`；复用 `src.prepare_data.create_extractor` 的离线 PSL 设置和域名语义，不重新规范化或改写 `splits.csv` 中的值。
-- [x] 校验 `label` 为 0/1；`normal_list` 必须为 label 0 且 algorithm 空；`public_dga` 必须为 label 1 且 algorithm 空；`manual_dga` 必须为 label 1 且 algorithm 属于三个契约 ID；split 集合必须为 train/val/test。
+- [x] 校验 `label` 为 0/1；`normal_list` 与 `hard_negative` 必须为 label 0 且 algorithm 空；`public_dga` 必须为 label 1 且 algorithm 空；`manual_dga` 必须为 label 1 且 algorithm 属于三个契约 ID；split 集合必须为 train/val/test。
 - [x] 每个 split 的正常与 DGA 样本池均须非空；`word_digit` 行为只可从同 split 的 `label=1, source=manual_dga, algorithm=word_digit` 域名池选择，不允许 fallback。
 - [x] 运行 `& $python -m pytest tests/test_gen_log.py -q`，确认错误输入在输出写入前失败。
 

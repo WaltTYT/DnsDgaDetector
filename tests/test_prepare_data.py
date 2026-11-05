@@ -207,7 +207,7 @@ def test_load_source_rows_reads_only_contract_files_and_maps_semantics(tmp_path)
     assert [(row.label, row.source, row.algorithm) for row in rows] == [
         (0, "normal_list", ""),
         (0, "normal_list", ""),
-        (0, "normal_list", ""),
+        (0, "hard_negative", ""),
         (1, "public_dga", ""),
     ]
     assert rows[-1].family == "family-a"
@@ -378,6 +378,46 @@ def test_merge_and_validate_folds_duplicate_semantics_and_retains_provenance(tmp
     } == {
         ("families-a", tmp_path / "public_dga__a.csv", 4, "family-a"),
         ("families-b", tmp_path / "public_dga__b.csv", 9, "family-a"),
+    }
+
+
+def test_merge_and_validate_promotes_hard_negative_and_retains_provenance(tmp_path):
+    rows = [
+        make_normalized_row(
+            "shared.example",
+            source_id="popular",
+            source="normal_list",
+            label=0,
+            algorithm="",
+            line_number=2,
+            family=None,
+        ),
+        make_normalized_row(
+            "shared.example",
+            source_id="numeric",
+            source="hard_negative",
+            label=0,
+            algorithm="",
+            line_number=1,
+            family=None,
+        ),
+    ]
+    rows[0].source_path = tmp_path / "normal_list__popular.txt"
+    rows[1].source_path = tmp_path / "hard_negative__numeric.txt"
+
+    records = prepare_data.merge_and_validate(rows)
+
+    assert len(records) == 1
+    assert (records[0].domain, records[0].label, records[0].source) == (
+        "shared.example",
+        0,
+        "hard_negative",
+    )
+    assert {
+        (row.source_id, row.source, row.line_number) for row in records[0].sources
+    } == {
+        ("popular", "normal_list", 2),
+        ("numeric", "hard_negative", 1),
     }
 
 
@@ -730,7 +770,8 @@ def test_run_data_preparation_is_offline_deterministic_and_preserves_dns_log(
     }
     assert sum(
         counts["deduplicated"] for counts in summary.source_counts.values()
-    ) == 1
+    ) == 0
+    assert summary.hard_negative_promoted == 1
     assert {
         (row["source_id"], row["line_number"], row["raw_domain"])
         for row in summary.excluded_rows
@@ -766,6 +807,7 @@ def test_run_data_preparation_is_offline_deterministic_and_preserves_dns_log(
     assert len({row["domain"] for row in split_rows}) == len(split_rows)
     assert {row["source"] for row in split_rows} == {
         "normal_list",
+        "hard_negative",
         "public_dga",
         "manual_dga",
     }
@@ -1062,6 +1104,7 @@ def test_main_runs_from_current_project_root_and_prints_json_summary(
             for algorithm in gen_dga.ALGORITHMS
         },
         collision_retries=0,
+        hard_negative_promoted=0,
         psl_sha256="psl-hash",
         input_sha256={},
     )

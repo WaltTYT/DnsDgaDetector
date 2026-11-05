@@ -501,6 +501,23 @@ def test_read_split_records_accepts_every_manual_algorithm(tmp_path):
     assert [record.algorithm for record in records[-2:]] == ["rand_alpha", "md5_date"]
 
 
+def test_read_split_records_accepts_hard_negative_rows(tmp_path):
+    rows = make_split_rows()
+    rows.extend(
+        [
+            ["hard-train.com", "0", "hard_negative", "", "train"],
+            ["hard-val.com", "0", "hard_negative", "", "val"],
+            ["hard-test.com", "0", "hard_negative", "", "test"],
+        ]
+    )
+    path = write_split_csv(tmp_path / "splits.csv", rows)
+
+    records = gen_log.read_split_records(path)
+
+    assert [record.source for record in records[-3:]] == ["hard_negative"] * 3
+    assert [record.algorithm for record in records[-3:]] == [""] * 3
+
+
 @pytest.mark.parametrize("domain", ["Normal-train.com", "normal-train.com."])
 def test_read_split_records_rejects_domains_that_need_normalization(tmp_path, domain):
     rows = make_split_rows()
@@ -1482,6 +1499,25 @@ def test_serialize_log_rejects_invalid_query_events(changes, message):
 
     with pytest.raises(ValueError, match=message):
         gen_log.serialize_log([replace(valid_event, **changes)])
+
+
+def test_serialize_log_accepts_hard_negative_events():
+    event = gen_log.QueryEvent(
+        timestamp=datetime(2026, 11, 1, tzinfo=timezone.utc),
+        client_ip="192.0.2.1",
+        qname="example.com",
+        qtype="A",
+        label=0,
+        source="hard_negative",
+        algorithm="",
+        split="train",
+        behavior="routine",
+        stable_order=0,
+    )
+
+    payload = gen_log.serialize_log([event]).decode("utf-8")
+
+    assert ",hard_negative,," in payload
 
 
 def test_serialize_log_rejects_non_string_qtype_that_compares_equal_to_valid_value():

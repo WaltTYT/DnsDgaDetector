@@ -97,6 +97,8 @@ def _validate_split_record(record, location):
         )
     if record.source == "normal_list":
         valid_semantics = record.label == 0 and record.algorithm == ""
+    elif record.source == "hard_negative":
+        valid_semantics = record.label == 0 and record.algorithm == ""
     elif record.source == "public_dga":
         valid_semantics = record.label == 1 and record.algorithm == ""
     elif record.source == "manual_dga":
@@ -1408,6 +1410,8 @@ def _validate_query_event(event, location):
     if not isinstance(event.source, str) or not isinstance(event.algorithm, str):
         raise ValueError(f"{location} source or algorithm must be a string")
     if event.source == "normal_list":
+        valid_semantics = event.label == 0 and event.algorithm == ""
+    elif event.source == "hard_negative":
         valid_semantics = event.label == 0 and event.algorithm == ""
     elif event.source == "public_dga":
         valid_semantics = event.label == 1 and event.algorithm == ""

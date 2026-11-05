@@ -38,7 +38,7 @@
 ### 2.2 项目特有规则（重要）
 
 - **骨架文件保护**：`src/`、`tests/`、`run_all.py` 当前仅含 docstring 规格说明，实现代码由三位分工负责人自行编写（见 `docs/specs/project-roadmap.md` 7.1）。除非用户明确要求代写某个模块，否则 Agent 不得填充实现代码，也不得删改 docstring 中的规格要点
-- **数据契约**：五类共享数据产物以 `docs/plans/data-contracts.md` v1 为准：`data/dns_log.csv`、`data/splits.csv`、`data/dga_domains.csv`、`results/features.csv`、`results/llm_cache.jsonl`。项目维护者负责版本管理；无需逐个组员审批。兼容性破坏变更时升级版本并同步更新生产者、消费者和测试。
+- **数据契约**：五类共享数据产物以 `docs/plans/data-contracts.md` v2 为准：`data/dns_log.csv`、`data/splits.csv`、`data/dga_domains.csv`、`results/features.csv`、`results/llm_cache.jsonl`。项目维护者负责版本管理；无需逐个组员审批。兼容性破坏变更时升级版本并同步更新生产者、消费者和测试。
 - **数据隔离红线**：任何代码不得让基线阈值拟合或提示模板读取 split=test 的数据；`label/source/algorithm/split` 元数据不得进入特征或 LLM 输入
 - **冻结点**：D7 后规则阈值、提示模板、模型配置冻结，改动需说明理由
 

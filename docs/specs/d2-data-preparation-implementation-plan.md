@@ -207,7 +207,7 @@ if ($LASTEXITCODE -ne 1) { throw "Expected runtime test failures with exit code 
 - [x] 实现 `create_extractor(psl_path)`，要求 PSL 文件存在且非空；用 `tldextract.TLDExtract(suffix_list_urls=(psl_path.resolve().as_uri(),), cache_dir=None, fallback_to_snapshot=False, include_psl_private_domains=True)` 创建解析器。不得使用默认在线 URL 或内置快照兜底。
 - [x] 实现 `load_source_rows(raw_dir)`，要求至少各有一个 normal、hard-negative、public-DGA 整理输入文件；按来源文件名前缀推导契约 `source`/`label`/`algorithm`，按相对路径排序读取。正常/难负域名文件逐行读取；公开 DGA CSV 必须精确使用 `domain,family` 两列。保留原始域名、source ID、文件路径和原始行号；`family` 校验时去首尾空白，原始快照仍保留原始字段，公开 family 只用于冲突与审计，不写入共享 `algorithm` 字段。
 - [x] 实现 `normalize_source_rows(rows)`：成功记录产生 `NormalizedSourceRow`；`normalize_domain` 的 `ValueError` 转为 `ExcludedRow(source_id, source_path, line_number, raw_domain, reason)` 并纳入统计。CSV 结构错误、缺失/空 family、文件无法读取属于输入错误，附文件与行号上下文抛错。
-- [x] 正常/难负来源统一映射为 `label=0, source=normal_list, algorithm=''`；公开 DGA 映射为 `label=1, source=public_dga, algorithm=''`。手工 DGA 记录稍后映射为 `label=1, source=manual_dga` 及其契约算法 ID。
+- [x] 正常榜单来源映射为 `label=0, source=normal_list, algorithm=''`，难负样本映射为 `label=0, source=hard_negative, algorithm=''`；公开 DGA 映射为 `label=1, source=public_dga, algorithm=''`。手工 DGA 记录稍后映射为 `label=1, source=manual_dga` 及其契约算法 ID。
 - [x] 实现 `select_public_dga(rows, limit, master_seed)`，流水线调用时固定 `limit=300`：同一规范化域名同 family 去重；同域名多 family 在抽样前报冲突；候选不超过 300 条时全部纳入，超出时按本计划“API 与确定性契约”中的最大余数配额及 SHA-256 层内排序选样，并返回稳定排序结果。
 - [x] 针对无来源文件、错误 CSV 表头、无效 PSL 和非法域名使用清晰异常；不联网、不静默回退、不静默修正来源标签。
 
@@ -320,7 +320,7 @@ Get-FileHash data/normal_domains.txt, data/dga_domains.csv, data/splits.csv -Alg
 **文件：** `README.md`、`data/sources.md`、`docs/plans/data-contracts.md`、`docs/plans/d2-data-preparation-design.md`、本计划。
 
 - [x] README 记录本地来源输入格式、`python -m src.prepare_data` 命令、数据许可注意事项和 DGA 标签不代表现实恶意的限制；不写任何本机绝对路径或 API Key。
-- [x] 自审设计与实现：契约算法 ID 一致；公开 DGA 保留原家族在来源原件但不进入 v1 共享字段；正常榜单及难负样本 `source=normal_list`；仅三种手工算法进入 `algorithm`。
+- [x] 自审设计与实现：契约算法 ID 一致；公开 DGA 保留原家族在来源原件但不进入共享字段；正常榜单 `source=normal_list`、难负样本 `source=hard_negative`；仅三种手工算法进入 `algorithm`。
 - [x] 检查输入文件许可和 Git 变更，确保未提交禁止再分发的数据集、下载缓存或运行环境目录；只保留许可证允许的快照和要求的派生数据。
 - [x] 运行全部 pytest、`pip check`、配置 JSON 校验和 `git diff --check`；检查最终三个共享数据 CSV 表头、列顺序、唯一性和 split group 不重叠。
 - [x] 报告最终正常样本数、难负样本数、公开 DGA 数、手工 DGA 数、排除/冲突数、各 split 比例、来源/PSL 哈希，以及未满足的目标和原因。不得将模拟域名数据描述成真实 DNS 观测。

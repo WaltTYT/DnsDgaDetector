@@ -86,6 +86,7 @@ class RunSummary:
     algorithm_counts: dict[str, int]
     algorithm_diagnostics: dict[str, AlgorithmDiagnostics]
     collision_retries: int
+    hard_negative_promoted: int
     psl_sha256: str
     input_sha256: dict[str, str]
 
@@ -188,7 +189,7 @@ def load_source_rows(raw_dir):
                             SourceRow(
                                 raw_domain=line.rstrip("\r\n"),
                                 label=0,
-                                source="normal_list",
+                                source=category,
                                 algorithm="",
                                 source_id=source_id,
                                 source_path=source_path,
@@ -426,6 +427,12 @@ def _validate_normalized_source_row(row):
                 f"invalid normal-list semantics for {row.domain!r} "
                 f"in {_source_location(row)}"
             )
+    elif row.source == "hard_negative":
+        if row.label != 0 or row.algorithm != "" or row.family is not None:
+            raise ValueError(
+                f"invalid hard-negative semantics for {row.domain!r} "
+                f"in {_source_location(row)}"
+            )
     elif row.source == "public_dga":
         if row.label != 1 or row.algorithm != "":
             raise ValueError(
@@ -463,6 +470,8 @@ def _validate_domain_record(record):
         raise ValueError(f"invalid source or algorithm for domain {record.domain!r}")
     if record.source == "normal_list":
         valid_semantics = record.label == 0 and record.algorithm == ""
+    elif record.source == "hard_negative":
+        valid_semantics = record.label == 0 and record.algorithm == ""
     elif record.source == "public_dga":
         valid_semantics = record.label == 1 and record.algorithm == ""
     elif record.source == "manual_dga":
@@ -496,11 +505,28 @@ def merge_and_validate(rows: Sequence[NormalizedSourceRow]) -> list[DomainRecord
         public_families = {
             row.family for row in domain_rows if row.source == "public_dga"
         }
-        if len(semantics) != 1 or len(public_families) > 1:
+        benign_semantics = {
+            (row.label, row.algorithm)
+            for row in domain_rows
+            if row.source in ("normal_list", "hard_negative")
+        }
+        if len(public_families) > 1:
             provenance = "; ".join(_source_location(row) for row in domain_rows)
             raise ValueError(
                 f"conflicting records for domain {domain!r}: {provenance}"
             )
+        if len(semantics) != 1:
+            if (
+                any(
+                    row.source not in ("normal_list", "hard_negative")
+                    for row in domain_rows
+                )
+                or benign_semantics != {(0, "")}
+            ):
+                provenance = "; ".join(_source_location(row) for row in domain_rows)
+                raise ValueError(
+                    f"conflicting records for domain {domain!r}: {provenance}"
+                )
         if domain_rows[0].source == "public_dga" and public_families == {None}:
             provenance = "; ".join(_source_location(row) for row in domain_rows)
             raise ValueError(
@@ -508,11 +534,16 @@ def merge_and_validate(rows: Sequence[NormalizedSourceRow]) -> list[DomainRecord
             )
 
         first = domain_rows[0]
+        source = (
+            "hard_negative"
+            if any(row.source == "hard_negative" for row in domain_rows)
+            else first.source
+        )
         records.append(
             DomainRecord(
                 domain=domain,
                 label=first.label,
-                source=first.source,
+                source=source,
                 algorithm=first.algorithm,
                 etld_plus_one="",
                 split="",
@@ -934,11 +965,22 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
         record
         for record in merged_records
         if record.domain in eligible_domains
-        and (record.source == "normal_list" or record.domain in selected_public_domains)
+        and (
+            record.source in ("normal_list", "hard_negative")
+            or record.domain in selected_public_domains
+        )
     ]
+    hard_negative_promoted = sum(
+        1
+        for record in output_records
+        if record.source == "hard_negative"
+        and any(row.source == "normal_list" for row in record.sources)
+    )
 
     reserved_domains = {
-        record.domain for record in merged_records if record.source == "normal_list"
+        record.domain
+        for record in merged_records
+        if record.source in ("normal_list", "hard_negative")
     } | selected_public_domains
     word_roots_path = raw_dir / "manual_word_roots.txt"
     generated_records = generate_dga_domains(
@@ -954,7 +996,9 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
 
     data_dir = root / "data"
     normal_domains = sorted(
-        record.domain for record in output_records if record.source == "normal_list"
+        record.domain
+        for record in output_records
+        if record.source in ("normal_list", "hard_negative")
     )
     dga_rows = [
         {
@@ -1090,6 +1134,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
         algorithm_counts=algorithm_counts,
         algorithm_diagnostics=algorithm_diagnostics,
         collision_retries=collision_retries,
+        hard_negative_promoted=hard_negative_promoted,
         psl_sha256=_sha256_file(psl_path),
         input_sha256=input_hashes,
     )
