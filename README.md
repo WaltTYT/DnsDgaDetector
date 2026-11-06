@@ -2,7 +2,7 @@
 
 DNS 异常查询检测的规则 + LLM 混合方案，实施范围见 [项目路线图](docs/specs/project-roadmap.md)。
 
-**当前状态（2026-11-06）**：D1–D12 已完成，D13 报告未在本仓库生成。最终流水线使用冻结配置跑通：50,000 行合成 DNS 日志、20,483 个聚合样本、96 个唯一域名完成在线复核、321 项测试通过，离线重放指标与在线结果一致。
+**当前状态（2026-11-06）**：D1–D12 已完成，D13 报告未在本仓库生成。最终流水线使用冻结配置跑通：50,000 行合成 DNS 日志、20,483 个聚合样本、最终口径 87 个唯一域名完成复核（全部命中缓存）、337 项测试通过，离线重放指标与在线结果一致。
 
 ## 项目文档
 
@@ -31,8 +31,8 @@ DNS 异常查询检测的规则 + LLM 混合方案，实施范围见 [项目路�
 
 ## 开发环境
 
-- 当前执行机器的 Miniconda：`%LOCALAPPDATA%\Miniconda3`
-- Conda 环境：`%LOCALAPPDATA%\Miniconda3\envs\dns-dga`（命名环境 `dns-dga`）
+- 当前执行机器的 Miniconda：`D:\study\miniconda`
+- Conda 环境：`D:\study\miniconda\envs\dns-dga`（命名环境 `dns-dga`）
 - Python：3.11.17
 - 核心依赖：dnspython、requests、tldextract、NumPy、pandas、Matplotlib、pytest
 
@@ -41,7 +41,7 @@ DNS 异常查询检测的规则 + LLM 混合方案，实施范围见 [项目路�
 若本机尚未创建 `dns-dga`，在仓库根目录的 PowerShell 中执行以下命令。首次使用 defaults channel 时，Conda 可能要求用户查看并接受相应服务条款；不要在未阅读和同意时绕过提示。
 
 ```powershell
-$installRoot = Join-Path $env:LOCALAPPDATA 'Miniconda3'
+$installRoot = 'D:\study\miniconda' # 本机已验证路径；其他机器按实际安装位置调整
 $conda = Join-Path $installRoot 'Scripts\conda.exe'
 $env:CONDA_PKGS_DIRS = Join-Path $installRoot '.cache\pkgs'
 $env:PIP_CACHE_DIR = Join-Path $installRoot '.cache\pip'
@@ -52,7 +52,7 @@ New-Item -ItemType Directory -Force $env:CONDA_PKGS_DIRS, $env:PIP_CACHE_DIR | O
 创建后用项目解释器验证：
 
 ```powershell
-$python = Join-Path $env:LOCALAPPDATA 'Miniconda3\envs\dns-dga\python.exe'
+$python = 'D:\study\miniconda\envs\dns-dga\python.exe'
 & $python --version
 & $python -m pip check
 ```
@@ -64,7 +64,7 @@ $python = Join-Path $env:LOCALAPPDATA 'Miniconda3\envs\dns-dga\python.exe'
 来源整理输入位于 `data/raw/` 顶层，按来源分别保存；`data/raw/snapshots/` 中的原始快照不由生成器读取。生成流程只使用本地文件和固定 PSL，不下载数据、不发 DNS 查询。运行前应查看 [`data/sources.md`](data/sources.md) 的许可、标签口径和筛选说明。
 
 ```powershell
-$python = Join-Path $env:LOCALAPPDATA 'Miniconda3\envs\dns-dga\python.exe'
+$python = 'D:\study\miniconda\envs\dns-dga\python.exe'
 & $python -m src.prepare_data
 ```
 
@@ -79,7 +79,7 @@ Majestic 与 Mendeley 的数据许可和上游来源限制见 [`data/sources.md`
 `src/llm_judge.py` 的 `get_api_key()` 优先读取环境变量，未设置时回退读取根目录 `api.txt`；该文件已被 `.gitignore` 忽略。配置凭证后，从仓库根目录执行一次真实 JSON 冒烟调用：
 
 ```powershell
-$python = Join-Path $env:LOCALAPPDATA 'Miniconda3\envs\dns-dga\python.exe'
+$python = 'D:\study\miniconda\envs\dns-dga\python.exe'
 & $python -m src.llm_judge --smoke
 ```
 
@@ -92,7 +92,7 @@ $python = Join-Path $env:LOCALAPPDATA 'Miniconda3\envs\dns-dga\python.exe'
 `run_all.py` 按顺序执行日志生成、特征计算、基线读取或拟合、规则判定、LLM 复核与双口径评估，并把各阶段摘要写入 `results/run_manifest.json`。`--from` 指定起始阶段（`data`、`log`、`features`），`--seed` 必须为 `20261101`，`--online/--offline` 选择调用模式（缺省为离线）。
 
 ```powershell
-$python = Join-Path $env:LOCALAPPDATA 'Miniconda3\envs\dns-dga\python.exe'
+$python = 'D:\study\miniconda\envs\dns-dga\python.exe'
 
 # 从特征阶段开始，离线复算并复核缓存
 & $python run_all.py --from features --offline
@@ -109,22 +109,22 @@ $python = Join-Path $env:LOCALAPPDATA 'Miniconda3\envs\dns-dga\python.exe'
 
 ## 最终结果
 
-冻结阈值：`H=3.5369`、`F=12.0`、`I=1.7587`，仅用训练集 `label=0` 样本拟合。评估口径与原始产物见 [`results/metrics.json`](results/metrics.json) 与 [`results/run_manifest.json`](results/run_manifest.json)。
+冻结阈值：`H=3.5466`、`F=12.0`、`I=1.751`，仅用训练集 `label=0` 样本拟合；`H` 在唯一可注册域标签上取值，`F`/`I` 在纯正常客户端窗口上统计且每窗口只计一次。评估口径与原始产物见 [`results/metrics.json`](results/metrics.json) 与 [`results/run_manifest.json`](results/run_manifest.json)。
 
 | 口径 | 方案 | FPR（val / test） | Precision（val / test） | Recall（val / test） |
 |---|---|---:|---:|---:|
-| 聚合样本 | 规则 | 0.98% / 0.53% | 49.35% / 54.35% | 27.74% / 18.25% |
-| 聚合样本 | 混合 | 0.91% / 0.40% | 51.35% / 60.98% | 27.74% / 18.25% |
-| 唯一域名 | 规则 | 1.68% / 1.18% | 68.75% / 72.00% | 28.21% / 23.38% |
-| 唯一域名 | 混合 | 1.52% / 1.01% | 70.97% / 75.00% | 28.21% / 23.38% |
+| 聚合样本 | 规则 | 0.71% / 0.53% | 57.58% / 47.50% | 27.74% / 13.87% |
+| 聚合样本 | 混合 | 0.63% / 0.40% | 60.32% / 54.29% | 27.74% / 13.87% |
+| 唯一域名 | 规则 | 1.52% / 1.18% | 70.97% / 69.57% | 28.21% / 20.78% |
+| 唯一域名 | 混合 | 1.35% / 1.01% | 73.33% / 72.73% | 28.21% / 20.78% |
 
-混合方案在测试集正确撤回 5 个误报、错误放行 0 个告警；验证集正确撤回 3 个、错误放行 0 个。离线重放 96/96 命中缓存，测试与验证缓存覆盖均为 100%。
+混合方案在测试集正确撤回 5 个误报、错误放行 0 个告警；验证集正确撤回 3 个、错误放行 0 个。冻结后离线重放 87/87 命中缓存，测试与验证缓存覆盖均为 100%。
 
 主要局限：
 
 - 整体召回偏低；`md5_date` 在测试集召回 0%、验证集 5.9%，短 MD5 截断串熵值低于 `H` 阈值，H 分支基本无法命中。
-- 难负样本在测试集和验证集的误报均为 0，说明它们主要覆盖词法难例；其合成查询行为仍是正常客户端，未真正压到频率/间隔分支。
-- LLM 唯一域名不确定率 47.9%，测试集为 33.3%；所有偏差表现为 `uncertain`，未出现明确的 DGA/normal 反向判断。
+- 难负样本共 100 个（train 57 / val 19 / test 19），验证集与测试集的误报均为 0；它们主要覆盖词法难例，合成查询行为仍是正常客户端，未真正压到频率/间隔分支。
+- LLM 唯一域名不确定率 47.1%，其中验证集 28.6%、测试集 37.5%；所有偏差表现为 `uncertain`，未出现明确的 DGA/normal 反向判断。
 - 日志行为为合成数据，公开 DGA 标签只表示已知生成类别，不构成对域名当前恶意性的独立验证。
 
 ## 复现与演示

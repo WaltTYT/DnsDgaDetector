@@ -235,7 +235,7 @@ H(label) = -Σ p(c) * log₂(p(c))   对 label 中出现的每个字符 c
   "python_version": "3.13.14",
   "numpy_version": "2.4.4",
   "pandas_version": "3.0.3",
-  "psl_source": "tldextract==5.4.0 built-in snapshot",
+  "psl_source": "data/raw/public_suffix_list.dat (include_psl_private_domains=True, cache_dir=None, fallback_to_snapshot=False)",
   "features": {
     "H": {"quantile": 0.99, "threshold": 4.18, "n_unique_labels": 2135, "n_missing": 0, "method": "numpy.percentile method=linear"},
     "F": {"quantile": 0.99, "threshold": 32,  "n_windows": 4500,   "n_missing": 0, "method": "numpy.percentile method=linear"},
