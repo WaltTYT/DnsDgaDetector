@@ -2,6 +2,8 @@
 
 DNS 异常查询检测的规则 + LLM 混合方案，实施范围见 [项目路线图](docs/specs/project-roadmap.md)。
 
+**当前状态（2026-11-06）**：D1–D12 已完成，D13 报告未在本仓库生成。最终流水线使用冻结配置跑通：50,000 行合成 DNS 日志、20,483 个聚合样本、96 个唯一域名完成在线复核、321 项测试通过，离线重放指标与在线结果一致。
+
 ## 项目文档
 
 - [项目路线图与实施计划](docs/specs/project-roadmap.md)
@@ -83,4 +85,48 @@ $python = Join-Path $env:LOCALAPPDATA 'Miniconda3\envs\dns-dga\python.exe'
 
 冒烟命令最多发送一次请求，不自动重试；只保存脱敏元数据到 `report/evidence/d1_glm_smoke.json`，不保存 Key 或模型原始回复。需成功完成此命令，才能认定当前账号、模型和端点已连通。
 
-本机 D1 实测于 2026-11-01 成功：HTTP 200、JSON 校验通过、耗时 2514 ms。该结果仅证明本次账号与接口连通，不代表检测准确率或后续调用始终可用。
+本机 2026-11-06 冒烟测试：HTTP 200、JSON 校验通过、耗时 884 ms、84 tokens；随后 96 个唯一域名在线复核全部 HTTP 200，失败 0 条。当前演示使用缓存离线重放，不重复发起在线请求。该结果仅证明本次账号与接口连通，不代表后续调用始终可用。
+
+## 一键流水线
+
+`run_all.py` 按顺序执行日志生成、特征计算、基线读取或拟合、规则判定、LLM 复核与双口径评估，并把各阶段摘要写入 `results/run_manifest.json`。`--from` 指定起始阶段（`data`、`log`、`features`），`--seed` 必须为 `20261101`，`--online/--offline` 选择调用模式（缺省为离线）。
+
+```powershell
+$python = Join-Path $env:LOCALAPPDATA 'Miniconda3\envs\dns-dga\python.exe'
+
+# 从特征阶段开始，离线复算并复核缓存
+& $python run_all.py --from features --offline
+
+# 从日志或数据阶段重跑（冻结后需与 run_manifest.json 的输入哈希一致）
+& $python run_all.py --from log --offline
+& $python run_all.py --from data --offline
+
+# 配置 ZHIPU_API_KEY 后在线复核
+& $python run_all.py --from features --online
+```
+
+冻结点（`results/run_manifest.json` 中 `freeze_check=frozen`）之后，流水线读取已冻结的 `results/baseline.json` 并校验阈值，不再重新拟合；从 `data`/`log` 重跑时会校验 `splits.csv` 与 `dns_log.csv` 的 SHA-256，不一致则退出并提示重开冻结检查点。`--offline` 不发起任何网络请求，缓存缺失样本按 `uncertain` 降级处理。
+
+## 最终结果
+
+冻结阈值：`H=3.5369`、`F=12.0`、`I=1.7587`，仅用训练集 `label=0` 样本拟合。评估口径与原始产物见 [`results/metrics.json`](results/metrics.json) 与 [`results/run_manifest.json`](results/run_manifest.json)。
+
+| 口径 | 方案 | FPR（val / test） | Precision（val / test） | Recall（val / test） |
+|---|---|---:|---:|---:|
+| 聚合样本 | 规则 | 0.98% / 0.53% | 49.35% / 54.35% | 27.74% / 18.25% |
+| 聚合样本 | 混合 | 0.91% / 0.40% | 51.35% / 60.98% | 27.74% / 18.25% |
+| 唯一域名 | 规则 | 1.68% / 1.18% | 68.75% / 72.00% | 28.21% / 23.38% |
+| 唯一域名 | 混合 | 1.52% / 1.01% | 70.97% / 75.00% | 28.21% / 23.38% |
+
+混合方案在测试集正确撤回 5 个误报、错误放行 0 个告警；验证集正确撤回 3 个、错误放行 0 个。离线重放 96/96 命中缓存，测试与验证缓存覆盖均为 100%。
+
+主要局限：
+
+- 整体召回偏低；`md5_date` 在测试集召回 0%、验证集 5.9%，短 MD5 截断串熵值低于 `H` 阈值，H 分支基本无法命中。
+- 难负样本在测试集和验证集的误报均为 0，说明它们主要覆盖词法难例；其合成查询行为仍是正常客户端，未真正压到频率/间隔分支。
+- LLM 唯一域名不确定率 47.9%，测试集为 33.3%；所有偏差表现为 `uncertain`，未出现明确的 DGA/normal 反向判断。
+- 日志行为为合成数据，公开 DGA 标签只表示已知生成类别，不构成对域名当前恶意性的独立验证。
+
+## 复现与演示
+
+最小离线复现命令为 `run_all.py --from features --offline`，约 14 秒完成特征复算、冻结基线校验、规则判定、缓存复核与双口径评估。完整从数据或日志重跑会重新生成 `data/` 与 `results/` 产物；演示前建议先备份 `results/`，避免覆盖冻结结果。

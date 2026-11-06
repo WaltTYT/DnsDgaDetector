@@ -18,6 +18,10 @@ api.txt
 *.tmp
 *.log
 
+# Local demo scripts
+docs/run_demo.bat
+docs/run_demo_raw.bat
+
 # Local copy of 360netlab/DGA examples pending dataset-level rights review
 data/raw/snapshots/360netlab_dga/
 data/raw/public_dga__360netlab_dga.csv
@@ -27,6 +31,7 @@ data/raw/snapshots/mendeley/dga_legit.csv
 
 # Mendeley-derived samples remain local until upstream redistribution rights are confirmed
 data/raw/hard_negative__mendeley_legit_subdomains.txt
+data/raw/normal_list__mendeley_majestic.txt
 data/raw/public_dga__mendeley.csv
 data/raw/mendeley_selection_evidence.csv
 
