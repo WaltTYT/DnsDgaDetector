@@ -5,32 +5,40 @@
     "split": "train",
     "label": 0
   },
-  "fitted_at": "2026-11-06T01:26:12.698Z",
+  "fitted_at": "2026-11-06T03:55:23.263Z",
   "python_version": "3.11.17",
   "numpy_version": "2.4.6",
   "pandas_version": "3.0.6",
-  "psl_source": "tldextract==5.4.0 built-in snapshot",
+  "psl_source": "data/raw/public_suffix_list.dat (include_psl_private_domains=True, cache_dir=None, fallback_to_snapshot=False)",
   "features": {
     "H": {
       "quantile": 0.99,
-      "threshold": 3.5369,
-      "n_unique_labels": 11880,
+      "threshold": 3.5466,
+      "n_unique_labels": 1699,
       "n_missing": 0,
       "method": "numpy.percentile(q, method='linear')",
-      "comparator": ">"
+      "comparator": ">",
+      "label_length_mean": 7.3367,
+      "digit_ratio_mean": 0.0134,
+      "length_buckets": {
+        "1-5": 597,
+        "6-10": 794,
+        "11-15": 256,
+        ">=16": 52
+      }
     },
     "F": {
       "quantile": 0.99,
       "threshold": 12.0,
-      "n_windows": 11880,
+      "n_windows": 11870,
       "method": "numpy.percentile(q, method='linear')",
       "comparator": ">"
     },
     "I": {
       "quantile": 0.01,
-      "threshold": 1.7587,
-      "n_windows_valid": 485,
-      "n_windows_total": 11880,
+      "threshold": 1.751,
+      "n_windows_valid": 475,
+      "n_windows_total": 11870,
       "i_rule_potentially_ineffective": false,
       "method": "numpy.percentile(q, method='linear')",
       "comparator": "<"

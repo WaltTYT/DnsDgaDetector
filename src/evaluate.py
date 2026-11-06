@@ -385,8 +385,8 @@ METRIC_LABELS = ["fpr", "fnr", "precision", "recall"]
 def plot_metric_comparison(metrics: dict, output_dir: str) -> str:
     rule_values = [metrics["rule"]["test"][key] for key in METRIC_LABELS]
     hybrid_values = [metrics["hybrid"]["test"][key] for key in METRIC_LABELS]
-    rule_heights = [0.0 if value is None else float(value) for value in rule_values]
-    hybrid_heights = [0.0 if value is None else float(value) for value in hybrid_values]
+    rule_heights = [float("nan") if value is None else float(value) for value in rule_values]
+    hybrid_heights = [float("nan") if value is None else float(value) for value in hybrid_values]
 
     fig, ax = plt.subplots(figsize=(8, 4.5))
     positions = np.arange(len(METRIC_LABELS))
@@ -407,7 +407,7 @@ def plot_metric_comparison(metrics: dict, output_dir: str) -> str:
     ax.set_xticklabels(["假阳性率", "假阴性率", "精确率", "召回率"])
     ax.set_ylabel("指标值")
     ax.set_ylim(0, 1.05)
-    ax.set_title("规则与混合方案测试集指标（无数据按 0 显示）")
+    ax.set_title("规则与混合方案测试集指标")
     ax.legend()
 
     plt.tight_layout()

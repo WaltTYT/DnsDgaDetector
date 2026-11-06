@@ -1,8 +1,8 @@
 {
   "baseline": {
     "F": 12.0,
-    "H": 3.5369,
-    "I": 1.7587
+    "H": 3.5466,
+    "I": 1.751
   },
   "budget": {
     "max_unique_requests": 800
@@ -12,20 +12,20 @@
     "budget_sampling_applied": false,
     "cache_coverage": {
       "test": {
-        "covered": 18,
-        "judgeable_unique": 18,
+        "covered": 16,
+        "judgeable_unique": 16,
         "rate": 1.0
       },
       "val": {
-        "covered": 22,
-        "judgeable_unique": 22,
+        "covered": 21,
+        "judgeable_unique": 21,
         "rate": 1.0
       }
     },
     "cache_sha256": "0919284b13843465aa8537b7f45b80f70ed7805a2965c4552b96bbf6203bf7a9",
     "config_snapshot_sha256": "e82291887fc187fb0afe9dcd1e664709bf2002ede9a3e8aca966c76eae4d6b18",
-    "features_sha256": "dbf01146a121f234368de476a08c98ce7117c0ead8728079419191a521de84ac",
-    "generated_at": "2026-11-06T02:36:57.602Z",
+    "features_sha256": "04592956c8f11573256d5800f8a35703c0d2519a8a77bbce95f1fce5e78d900d",
+    "generated_at": "2026-11-06T04:42:39.240Z",
     "splits_evaluated": [
       "val",
       "test"
@@ -39,9 +39,9 @@
       "test": "passed"
     }
   },
-  "finished_at": "2026-11-06T02:36:58Z",
+  "finished_at": "2026-11-06T04:42:39Z",
   "freeze_check": "frozen",
-  "frozen_at": "2026-11-06T01:26:16.494Z",
+  "frozen_at": "2026-11-06T03:56:24.908Z",
   "input_sha256": {
     "config.json": "e82291887fc187fb0afe9dcd1e664709bf2002ede9a3e8aca966c76eae4d6b18",
     "data/dns_log.csv": "51eae0fc39c5e752dfa8c5b3a02c63e9e2eae04b68f28865d6fc18f482ad660f",
@@ -53,16 +53,16 @@
   },
   "llm": {
     "budget_applied": false,
-    "cache_hits": 96,
+    "cache_hits": 87,
     "fail_reason_counts": {},
     "mode": "offline",
     "offline_coverage": 1.0,
-    "requested_unique": 96,
+    "requested_unique": 87,
     "sampling_rule": null,
     "verdict_counts": {
-      "DGA": 44,
-      "normal": 6,
-      "uncertain": 46
+      "DGA": 42,
+      "normal": 4,
+      "uncertain": 41
     }
   },
   "mode": "offline",
@@ -92,22 +92,22 @@
         "label": 0
       },
       "thresholds": {
-        "H": 3.5369,
+        "H": 3.5466,
         "F": 12.0,
-        "I": 1.7587
+        "I": 1.751
       }
     },
     {
       "name": "rules",
       "output": "results/features.csv",
       "rows": 20483,
-      "alerts": 335
+      "alerts": 290
     },
     {
       "name": "llm",
       "mode": "offline",
-      "requested_unique": 96,
-      "cache_hits": 96
+      "requested_unique": 87,
+      "cache_hits": 87
     },
     {
       "name": "evaluate",
@@ -115,13 +115,13 @@
       "figure": "D:\\study\\AgentWorkPlace\\CodexWorkPlace\\DnsDgaDetector\\results\\figures\\metric_comparison.png"
     }
   ],
-  "started_at": "2026-11-06T02:36:48Z",
+  "started_at": "2026-11-06T04:42:29Z",
   "thresholds": {
     "F": 12.0,
     "F_quantile": 0.99,
-    "H": 3.5369,
+    "H": 3.5466,
     "H_quantile": 0.99,
-    "I": 1.7587,
+    "I": 1.751,
     "I_quantile": 0.01,
     "fitted_on": {
       "label": 0,

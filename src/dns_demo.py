@@ -275,7 +275,7 @@ def save_json(results: list[QueryResult], out_dir: str) -> str:
     path = os.path.join(out_dir, f"dns_demo_{ts}.json")
 
     data = {
-        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.mmmZ"),
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
         "nameservers_observed": list(results[0].nameservers) if results else [],
         "stub_resolver_note": (
             "这些是 stub resolver 向配置的递归解析器发送递归查询后，"
