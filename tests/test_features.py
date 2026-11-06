@@ -108,7 +108,7 @@ class TestPslExtraction:
         import socket
         import urllib.request
 
-        from features import _make_tldextract
+        from features import _PSL_PATH, _make_tldextract
 
         def _blocked(*args, **kwargs):
             raise OSError("network access blocked in test")
@@ -118,7 +118,7 @@ class TestPslExtraction:
 
         _make_tldextract.cache_clear()
         ext = _make_tldextract()
-        assert ext.suffix_list_urls == ()
+        assert ext.suffix_list_urls == (_PSL_PATH.as_uri(),)
 
         result = ext("sub.example.co.uk")
         assert result.domain == "example"
@@ -129,6 +129,11 @@ class TestPslExtraction:
         assert status == "ok"
 
         assert _make_tldextract() is ext
+
+    def test_private_suffix_enabled(self):
+        label, status = extract_label("foo.github.io")
+        assert label == "foo"
+        assert status == "ok"
 
 
 class TestQnameNormalization:
@@ -334,8 +339,60 @@ class TestBaselineFitting:
             "E": pd.NA, "B": pd.NA, "R": pd.NA,
             "llm_verdict": pd.NA, "llm_fail_reason": pd.NA, "hybrid": pd.NA,
         }], columns=FEATURES_COLUMNS)
-        with pytest.raises(ValueError, match="No train\+label=0"):
+        with pytest.raises(ValueError, match=r"No train\+label=0"):
             fit_baseline_from_features(df)
+
+    def test_h_threshold_uses_unique_labels(self):
+        rows = []
+        for i in range(50):
+            rows.append({
+                "client_ip": f"10.0.{i}.1",
+                "window_start": f"2026-11-01T12:{i:02d}:00Z",
+                "qname": "aaaa.com", "label": 0, "source": "normal_list",
+                "algorithm": "", "split": "train",
+                "H": 0.0, "F": 1.0, "I": 1.0,
+                "E": pd.NA, "B": pd.NA, "R": pd.NA,
+                "llm_verdict": pd.NA, "llm_fail_reason": pd.NA, "hybrid": pd.NA,
+            })
+        rows.append({
+            "client_ip": "10.1.0.1",
+            "window_start": "2026-11-01T13:00:00Z",
+            "qname": "abcdefghij.com", "label": 0, "source": "normal_list",
+            "algorithm": "", "split": "train",
+            "H": 3.3219, "F": 1.0, "I": 1.0,
+            "E": pd.NA, "B": pd.NA, "R": pd.NA,
+            "llm_verdict": pd.NA, "llm_fail_reason": pd.NA, "hybrid": pd.NA,
+        })
+        baseline = fit_baseline_from_features(pd.DataFrame(rows, columns=FEATURES_COLUMNS))
+        assert baseline["features"]["H"]["n_unique_labels"] == 2
+        assert baseline["features"]["H"]["threshold"] > 3.0
+
+    def test_f_and_i_use_pure_normal_windows_once(self):
+        rows = []
+
+        def add(client_ip, window_start, qname, label, f, i):
+            rows.append({
+                "client_ip": client_ip, "window_start": window_start,
+                "qname": qname, "label": label,
+                "source": "manual_dga" if label else "normal_list",
+                "algorithm": "rand_alpha" if label else "", "split": "train",
+                "H": 2.0, "F": f, "I": i,
+                "E": pd.NA, "B": pd.NA, "R": pd.NA,
+                "llm_verdict": pd.NA, "llm_fail_reason": pd.NA, "hybrid": pd.NA,
+            })
+
+        for qname in ("a.com", "b.com", "c.com"):
+            add("10.0.0.1", "2026-11-01T12:00:00Z", qname, 0, 3, 1.0)
+        add("10.0.0.2", "2026-11-01T12:01:00Z", "d.com", 0, 5, 2.0)
+        add("10.0.0.3", "2026-11-01T12:02:00Z", "e.com", 0, 10, 0.5)
+        add("10.0.0.3", "2026-11-01T12:02:00Z", "f.com", 1, 10, 0.5)
+
+        baseline = fit_baseline_from_features(pd.DataFrame(rows, columns=FEATURES_COLUMNS))
+        assert baseline["features"]["F"]["n_windows"] == 2
+        assert baseline["features"]["F"]["threshold"] < 10.0
+        assert baseline["features"]["I"]["n_windows_total"] == 2
+        assert baseline["features"]["I"]["n_windows_valid"] == 2
+        assert baseline["features"]["I"]["threshold"] > 0.6
 
 
 class TestRuleEngine:

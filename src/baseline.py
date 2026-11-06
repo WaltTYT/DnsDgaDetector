@@ -20,7 +20,6 @@ import os
 import platform
 import sys
 from datetime import datetime, timezone
-from typing import Optional
 
 import matplotlib
 matplotlib.use("Agg")
@@ -61,77 +60,42 @@ def _validate_features_input(df: pd.DataFrame) -> None:
         raise ValueError("Invalid split values in features input")
 
 
-def _filter_train_normal(log_df: pd.DataFrame) -> pd.DataFrame:
-    train = log_df[log_df["split"] == "train"].copy()
-    train_normal = train[train["label"] == 0].copy()
-    if train_normal.empty:
-        raise ValueError("No train+label=0 samples available for baseline fitting")
-    n_total = len(log_df)
-    n_non_train = n_total - len(train)
-    n_non_normal_in_train = len(train) - len(train_normal)
-    if n_non_train > 0 or n_non_normal_in_train > 0:
-        pass
-    return train_normal
+def _extract_unique_labels(train_normal: pd.DataFrame) -> np.ndarray:
+    ext = _make_tldextract()
+    local = train_normal.copy()
+    local["qname_norm"] = local["qname"].apply(normalize_qname)
+    labels = local["qname_norm"].apply(lambda q: extract_label(q, ext))
+    local["label_psl"] = labels.apply(lambda t: t[0])
+    local["label_status"] = labels.apply(lambda t: t[1])
+    return local.loc[
+        local["label_status"] == "ok", "label_psl"
+    ].unique()
 
 
 def _build_h_distribution(train_normal: pd.DataFrame) -> np.ndarray:
-    ext = _make_tldextract()
-    train_normal_local = train_normal.copy()
-
-    train_normal_local["qname_norm"] = train_normal_local["qname"].apply(normalize_qname)
-    labels = train_normal_local["qname_norm"].apply(lambda q: extract_label(q, ext))
-    train_normal_local["label_psl"] = labels.apply(lambda t: t[0])
-    train_normal_local["label_status"] = labels.apply(lambda t: t[1])
-
-    unique_labels = train_normal_local.loc[
-        train_normal_local["label_status"] == "ok", "label_psl"
-    ].unique()
-
-    entropies = np.array([
+    unique_labels = _extract_unique_labels(train_normal)
+    return np.array([
         shannon_entropy(l) for l in unique_labels if l
     ], dtype=np.float64)
-    return entropies
 
 
-def _build_f_distribution(train_normal: pd.DataFrame) -> tuple[np.ndarray, int]:
-    if not {"client_ip", "window_start", "event_id"}.issubset(train_normal.columns):
-        train_normal_local = train_normal.copy()
-        train_normal_local["qname_norm"] = train_normal_local["qname"].apply(normalize_qname)
-        from features import align_to_window_start
-        train_normal_local["window_start"] = train_normal_local["timestamp"].apply(align_to_window_start)
-        grp = train_normal_local.groupby(["client_ip", "window_start"])
-    else:
-        grp = train_normal.groupby(["client_ip", "window_start"])
-
-    f_values = grp.size().to_numpy()
-    return f_values, int(len(f_values))
-
-
-def _build_i_distribution(train_normal: pd.DataFrame) -> tuple[np.ndarray, int, int]:
-    if not {"client_ip", "window_start", "timestamp"}.issubset(train_normal.columns):
-        train_normal_local = train_normal.copy()
-        train_normal_local["qname_norm"] = train_normal_local["qname"].apply(normalize_qname)
-        from features import align_to_window_start
-        train_normal_local["window_start"] = train_normal_local["timestamp"].apply(align_to_window_start)
-    else:
-        train_normal_local = train_normal.copy()
-
-    def _interval(group: pd.DataFrame) -> Optional[float]:
-        if len(group) < 3:
-            return None
-        ts = pd.to_datetime(group["timestamp"], utc=True).sort_values()
-        diffs = ts.diff().dropna().dt.total_seconds()
-        if len(diffs) == 0:
-            return None
-        return float(np.median(diffs.to_numpy()))
-
-    intervals = (
-        train_normal_local.groupby(["client_ip", "window_start"], group_keys=False)
-        .apply(_interval)
+def _label_stats(unique_labels: np.ndarray) -> dict:
+    labels = [l for l in unique_labels if l]
+    lengths = np.array([len(l) for l in labels], dtype=np.int64)
+    digit_ratios = np.array(
+        [sum(c.isdigit() for c in l) / len(l) for l in labels],
+        dtype=np.float64,
     )
-    total_windows = int(len(intervals))
-    valid = intervals.dropna().to_numpy(dtype=np.float64)
-    return valid, total_windows, int(len(valid))
+    return {
+        "label_length_mean": round(float(lengths.mean()), 4),
+        "digit_ratio_mean": round(float(digit_ratios.mean()), 4),
+        "length_buckets": {
+            "1-5": int((lengths <= 5).sum()),
+            "6-10": int(((lengths > 5) & (lengths <= 10)).sum()),
+            "11-15": int(((lengths > 10) & (lengths <= 15)).sum()),
+            ">=16": int((lengths > 15).sum()),
+        },
+    }
 
 
 def fit_baseline(log_df: pd.DataFrame,
@@ -139,61 +103,16 @@ def fit_baseline(log_df: pd.DataFrame,
                  F_quantile: float = 0.99,
                  I_quantile: float = 0.01,
                  window_seconds: int = 60) -> dict:
-    train_normal = _filter_train_normal(log_df)
+    from features import compute_features
 
-    h_dist = _build_h_distribution(train_normal)
-    f_dist, n_windows = _build_f_distribution(train_normal)
-    i_dist, n_windows_total, n_windows_valid = _build_i_distribution(train_normal)
-
-    h_threshold = float(np.percentile(h_dist, H_quantile * 100, method="linear"))
-    f_threshold = float(np.percentile(f_dist, F_quantile * 100, method="linear"))
-
-    if len(i_dist) == 0:
-        i_threshold = 0.0
-        i_potentially_ineffective = True
-    else:
-        i_threshold = float(np.percentile(i_dist, I_quantile * 100, method="linear"))
-        i_potentially_ineffective = (i_threshold == 0.0)
-
-    baseline = {
-        "version": BASELINE_SCHEMA_VERSION,
-        "window_seconds": window_seconds,
-        "fitted_on": {"split": "train", "label": 0},
-        "fitted_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
-        "python_version": platform.python_version(),
-        "numpy_version": np.__version__,
-        "pandas_version": pd.__version__,
-        "psl_source": "tldextract==5.4.0 built-in snapshot (include_psl_private_domains=False, cache_dir=None, fallback_to_snapshot=False)",
-        "features": {
-            "H": {
-                "quantile": H_quantile,
-                "threshold": round(h_threshold, 4),
-                "n_unique_labels": int(len(h_dist)),
-                "n_missing": int(len([x for x in h_dist if np.isnan(x)])),
-                "method": "numpy.percentile(q, method='linear')",
-                "comparator": ">",
-            },
-            "F": {
-                "quantile": F_quantile,
-                "threshold": round(f_threshold, 4),
-                "n_windows": n_windows,
-                "method": "numpy.percentile(q, method='linear')",
-                "comparator": ">",
-            },
-            "I": {
-                "quantile": I_quantile,
-                "threshold": round(i_threshold, 4),
-                "n_windows_valid": n_windows_valid,
-                "n_windows_total": n_windows_total,
-                "i_rule_potentially_ineffective": i_potentially_ineffective,
-                "method": "numpy.percentile(q, method='linear')",
-                "comparator": "<",
-            },
-        },
-        "freeze_check": "not frozen until D7",
-    }
-
-    return baseline
+    features_df = compute_features(log_df)
+    return fit_baseline_from_features(
+        features_df,
+        H_quantile=H_quantile,
+        F_quantile=F_quantile,
+        I_quantile=I_quantile,
+        window_seconds=window_seconds,
+    )
 
 
 def fit_baseline_from_features(features_df: pd.DataFrame,
@@ -203,22 +122,29 @@ def fit_baseline_from_features(features_df: pd.DataFrame,
                                window_seconds: int = 60) -> dict:
     _validate_features_input(features_df)
 
-    train_normal = features_df[
-        (features_df["split"] == "train") & (features_df["label"] == 0)
-    ].copy()
+    train = features_df[features_df["split"] == "train"].copy()
+    train_normal = train[train["label"] == 0].copy()
     if train_normal.empty:
         raise ValueError("No train+label=0 samples in features_df")
 
-    h_dist = train_normal["H"].dropna().to_numpy(dtype=np.float64)
-    f_dist = train_normal["F"].dropna().to_numpy(dtype=np.float64)
+    unique_labels = _extract_unique_labels(train_normal)
+    h_dist = _build_h_distribution(train_normal)
 
-    i_total = len(train_normal)
-    i_valid = train_normal["I"].notna().sum()
-    i_dist = train_normal["I"].dropna().to_numpy(dtype=np.float64)
+    windows = (
+        train.groupby(["client_ip", "window_start"], as_index=False)
+        .agg(max_label=("label", "max"), F=("F", "first"), I=("I", "first"))
+    )
+    pure_windows = windows[windows["max_label"] == 0]
+    f_dist = pure_windows["F"].dropna().to_numpy(dtype=np.float64)
+    i_dist = pure_windows["I"].dropna().to_numpy(dtype=np.float64)
+
+    i_total = int(len(pure_windows))
+    i_valid = int(len(i_dist))
 
     if len(h_dist) == 0 or len(f_dist) == 0:
         raise ValueError("H or F distribution empty in train+label=0 samples")
 
+    h_stats = _label_stats(unique_labels)
     h_threshold = float(np.percentile(h_dist, H_quantile * 100, method="linear"))
     f_threshold = float(np.percentile(f_dist, F_quantile * 100, method="linear"))
 
@@ -237,15 +163,16 @@ def fit_baseline_from_features(features_df: pd.DataFrame,
         "python_version": platform.python_version(),
         "numpy_version": np.__version__,
         "pandas_version": pd.__version__,
-        "psl_source": "tldextract==5.4.0 built-in snapshot",
+        "psl_source": "data/raw/public_suffix_list.dat (include_psl_private_domains=True, cache_dir=None, fallback_to_snapshot=False)",
         "features": {
             "H": {
                 "quantile": H_quantile,
                 "threshold": round(h_threshold, 4),
                 "n_unique_labels": int(len(h_dist)),
-                "n_missing": 0,
+                "n_missing": int(np.isnan(h_dist).sum()),
                 "method": "numpy.percentile(q, method='linear')",
                 "comparator": ">",
+                **h_stats,
             },
             "F": {
                 "quantile": F_quantile,
@@ -257,8 +184,8 @@ def fit_baseline_from_features(features_df: pd.DataFrame,
             "I": {
                 "quantile": I_quantile,
                 "threshold": round(i_threshold, 4),
-                "n_windows_valid": int(i_valid),
-                "n_windows_total": int(i_total),
+                "n_windows_valid": i_valid,
+                "n_windows_total": i_total,
                 "i_rule_potentially_ineffective": i_potentially_ineffective,
                 "method": "numpy.percentile(q, method='linear')",
                 "comparator": "<",

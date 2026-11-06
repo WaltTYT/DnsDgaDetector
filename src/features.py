@@ -23,6 +23,7 @@ import math
 import re
 from datetime import datetime, timezone
 from functools import lru_cache
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -48,13 +49,18 @@ PUNYCODE_PREFIX = "xn--"
 _ABSOLUTE_MIN = pd.Timestamp("1970-01-01T00:00:00Z")
 
 
+_PSL_PATH = Path(__file__).resolve().parents[1] / "data" / "raw" / "public_suffix_list.dat"
+
+
 @lru_cache(maxsize=1)
 def _make_tldextract() -> tldextract.TLDExtract:
+    if not _PSL_PATH.is_file():
+        raise FileNotFoundError(f"PSL snapshot not found: {_PSL_PATH}")
     return tldextract.TLDExtract(
-        include_psl_private_domains=False,
+        include_psl_private_domains=True,
         cache_dir=None,
-        suffix_list_urls=(),
-        fallback_to_snapshot=True,
+        suffix_list_urls=(_PSL_PATH.as_uri(),),
+        fallback_to_snapshot=False,
     )
 
 

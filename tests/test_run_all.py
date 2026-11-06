@@ -45,7 +45,7 @@ def _baseline():
         "python_version": "3.11.17",
         "numpy_version": "2.4.6",
         "pandas_version": "3.0.6",
-        "psl_source": "tldextract==5.4.0 built-in snapshot",
+        "psl_source": "data/raw/public_suffix_list.dat (include_psl_private_domains=True, cache_dir=None, fallback_to_snapshot=False)",
         "features": {
             "H": {
                 "quantile": 0.99, "threshold": 3.5369,
