@@ -25,6 +25,9 @@ from typing import Optional
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "DejaVu Sans"]
+plt.rcParams["axes.unicode_minus"] = False
 import numpy as np
 import pandas as pd
 
@@ -156,7 +159,7 @@ def fit_baseline(log_df: pd.DataFrame,
         "version": BASELINE_SCHEMA_VERSION,
         "window_seconds": window_seconds,
         "fitted_on": {"split": "train", "label": 0},
-        "fitted_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.mmmZ"),
+        "fitted_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
         "python_version": platform.python_version(),
         "numpy_version": np.__version__,
         "pandas_version": pd.__version__,
@@ -230,7 +233,7 @@ def fit_baseline_from_features(features_df: pd.DataFrame,
         "version": BASELINE_SCHEMA_VERSION,
         "window_seconds": window_seconds,
         "fitted_on": {"split": "train", "label": 0},
-        "fitted_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.mmmZ"),
+        "fitted_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
         "python_version": platform.python_version(),
         "numpy_version": np.__version__,
         "pandas_version": pd.__version__,
@@ -307,7 +310,7 @@ def plot_baseline_histograms(features_df: pd.DataFrame,
         return
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-    fig.suptitle("Baseline Histograms — Train Normal Only", fontsize=12)
+    fig.suptitle("基线分布 —— 仅训练集正常样本", fontsize=12)
 
     h_vals = train_normal["H"].dropna().to_numpy()
     f_vals = train_normal["F"].dropna().to_numpy()
@@ -315,26 +318,26 @@ def plot_baseline_histograms(features_df: pd.DataFrame,
 
     axes[0].hist(h_vals, bins=30, color="steelblue", edgecolor="white")
     axes[0].axvline(baseline["features"]["H"]["threshold"],
-                     color="red", linestyle="--", label=f"P{int(baseline['features']['H']['quantile']*100)}={baseline['features']['H']['threshold']:.2f}")
-    axes[0].set_xlabel("Entropy H")
-    axes[0].set_ylabel("Count")
-    axes[0].set_title("H Distribution")
+                     color="red", linestyle="--", label=f"P{int(baseline['features']['H']['quantile']*100)} 阈值={baseline['features']['H']['threshold']:.2f}")
+    axes[0].set_xlabel("熵 H")
+    axes[0].set_ylabel("样本数")
+    axes[0].set_title("H 分布")
     axes[0].legend()
 
     axes[1].hist(f_vals, bins=30, color="seagreen", edgecolor="white")
     axes[1].axvline(baseline["features"]["F"]["threshold"],
-                     color="red", linestyle="--", label=f"P{int(baseline['features']['F']['quantile']*100)}={baseline['features']['F']['threshold']:.1f}")
-    axes[1].set_xlabel("Window Frequency F")
-    axes[1].set_ylabel("Count")
-    axes[1].set_title("F Distribution")
+                     color="red", linestyle="--", label=f"P{int(baseline['features']['F']['quantile']*100)} 阈值={baseline['features']['F']['threshold']:.1f}")
+    axes[1].set_xlabel("窗口频次 F")
+    axes[1].set_ylabel("样本数")
+    axes[1].set_title("F 分布")
     axes[1].legend()
 
     axes[2].hist(i_vals, bins=30, color="orange", edgecolor="white")
     axes[2].axvline(baseline["features"]["I"]["threshold"],
-                     color="red", linestyle="--", label=f"P{int(baseline['features']['I']['quantile']*100)}={baseline['features']['I']['threshold']:.2f}")
-    axes[2].set_xlabel("Interval Median I (s)")
-    axes[2].set_ylabel("Count")
-    axes[2].set_title("I Distribution")
+                     color="red", linestyle="--", label=f"P{int(baseline['features']['I']['quantile']*100)} 阈值={baseline['features']['I']['threshold']:.2f}")
+    axes[2].set_xlabel("间隔中位数 I（秒）")
+    axes[2].set_ylabel("样本数")
+    axes[2].set_title("I 分布")
     axes[2].legend()
 
     plt.tight_layout()

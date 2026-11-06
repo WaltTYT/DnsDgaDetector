@@ -3,13 +3,47 @@
 每项来源必须记录：名称、下载链接、版本或获取日期、许可、标签依据。
 
 ## 正常域名榜单（Majestic Million 等）
-- 待填写
+
+### 来源
+- **名称**：Mendeley Data《Legitimate domains and DGA categorized morphologically and by families》中的 `family=legit` 子集
+- **数据集 DOI**：`10.17632/nhvyvytn2h.1`（Version 1，2025-11-12 发布）
+- **URL**：`https://data.mendeley.com/datasets/nhvyvytn2h/1`
+- **许可**：数据集页面标注 CC BY 4.0；上游 Majestic Million 及 DGArchive 的再分发权尚未独立确认，派生文件仅在本机使用
+- **标签依据**：该子集由作者于 2025-09-28 采集的 Majestic Million 组成，按榜单原始顺序保存；本清单只作为良性近似，不宣称域名绝对安全
+- **原始快照**：`data/raw/snapshots/mendeley/dga_legit.csv`，133,777,367 字节，SHA-256 `ad783f5dbef10bf2836d37f107db202c1a5b76f053c45ec394b81bdb42ccca1f`，已被 `.gitignore` 忽略
+- **纳入规则**：按文件原始顺序取 `family=legit` 的前 3,000 个唯一规范化域名，不做随机打乱
+- **产物**：`data/raw/normal_list__mendeley_majestic.txt`，3,000 行，SHA-256 `09c07c40da92fa47686239d6f2cc5a8d5e59abb02ff4c99222e1149ed4b2c5de`
 
 ## 公开 DGA 数据集（优先核验 360netlab/DGA 可用性）
-- 待填写；域名清单与真实 DNS 查询日志分开描述
+
+### 来源
+- **名称**：Mendeley Data《Legitimate domains and DGA categorized morphologically and by families》
+- **数据集 DOI**：`10.17632/nhvyvytn2h.1`（Version 1，2025-11-12 发布）
+- **URL**：`https://data.mendeley.com/datasets/nhvyvytn2h/1`
+- **许可**：CC BY 4.0；上游 DGArchive 材料再分发权尚未独立确认，派生样本仅在本机使用
+- **标签依据**：作者整理自 DGArchive（2025-09-28 至 2025-10-28），按家族与形态标注；共 4,090,661 行，其中 DGA 3,092,348 行、160 个家族、5 种形态
+- **原始快照**：同上一节的 `dga_legit.csv`，已在 `.gitignore` 中忽略
+- **纳入规则**：排除 `family=legit`；按固定 seed `20261101` 对 160 个家族分配配额（每家族基础 1 条，余量按 `SHA-256(seed|public_dga|family|<family>)` 升序发放），家族内按 `SHA-256(seed|public_dga|<family>|<domain>)` 升序取前若干条；域名去重并排除与正常清单重复项
+- **产物**：`data/raw/public_dga__mendeley.csv`，300 行、160 个家族，表头 `domain,family`，SHA-256 `5e65abc8d9fd7fb007aee1f8967edf7834a723f6f631fdde69e7090efe3e18d2`
+- **说明**：域名清单不是真实 DNS 查询日志；D3 生成的查询事件为合成行为
 
 ## PSL 快照（固定本地文件，离线运行不得联网更新）
-- 待填写：快照日期、是否启用私有后缀
+
+### 来源
+- **名称**：Public Suffix List 官方快照
+- **URL**：`https://publicsuffix.org/list/public_suffix_list.dat`
+- **获取日期**：2026-11-06
+- **许可**：Mozilla Public License 2.0
+- **内容**：包含 PRIVATE 区（`===BEGIN PRIVATE DOMAINS===`），启用私有后缀
+- **文件**：`data/raw/public_suffix_list.dat`，338,546 字节，SHA-256 `019fcc1daca33416846853ee1f3b99ea6cc6f03388ecd4ce3e5317039bcfd004`
+- **离线要求**：`prepare_data`、`gen_log`、`features` 运行时只读取本快照或库内置快照，不得联网更新
+
+## 手工 DGA 词根表（项目自有）
+
+- **文件**：`data/raw/manual_word_roots.txt`
+- **内容**：20 个固定英文词根，UTF-8、每行一个、无空行，匹配 `[a-z][a-z0-9-]{0,19}` 且不以连字符结尾
+- **来源**：本项目自建固定词表，不复制第三方词库
+- **SHA-256**：`92f5078ce7c4bcbb1f702b1d47c216ab1bc233d47e3f6dd9b622faa9c287cf44`
 
 ## 难负样本（CDN 哈希子域、云服务域名、含数字合法域名，约 100 个）
 

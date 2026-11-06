@@ -18,10 +18,18 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "DejaVu Sans"]
+plt.rcParams["axes.unicode_minus"] = False
+import numpy as np
 import pandas as pd
 
 try:
@@ -371,6 +379,45 @@ def _cache_coverage(df: pd.DataFrame, split: str,
     }
 
 
+METRIC_LABELS = ["fpr", "fnr", "precision", "recall"]
+
+
+def plot_metric_comparison(metrics: dict, output_dir: str) -> str:
+    rule_values = [metrics["rule"]["test"][key] for key in METRIC_LABELS]
+    hybrid_values = [metrics["hybrid"]["test"][key] for key in METRIC_LABELS]
+    rule_heights = [0.0 if value is None else float(value) for value in rule_values]
+    hybrid_heights = [0.0 if value is None else float(value) for value in hybrid_values]
+
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    positions = np.arange(len(METRIC_LABELS))
+    width = 0.35
+    ax.bar(positions - width / 2, rule_heights, width,
+           label="规则", color="steelblue")
+    ax.bar(positions + width / 2, hybrid_heights, width,
+           label="混合", color="seagreen")
+    for index, value in enumerate(rule_values):
+        if value is None:
+            ax.text(positions[index] - width / 2, 0.01, "无数据",
+                    ha="center", va="bottom", fontsize=8)
+    for index, value in enumerate(hybrid_values):
+        if value is None:
+            ax.text(positions[index] + width / 2, 0.01, "无数据",
+                    ha="center", va="bottom", fontsize=8)
+    ax.set_xticks(positions)
+    ax.set_xticklabels(["假阳性率", "假阴性率", "精确率", "召回率"])
+    ax.set_ylabel("指标值")
+    ax.set_ylim(0, 1.05)
+    ax.set_title("规则与混合方案测试集指标（无数据按 0 显示）")
+    ax.legend()
+
+    plt.tight_layout()
+    os.makedirs(output_dir, exist_ok=True)
+    path = os.path.join(output_dir, "metric_comparison.png")
+    plt.savefig(path, dpi=100)
+    plt.close(fig)
+    return path
+
+
 def evaluate_all(features_path: str | Path, cache_path: str | Path,
                  config_path: str | Path | None = None) -> dict:
     project_root = Path(__file__).resolve().parent.parent
@@ -454,6 +501,10 @@ def evaluate_all(features_path: str | Path, cache_path: str | Path,
         encoding="utf-8",
     )
 
+    figure_path = plot_metric_comparison(
+        payload, str(features_file.parent / "figures")
+    )
+
     manifest["evaluation"] = {
         "features_sha256": features_sha256,
         "cache_sha256": cache_sha256,
@@ -470,6 +521,7 @@ def evaluate_all(features_path: str | Path, cache_path: str | Path,
 
     return {
         "metrics_path": str(metrics_path),
+        "figure_path": figure_path,
         "manifest_path": str(manifest_path),
         "splits_evaluated": splits,
         "features_rows": int(len(out)),

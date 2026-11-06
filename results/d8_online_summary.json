@@ -1,0 +1,1 @@
+{"budget_applied": false, "cache_hits": 0, "fail_reason_counts": {}, "mode": "online", "offline_coverage": 1.0, "requested_unique": 96, "sampling_rule": null, "verdict_counts": {"DGA": 44, "normal": 6, "uncertain": 46}}

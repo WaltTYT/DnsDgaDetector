@@ -1,0 +1,255 @@
+{
+  "baseline": {
+    "F": 12.0,
+    "H": 3.5369,
+    "I": 1.7587
+  },
+  "budget": {
+    "max_unique_requests": 800
+  },
+  "config_sha256": "e82291887fc187fb0afe9dcd1e664709bf2002ede9a3e8aca966c76eae4d6b18",
+  "evaluation": {
+    "budget_sampling_applied": false,
+    "cache_coverage": {
+      "test": {
+        "covered": 18,
+        "judgeable_unique": 18,
+        "rate": 1.0
+      },
+      "val": {
+        "covered": 22,
+        "judgeable_unique": 22,
+        "rate": 1.0
+      }
+    },
+    "cache_sha256": "0919284b13843465aa8537b7f45b80f70ed7805a2965c4552b96bbf6203bf7a9",
+    "config_snapshot_sha256": "e82291887fc187fb0afe9dcd1e664709bf2002ede9a3e8aca966c76eae4d6b18",
+    "features_sha256": "dbf01146a121f234368de476a08c98ce7117c0ead8728079419191a521de84ac",
+    "generated_at": "2026-11-06T02:36:57.602Z",
+    "splits_evaluated": [
+      "val",
+      "test"
+    ],
+    "metrics_path": "D:\\study\\AgentWorkPlace\\CodexWorkPlace\\DnsDgaDetector\\results\\metrics.json",
+    "figure_path": "D:\\study\\AgentWorkPlace\\CodexWorkPlace\\DnsDgaDetector\\results\\figures\\metric_comparison.png",
+    "manifest_path": "D:\\study\\AgentWorkPlace\\CodexWorkPlace\\DnsDgaDetector\\results\\run_manifest.json",
+    "features_rows": 20483,
+    "subset_assertions": {
+      "val": "passed",
+      "test": "passed"
+    }
+  },
+  "finished_at": "2026-11-06T02:36:58Z",
+  "freeze_check": "frozen",
+  "frozen_at": "2026-11-06T01:26:16.494Z",
+  "input_sha256": {
+    "config.json": "e82291887fc187fb0afe9dcd1e664709bf2002ede9a3e8aca966c76eae4d6b18",
+    "data/dns_log.csv": "51eae0fc39c5e752dfa8c5b3a02c63e9e2eae04b68f28865d6fc18f482ad660f",
+    "data/raw/manual_word_roots.txt": "92f5078ce7c4bcbb1f702b1d47c216ab1bc233d47e3f6dd9b622faa9c287cf44",
+    "data/raw/normal_list__mendeley_majestic.txt": "09c07c40da92fa47686239d6f2cc5a8d5e59abb02ff4c99222e1149ed4b2c5de",
+    "data/raw/public_dga__mendeley.csv": "5e65abc8d9fd7fb007aee1f8967edf7834a723f6f631fdde69e7090efe3e18d2",
+    "data/raw/public_suffix_list.dat": "019fcc1daca33416846853ee1f3b99ea6cc6f03388ecd4ce3e5317039bcfd004",
+    "data/splits.csv": "3d74f5f6c4c2dc3f4ae5063aec923cfc633fe64e03e0f9cb49f40dcb8e5ced43"
+  },
+  "llm": {
+    "budget_applied": false,
+    "cache_hits": 96,
+    "fail_reason_counts": {},
+    "mode": "offline",
+    "offline_coverage": 1.0,
+    "requested_unique": 96,
+    "sampling_rule": null,
+    "verdict_counts": {
+      "DGA": 44,
+      "normal": 6,
+      "uncertain": 46
+    }
+  },
+  "mode": "offline",
+  "model": {
+    "endpoint": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+    "max_retries": 3,
+    "max_tokens": 32,
+    "name": "GLM-4-Flash",
+    "temperature": 0,
+    "timeout_seconds": 30
+  },
+  "prompt_template_hash": "c75112bd9ba7a58974ae44fe88ca41b882a3851a95e4b2797f26b99bf6fe6777",
+  "seed": 20261101,
+  "stages": [
+    {
+      "name": "features",
+      "output": "results/features.csv",
+      "rows": 20483,
+      "columns": 16
+    },
+    {
+      "name": "baseline",
+      "output": "results/baseline.json",
+      "source": "frozen",
+      "fitted_on": {
+        "split": "train",
+        "label": 0
+      },
+      "thresholds": {
+        "H": 3.5369,
+        "F": 12.0,
+        "I": 1.7587
+      }
+    },
+    {
+      "name": "rules",
+      "output": "results/features.csv",
+      "rows": 20483,
+      "alerts": 335
+    },
+    {
+      "name": "llm",
+      "mode": "offline",
+      "requested_unique": 96,
+      "cache_hits": 96
+    },
+    {
+      "name": "evaluate",
+      "metrics": "results/metrics.json",
+      "figure": "D:\\study\\AgentWorkPlace\\CodexWorkPlace\\DnsDgaDetector\\results\\figures\\metric_comparison.png"
+    }
+  ],
+  "started_at": "2026-11-06T02:36:48Z",
+  "thresholds": {
+    "F": 12.0,
+    "F_quantile": 0.99,
+    "H": 3.5369,
+    "H_quantile": 0.99,
+    "I": 1.7587,
+    "I_quantile": 0.01,
+    "fitted_on": {
+      "label": 0,
+      "split": "train"
+    }
+  },
+  "validation": {
+    "by_algorithm": {
+      "md5_date": {
+        "fn": 16,
+        "fnr": 0.9412,
+        "fp": 0,
+        "fpr": null,
+        "negative_support": 0,
+        "positive_support": 17,
+        "precision": 1.0,
+        "recall": 0.0588,
+        "tn": 0,
+        "total": 17,
+        "tp": 1
+      },
+      "none": {
+        "fn": 48,
+        "fnr": 0.8136,
+        "fp": 39,
+        "fpr": 0.0098,
+        "negative_support": 3961,
+        "positive_support": 59,
+        "precision": 0.22,
+        "recall": 0.1864,
+        "tn": 3922,
+        "total": 4020,
+        "tp": 11
+      },
+      "rand_alpha": {
+        "fn": 7,
+        "fnr": 0.4667,
+        "fp": 0,
+        "fpr": null,
+        "negative_support": 0,
+        "positive_support": 15,
+        "precision": 1.0,
+        "recall": 0.5333,
+        "tn": 0,
+        "total": 15,
+        "tp": 8
+      },
+      "word_digit": {
+        "fn": 28,
+        "fnr": 0.6087,
+        "fp": 0,
+        "fpr": null,
+        "negative_support": 0,
+        "positive_support": 46,
+        "precision": 1.0,
+        "recall": 0.3913,
+        "tn": 0,
+        "total": 46,
+        "tp": 18
+      }
+    },
+    "by_source": {
+      "hard_negative": {
+        "fn": 0,
+        "fnr": null,
+        "fp": 0,
+        "fpr": 0.0,
+        "negative_support": 136,
+        "positive_support": 0,
+        "precision": null,
+        "recall": null,
+        "tn": 136,
+        "total": 136,
+        "tp": 0
+      },
+      "manual_dga": {
+        "fn": 51,
+        "fnr": 0.6538,
+        "fp": 0,
+        "fpr": null,
+        "negative_support": 0,
+        "positive_support": 78,
+        "precision": 1.0,
+        "recall": 0.3462,
+        "tn": 0,
+        "total": 78,
+        "tp": 27
+      },
+      "normal_list": {
+        "fn": 0,
+        "fnr": null,
+        "fp": 39,
+        "fpr": 0.0102,
+        "negative_support": 3825,
+        "positive_support": 0,
+        "precision": 0.0,
+        "recall": null,
+        "tn": 3786,
+        "total": 3825,
+        "tp": 0
+      },
+      "public_dga": {
+        "fn": 48,
+        "fnr": 0.8136,
+        "fp": 0,
+        "fpr": null,
+        "negative_support": 0,
+        "positive_support": 59,
+        "precision": 1.0,
+        "recall": 0.1864,
+        "tn": 0,
+        "total": 59,
+        "tp": 11
+      }
+    },
+    "rule": {
+      "fn": 99,
+      "fnr": 0.7226,
+      "fp": 39,
+      "fpr": 0.0098,
+      "negative_support": 3961,
+      "positive_support": 137,
+      "precision": 0.4935,
+      "recall": 0.2774,
+      "tn": 3922,
+      "total": 4098,
+      "tp": 38
+    },
+    "split": "val"
+  }
+}

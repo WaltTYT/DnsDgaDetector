@@ -242,6 +242,20 @@ def test_grouped_metrics_by_source_algorithm_and_rule_hit():
     assert "E_and_B" not in groups["by_rule_hit"]
 
 
+def test_plot_metric_comparison_writes_png(tmp_path):
+    metrics = {
+        "rule": {"test": {
+            "fpr": 0.1, "fnr": 0.2, "precision": 0.8, "recall": 0.8,
+        }},
+        "hybrid": {"test": {
+            "fpr": 0.05, "fnr": None, "precision": None, "recall": 0.9,
+        }},
+    }
+    path = evaluate.plot_metric_comparison(metrics, str(tmp_path))
+    assert Path(path).exists()
+    assert Path(path).stat().st_size > 0
+
+
 def test_evaluate_all_end_to_end(tmp_path):
     config = json.loads((PROJECT_ROOT / "config.json").read_text(encoding="utf-8"))
     config_path = tmp_path / "config.json"

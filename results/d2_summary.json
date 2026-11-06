@@ -1,0 +1,1746 @@
+{
+  "algorithm_counts": {
+    "md5_date": 100,
+    "rand_alpha": 100,
+    "word_digit": 100
+  },
+  "algorithm_diagnostics": {
+    "md5_date": {
+      "collision_retries": 0,
+      "count": 100,
+      "example_domains": [
+        "4a5a04aed162.com",
+        "2a8d2d5edfa10.com",
+        "8c7156bb6cf71.com"
+      ],
+      "unique_count": 100
+    },
+    "rand_alpha": {
+      "collision_retries": 0,
+      "count": 100,
+      "example_domains": [
+        "lpbvkecxozhjpdgh.com",
+        "pufwqzegwnghm.com",
+        "kxyxgtgwmwhksuct.com"
+      ],
+      "unique_count": 100
+    },
+    "word_digit": {
+      "collision_retries": 0,
+      "count": 100,
+      "example_domains": [
+        "download870.com",
+        "networkaccount353.com",
+        "loginonline092.com"
+      ],
+      "unique_count": 100
+    }
+  },
+  "collision_retries": 0,
+  "excluded_rows": [
+    {
+      "line_number": 17,
+      "raw_domain": "cfcfikchefir.bazaar",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley",
+      "source_path": "data/raw/public_dga__mendeley.csv"
+    },
+    {
+      "line_number": 18,
+      "raw_domain": "udefudli.bazar",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley",
+      "source_path": "data/raw/public_dga__mendeley.csv"
+    },
+    {
+      "line_number": 135,
+      "raw_domain": "03e176e991.oss",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley",
+      "source_path": "data/raw/public_dga__mendeley.csv"
+    },
+    {
+      "line_number": 136,
+      "raw_domain": "ae6a7f705a.geek",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley",
+      "source_path": "data/raw/public_dga__mendeley.csv"
+    },
+    {
+      "line_number": 138,
+      "raw_domain": "cf56c91076.session.geek",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley",
+      "source_path": "data/raw/public_dga__mendeley.csv"
+    },
+    {
+      "line_number": 37,
+      "raw_domain": "blogspot.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 43,
+      "raw_domain": "github.io",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 84,
+      "raw_domain": "wixsite.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 146,
+      "raw_domain": "cloudfront.net",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 150,
+      "raw_domain": "myshopify.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 192,
+      "raw_domain": "gc.ca",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 198,
+      "raw_domain": "uk.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 222,
+      "raw_domain": "gouv.fr",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 255,
+      "raw_domain": "readthedocs.io",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 339,
+      "raw_domain": "googleapis.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 345,
+      "raw_domain": "or.kr",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 367,
+      "raw_domain": "azurewebsites.net",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 370,
+      "raw_domain": "go.id",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 384,
+      "raw_domain": "eu.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 404,
+      "raw_domain": "gob.mx",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 420,
+      "raw_domain": "us.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 455,
+      "raw_domain": "in.ua",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 490,
+      "raw_domain": "qc.ca",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 501,
+      "raw_domain": "go.kr",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 511,
+      "raw_domain": "govt.nz",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 542,
+      "raw_domain": "service.gov.uk",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 562,
+      "raw_domain": "withgoogle.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 572,
+      "raw_domain": "it.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 573,
+      "raw_domain": "ru.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 580,
+      "raw_domain": "netlify.app",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 582,
+      "raw_domain": "kiev.ua",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 583,
+      "raw_domain": "altervista.org",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 603,
+      "raw_domain": "gob.es",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 608,
+      "raw_domain": "appspot.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 612,
+      "raw_domain": "on.ca",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 635,
+      "raw_domain": "vic.gov.au",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 644,
+      "raw_domain": "vercel.app",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 656,
+      "raw_domain": "go.th",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 658,
+      "raw_domain": "notion.site",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 666,
+      "raw_domain": "sakura.ne.jp",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 668,
+      "raw_domain": "pages.dev",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 682,
+      "raw_domain": "gob.ar",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 702,
+      "raw_domain": "translate.goog",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 707,
+      "raw_domain": "gv.at",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 717,
+      "raw_domain": "or.id",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 723,
+      "raw_domain": "in.net",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 737,
+      "raw_domain": "bc.ca",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 748,
+      "raw_domain": "sch.id",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 758,
+      "raw_domain": "spb.ru",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 765,
+      "raw_domain": "githubusercontent.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 767,
+      "raw_domain": "webflow.io",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 776,
+      "raw_domain": "square.site",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 848,
+      "raw_domain": "cn.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 951,
+      "raw_domain": "nic.in",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 957,
+      "raw_domain": "freedesktop.org",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 978,
+      "raw_domain": "gitbook.io",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 998,
+      "raw_domain": "uk.net",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1059,
+      "raw_domain": "co.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1072,
+      "raw_domain": "in.th",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1080,
+      "raw_domain": "asso.fr",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1089,
+      "raw_domain": "akamaihd.net",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1090,
+      "raw_domain": "eu.org",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1098,
+      "raw_domain": "gob.pe",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1138,
+      "raw_domain": "jp.net",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1158,
+      "raw_domain": "herokuapp.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1160,
+      "raw_domain": "sa.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1189,
+      "raw_domain": "my.id",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1191,
+      "raw_domain": "yolasite.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1234,
+      "raw_domain": "qld.gov.au",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1335,
+      "raw_domain": "mn.us",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1338,
+      "raw_domain": "js.org",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1347,
+      "raw_domain": "or.th",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1397,
+      "raw_domain": "dyndns.org",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1436,
+      "raw_domain": "tx.us",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1467,
+      "raw_domain": "pantheonsite.io",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1469,
+      "raw_domain": "waw.pl",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1522,
+      "raw_domain": "carrd.co",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1560,
+      "raw_domain": "ca.us",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1566,
+      "raw_domain": "dp.ua",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1574,
+      "raw_domain": "us.org",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1590,
+      "raw_domain": "web.app",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1597,
+      "raw_domain": "wa.gov.au",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1627,
+      "raw_domain": "de.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1648,
+      "raw_domain": "hatenablog.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1691,
+      "raw_domain": "fl.us",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1750,
+      "raw_domain": "od.ua",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1769,
+      "raw_domain": "web.id",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1839,
+      "raw_domain": "azureedge.net",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1889,
+      "raw_domain": "jpn.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1901,
+      "raw_domain": "sp.gov.br",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1902,
+      "raw_domain": "re.kr",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1986,
+      "raw_domain": "ny.us",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1994,
+      "raw_domain": "nj.us",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2016,
+      "raw_domain": "pa.us",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2026,
+      "raw_domain": "msk.ru",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2076,
+      "raw_domain": "gob.ec",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2123,
+      "raw_domain": "ab.ca",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2128,
+      "raw_domain": "go.ke",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2181,
+      "raw_domain": "pp.ua",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2190,
+      "raw_domain": "br.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2228,
+      "raw_domain": "main.jp",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2239,
+      "raw_domain": "lviv.ua",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2242,
+      "raw_domain": "info.pl",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2300,
+      "raw_domain": "tokyo.jp",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2368,
+      "raw_domain": "sa.gov.au",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2369,
+      "raw_domain": "gitlab.io",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2370,
+      "raw_domain": "va.us",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2493,
+      "raw_domain": "or.us",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2541,
+      "raw_domain": "or.at",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2589,
+      "raw_domain": "il.us",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2622,
+      "raw_domain": "mb.ca",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2683,
+      "raw_domain": "krakow.pl",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2723,
+      "raw_domain": "gob.cl",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2878,
+      "raw_domain": "jpn.org",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2884,
+      "raw_domain": "ddns.net",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2915,
+      "raw_domain": "res.in",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 2940,
+      "raw_domain": "desa.id",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "mendeley_majestic",
+      "source_path": "data/raw/normal_list__mendeley_majestic.txt"
+    },
+    {
+      "line_number": 1,
+      "raw_domain": "akamai.net",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "opendns_top10k_cdn_cloud",
+      "source_path": "data/raw/hard_negative__opendns_top10k_cdn_cloud.txt"
+    },
+    {
+      "line_number": 2,
+      "raw_domain": "akamaihd.net",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "opendns_top10k_cdn_cloud",
+      "source_path": "data/raw/hard_negative__opendns_top10k_cdn_cloud.txt"
+    },
+    {
+      "line_number": 4,
+      "raw_domain": "appspot.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "opendns_top10k_cdn_cloud",
+      "source_path": "data/raw/hard_negative__opendns_top10k_cdn_cloud.txt"
+    },
+    {
+      "line_number": 14,
+      "raw_domain": "herokuapp.com",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "opendns_top10k_cdn_cloud",
+      "source_path": "data/raw/hard_negative__opendns_top10k_cdn_cloud.txt"
+    },
+    {
+      "line_number": 17,
+      "raw_domain": "trafficmanager.net",
+      "reason": "no registered domain (eTLD+1) under the configured PSL",
+      "source_id": "opendns_top10k_cdn_cloud",
+      "source_path": "data/raw/hard_negative__opendns_top10k_cdn_cloud.txt"
+    }
+  ],
+  "hard_negative_promoted": 13,
+  "input_sha256": {
+    "config.json": "e82291887fc187fb0afe9dcd1e664709bf2002ede9a3e8aca966c76eae4d6b18",
+    "data/raw/hard_negative__opendns_top10k_cdn_cloud.txt": "149e718eef6e1c9055f938cb0563ecd84cae70689d2fc056f61a49883d51aa23",
+    "data/raw/hard_negative__opendns_top10k_dga_like.txt": "c948f0374af184be3c3753fa727859816cd07c92e4c2e60ce30101ca430dac78",
+    "data/raw/hard_negative__opendns_top10k_digits.txt": "7e7838d19e9b773d4345fe2385f81dd0f3f0a8d9be5e12f92e1417e657040d6e",
+    "data/raw/manual_word_roots.txt": "92f5078ce7c4bcbb1f702b1d47c216ab1bc233d47e3f6dd9b622faa9c287cf44",
+    "data/raw/normal_list__mendeley_majestic.txt": "09c07c40da92fa47686239d6f2cc5a8d5e59abb02ff4c99222e1149ed4b2c5de",
+    "data/raw/public_dga__mendeley.csv": "5e65abc8d9fd7fb007aee1f8967edf7834a723f6f631fdde69e7090efe3e18d2",
+    "data/raw/public_suffix_list.dat": "019fcc1daca33416846853ee1f3b99ea6cc6f03388ecd4ce3e5317039bcfd004"
+  },
+  "label_counts": {
+    "0": 2970,
+    "1": 595
+  },
+  "psl_sha256": "019fcc1daca33416846853ee1f3b99ea6cc6f03388ecd4ce3e5317039bcfd004",
+  "public_dga_family_counts": {
+    "abcbot": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "abcbot_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "alien": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "allasenha": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "amadey": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "ares": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "bamital": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "banjori": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "bedep": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "bigviktor": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "bigviktor_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "bobax": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "bumblebee": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "calfbot": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "calfbot_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "carnavalheist": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "ccleaner": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "chaes": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "chaes_subdomain": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "chinad": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "chir": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "coffeeloader": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "conficker": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "coper": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "copperstealer": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "corebot": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "corebot_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "cryptolocker": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "darkcracks": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "darkshell": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "darkwatchman": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "diamondfox": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "dircrypt": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "dmsniff": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "dmsniff_subdomain": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "downloader": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "dyre": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "ebury": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "ekforward": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "emotet": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "enviserv": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "errorfather": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "feodo": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "flashback": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "flubot": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "fobber": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "fosniw": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "ftcode": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "g01": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "gameover": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "gameover_p2p_a0b92382": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "gazavat": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "ghostweaver": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "gozi": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "grandoreiro": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "gspy": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "hesperbot": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "infy": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "kfos": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "kingminer": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "lechiket": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "locky": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "m0yv": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "m0yvtdd": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "madmax": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "magecart": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "makloader": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "matsnu": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "metastealer": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "mintsloader": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "mirai": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "mirainomi_subdomain": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "misfox": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "monerominer": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "murofet": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "murofetweekly": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "mydoom": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "mydoomtid": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "n3cr0m0rph": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "n3cr0m0rph_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "necurs": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "ngioweb": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "nymaim": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "nymaim2": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "oderoor": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "oderoor_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "omexo": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "orchard": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "orchard_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "orchardgenesis": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "orchardgenesis_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "padcrypt": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "pandabanker": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "phorpiex": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "pitou": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "prometei": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "proslikefan": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "pseudomanuscrypt": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "pseudomanuscrypt_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "pushdo": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "pushdotid": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "pykspa": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "pykspa2": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "pykspa2s": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "qadars": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "qakbot": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "qhost": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "qsnatch": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "ramdo": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "ramnit": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "ranbyus": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "recjs_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "redyms": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "rovnix": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "runforestrun": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "runforestrun_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "shadowpad": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "sharkbot": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "shifu": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "simda": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "sinowal": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "sisron": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "sphinx": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "suppobox": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "symmi": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "symmi_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "szribi": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "tempedreve": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "tempedrevetdd": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "tinba": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "tinyfluff": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "tinynuke": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "tofsee": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "toxicpanda": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "tsifiri": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "tufik": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "ud2": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "ud3": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "ud6": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "ud8": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "urlzone": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "vawtrak": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "verblecon": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "vidro": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "vidro_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "vidrotid": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "vidrotid_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "vipersoftx": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "virut": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "vo1d": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "vobfus": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "vobfus_subdomain": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "volatilecedar": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "wd": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "xagent": {
+      "available": 1,
+      "quota": 1,
+      "selected": 1
+    },
+    "xxhex": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "zeroaccess": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    },
+    "zloader": {
+      "available": 2,
+      "quota": 2,
+      "selected": 2
+    }
+  },
+  "source_counts": {
+    "mendeley": {
+      "deduplicated": 0,
+      "excluded": 5,
+      "raw": 300,
+      "valid": 295
+    },
+    "mendeley_majestic": {
+      "deduplicated": 0,
+      "excluded": 112,
+      "raw": 3000,
+      "valid": 2888
+    },
+    "opendns_top10k_cdn_cloud": {
+      "deduplicated": 0,
+      "excluded": 5,
+      "raw": 20,
+      "valid": 15
+    },
+    "opendns_top10k_dga_like": {
+      "deduplicated": 0,
+      "excluded": 0,
+      "raw": 20,
+      "valid": 20
+    },
+    "opendns_top10k_digits": {
+      "deduplicated": 0,
+      "excluded": 0,
+      "raw": 60,
+      "valid": 60
+    }
+  },
+  "split_counts": {
+    "test": 713,
+    "train": 2139,
+    "val": 713
+  },
+  "split_ratios": {
+    "test": 0.2,
+    "train": 0.6,
+    "val": 0.2
+  }
+}

@@ -22,6 +22,7 @@ from __future__ import annotations
 import math
 import re
 from datetime import datetime, timezone
+from functools import lru_cache
 from typing import Optional
 
 import numpy as np
@@ -47,11 +48,13 @@ PUNYCODE_PREFIX = "xn--"
 _ABSOLUTE_MIN = pd.Timestamp("1970-01-01T00:00:00Z")
 
 
+@lru_cache(maxsize=1)
 def _make_tldextract() -> tldextract.TLDExtract:
     return tldextract.TLDExtract(
         include_psl_private_domains=False,
         cache_dir=None,
-        fallback_to_snapshot=False,
+        suffix_list_urls=(),
+        fallback_to_snapshot=True,
     )
 
 

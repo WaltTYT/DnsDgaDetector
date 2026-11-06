@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "window_seconds": 60,
+  "fitted_on": {
+    "split": "train",
+    "label": 0
+  },
+  "fitted_at": "2026-11-06T01:26:12.698Z",
+  "python_version": "3.11.17",
+  "numpy_version": "2.4.6",
+  "pandas_version": "3.0.6",
+  "psl_source": "tldextract==5.4.0 built-in snapshot",
+  "features": {
+    "H": {
+      "quantile": 0.99,
+      "threshold": 3.5369,
+      "n_unique_labels": 11880,
+      "n_missing": 0,
+      "method": "numpy.percentile(q, method='linear')",
+      "comparator": ">"
+    },
+    "F": {
+      "quantile": 0.99,
+      "threshold": 12.0,
+      "n_windows": 11880,
+      "method": "numpy.percentile(q, method='linear')",
+      "comparator": ">"
+    },
+    "I": {
+      "quantile": 0.01,
+      "threshold": 1.7587,
+      "n_windows_valid": 485,
+      "n_windows_total": 11880,
+      "i_rule_potentially_ineffective": false,
+      "method": "numpy.percentile(q, method='linear')",
+      "comparator": "<"
+    }
+  },
+  "freeze_check": "not frozen until D7"
+}

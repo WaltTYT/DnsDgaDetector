@@ -104,16 +104,31 @@ class TestPslExtraction:
         assert label == ""
         assert status == "no_domain"
 
-    def test_tldextract_offline(self):
-        import tldextract
-        ext = tldextract.TLDExtract(
-            include_psl_private_domains=False,
-            cache_dir=None,
-            fallback_to_snapshot=False,
-        )
+    def test_tldextract_offline(self, monkeypatch):
+        import socket
+        import urllib.request
+
+        from features import _make_tldextract
+
+        def _blocked(*args, **kwargs):
+            raise OSError("network access blocked in test")
+
+        monkeypatch.setattr(socket.socket, "connect", _blocked)
+        monkeypatch.setattr(urllib.request, "urlopen", _blocked)
+
+        _make_tldextract.cache_clear()
+        ext = _make_tldextract()
+        assert ext.suffix_list_urls == ()
+
         result = ext("sub.example.co.uk")
         assert result.domain == "example"
         assert result.suffix == "co.uk"
+
+        label, status = extract_label("mail.cctv.com", ext)
+        assert label == "cctv"
+        assert status == "ok"
+
+        assert _make_tldextract() is ext
 
 
 class TestQnameNormalization:

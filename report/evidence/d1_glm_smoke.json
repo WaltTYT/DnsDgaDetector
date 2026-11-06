@@ -1,0 +1,16 @@
+{
+  "checked_at": "2026-11-06T01:26:38.639Z",
+  "model": "GLM-4-Flash",
+  "endpoint": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+  "http_status": 200,
+  "latency_ms": 884,
+  "request_id": "539c794c-9bf7-474d-a26d-17d9e91874fa",
+  "usage": {
+    "prompt_tokens": 73,
+    "completion_tokens": 11,
+    "total_tokens": 84
+  },
+  "response_json_valid": true,
+  "success": true,
+  "error_category": null
+}

@@ -1,0 +1,1208 @@
+{
+  "budget_sampling_applied": false,
+  "cache_coverage": {
+    "test": {
+      "covered": 18,
+      "judgeable_unique": 18,
+      "rate": 1.0
+    },
+    "val": {
+      "covered": 22,
+      "judgeable_unique": 22,
+      "rate": 1.0
+    }
+  },
+  "cache_sha256": "0919284b13843465aa8537b7f45b80f70ed7805a2965c4552b96bbf6203bf7a9",
+  "config_snapshot_sha256": "e82291887fc187fb0afe9dcd1e664709bf2002ede9a3e8aca966c76eae4d6b18",
+  "features_sha256": "dbf01146a121f234368de476a08c98ce7117c0ead8728079419191a521de84ac",
+  "generated_at": "2026-11-06T02:36:57.602Z",
+  "group_metrics": {
+    "test": {
+      "by_algorithm": {
+        "md5_date": {
+          "hybrid": {
+            "fn": 22,
+            "fnr": 1.0,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 22,
+            "precision": null,
+            "recall": 0.0,
+            "tn": 0,
+            "total": 22,
+            "tp": 0
+          },
+          "label_counts": {
+            "0": 0,
+            "1": 22
+          },
+          "rows": 22,
+          "rule": {
+            "fn": 22,
+            "fnr": 1.0,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 22,
+            "precision": null,
+            "recall": 0.0,
+            "tn": 0,
+            "total": 22,
+            "tp": 0
+          }
+        },
+        "none": {
+          "hybrid": {
+            "fn": 37,
+            "fnr": 0.74,
+            "fp": 16,
+            "fpr": 0.004,
+            "negative_support": 3961,
+            "positive_support": 50,
+            "precision": 0.4483,
+            "recall": 0.26,
+            "tn": 3945,
+            "total": 4011,
+            "tp": 13
+          },
+          "label_counts": {
+            "0": 3961,
+            "1": 50
+          },
+          "rows": 4011,
+          "rule": {
+            "fn": 37,
+            "fnr": 0.74,
+            "fp": 21,
+            "fpr": 0.0053,
+            "negative_support": 3961,
+            "positive_support": 50,
+            "precision": 0.3824,
+            "recall": 0.26,
+            "tn": 3940,
+            "total": 4011,
+            "tp": 13
+          }
+        },
+        "rand_alpha": {
+          "hybrid": {
+            "fn": 12,
+            "fnr": 0.6667,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 18,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "tn": 0,
+            "total": 18,
+            "tp": 6
+          },
+          "label_counts": {
+            "0": 0,
+            "1": 18
+          },
+          "rows": 18,
+          "rule": {
+            "fn": 12,
+            "fnr": 0.6667,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 18,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "tn": 0,
+            "total": 18,
+            "tp": 6
+          }
+        },
+        "word_digit": {
+          "hybrid": {
+            "fn": 41,
+            "fnr": 0.8723,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 47,
+            "precision": 1.0,
+            "recall": 0.1277,
+            "tn": 0,
+            "total": 47,
+            "tp": 6
+          },
+          "label_counts": {
+            "0": 0,
+            "1": 47
+          },
+          "rows": 47,
+          "rule": {
+            "fn": 41,
+            "fnr": 0.8723,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 47,
+            "precision": 1.0,
+            "recall": 0.1277,
+            "tn": 0,
+            "total": 47,
+            "tp": 6
+          }
+        }
+      },
+      "by_rule_hit": {
+        "B_only": {
+          "hybrid": {
+            "fn": 0,
+            "fnr": 0.0,
+            "fp": 4,
+            "fpr": 1.0,
+            "negative_support": 4,
+            "positive_support": 3,
+            "precision": 0.4286,
+            "recall": 1.0,
+            "tn": 0,
+            "total": 7,
+            "tp": 3
+          },
+          "label_counts": {
+            "0": 4,
+            "1": 3
+          },
+          "rows": 7,
+          "rule": {
+            "fn": 0,
+            "fnr": 0.0,
+            "fp": 4,
+            "fpr": 1.0,
+            "negative_support": 4,
+            "positive_support": 3,
+            "precision": 0.4286,
+            "recall": 1.0,
+            "tn": 0,
+            "total": 7,
+            "tp": 3
+          }
+        },
+        "E_only": {
+          "hybrid": {
+            "fn": 0,
+            "fnr": 0.0,
+            "fp": 12,
+            "fpr": 0.7059,
+            "negative_support": 17,
+            "positive_support": 22,
+            "precision": 0.6471,
+            "recall": 1.0,
+            "tn": 5,
+            "total": 39,
+            "tp": 22
+          },
+          "label_counts": {
+            "0": 17,
+            "1": 22
+          },
+          "rows": 39,
+          "rule": {
+            "fn": 0,
+            "fnr": 0.0,
+            "fp": 17,
+            "fpr": 1.0,
+            "negative_support": 17,
+            "positive_support": 22,
+            "precision": 0.5641,
+            "recall": 1.0,
+            "tn": 0,
+            "total": 39,
+            "tp": 22
+          }
+        }
+      },
+      "by_source": {
+        "hard_negative": {
+          "hybrid": {
+            "fn": 0,
+            "fnr": null,
+            "fp": 0,
+            "fpr": 0.0,
+            "negative_support": 154,
+            "positive_support": 0,
+            "precision": null,
+            "recall": null,
+            "tn": 154,
+            "total": 154,
+            "tp": 0
+          },
+          "label_counts": {
+            "0": 154,
+            "1": 0
+          },
+          "rows": 154,
+          "rule": {
+            "fn": 0,
+            "fnr": null,
+            "fp": 0,
+            "fpr": 0.0,
+            "negative_support": 154,
+            "positive_support": 0,
+            "precision": null,
+            "recall": null,
+            "tn": 154,
+            "total": 154,
+            "tp": 0
+          }
+        },
+        "manual_dga": {
+          "hybrid": {
+            "fn": 75,
+            "fnr": 0.8621,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 87,
+            "precision": 1.0,
+            "recall": 0.1379,
+            "tn": 0,
+            "total": 87,
+            "tp": 12
+          },
+          "label_counts": {
+            "0": 0,
+            "1": 87
+          },
+          "rows": 87,
+          "rule": {
+            "fn": 75,
+            "fnr": 0.8621,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 87,
+            "precision": 1.0,
+            "recall": 0.1379,
+            "tn": 0,
+            "total": 87,
+            "tp": 12
+          }
+        },
+        "normal_list": {
+          "hybrid": {
+            "fn": 0,
+            "fnr": null,
+            "fp": 16,
+            "fpr": 0.0042,
+            "negative_support": 3807,
+            "positive_support": 0,
+            "precision": 0.0,
+            "recall": null,
+            "tn": 3791,
+            "total": 3807,
+            "tp": 0
+          },
+          "label_counts": {
+            "0": 3807,
+            "1": 0
+          },
+          "rows": 3807,
+          "rule": {
+            "fn": 0,
+            "fnr": null,
+            "fp": 21,
+            "fpr": 0.0055,
+            "negative_support": 3807,
+            "positive_support": 0,
+            "precision": 0.0,
+            "recall": null,
+            "tn": 3786,
+            "total": 3807,
+            "tp": 0
+          }
+        },
+        "public_dga": {
+          "hybrid": {
+            "fn": 37,
+            "fnr": 0.74,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 50,
+            "precision": 1.0,
+            "recall": 0.26,
+            "tn": 0,
+            "total": 50,
+            "tp": 13
+          },
+          "label_counts": {
+            "0": 0,
+            "1": 50
+          },
+          "rows": 50,
+          "rule": {
+            "fn": 37,
+            "fnr": 0.74,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 50,
+            "precision": 1.0,
+            "recall": 0.26,
+            "tn": 0,
+            "total": 50,
+            "tp": 13
+          }
+        }
+      }
+    },
+    "val": {
+      "by_algorithm": {
+        "md5_date": {
+          "hybrid": {
+            "fn": 16,
+            "fnr": 0.9412,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 17,
+            "precision": 1.0,
+            "recall": 0.0588,
+            "tn": 0,
+            "total": 17,
+            "tp": 1
+          },
+          "label_counts": {
+            "0": 0,
+            "1": 17
+          },
+          "rows": 17,
+          "rule": {
+            "fn": 16,
+            "fnr": 0.9412,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 17,
+            "precision": 1.0,
+            "recall": 0.0588,
+            "tn": 0,
+            "total": 17,
+            "tp": 1
+          }
+        },
+        "none": {
+          "hybrid": {
+            "fn": 48,
+            "fnr": 0.8136,
+            "fp": 36,
+            "fpr": 0.0091,
+            "negative_support": 3961,
+            "positive_support": 59,
+            "precision": 0.234,
+            "recall": 0.1864,
+            "tn": 3925,
+            "total": 4020,
+            "tp": 11
+          },
+          "label_counts": {
+            "0": 3961,
+            "1": 59
+          },
+          "rows": 4020,
+          "rule": {
+            "fn": 48,
+            "fnr": 0.8136,
+            "fp": 39,
+            "fpr": 0.0098,
+            "negative_support": 3961,
+            "positive_support": 59,
+            "precision": 0.22,
+            "recall": 0.1864,
+            "tn": 3922,
+            "total": 4020,
+            "tp": 11
+          }
+        },
+        "rand_alpha": {
+          "hybrid": {
+            "fn": 7,
+            "fnr": 0.4667,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 15,
+            "precision": 1.0,
+            "recall": 0.5333,
+            "tn": 0,
+            "total": 15,
+            "tp": 8
+          },
+          "label_counts": {
+            "0": 0,
+            "1": 15
+          },
+          "rows": 15,
+          "rule": {
+            "fn": 7,
+            "fnr": 0.4667,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 15,
+            "precision": 1.0,
+            "recall": 0.5333,
+            "tn": 0,
+            "total": 15,
+            "tp": 8
+          }
+        },
+        "word_digit": {
+          "hybrid": {
+            "fn": 28,
+            "fnr": 0.6087,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 46,
+            "precision": 1.0,
+            "recall": 0.3913,
+            "tn": 0,
+            "total": 46,
+            "tp": 18
+          },
+          "label_counts": {
+            "0": 0,
+            "1": 46
+          },
+          "rows": 46,
+          "rule": {
+            "fn": 28,
+            "fnr": 0.6087,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 46,
+            "precision": 1.0,
+            "recall": 0.3913,
+            "tn": 0,
+            "total": 46,
+            "tp": 18
+          }
+        }
+      },
+      "by_rule_hit": {
+        "B_only": {
+          "hybrid": {
+            "fn": 0,
+            "fnr": 0.0,
+            "fp": 6,
+            "fpr": 1.0,
+            "negative_support": 6,
+            "positive_support": 4,
+            "precision": 0.4,
+            "recall": 1.0,
+            "tn": 0,
+            "total": 10,
+            "tp": 4
+          },
+          "label_counts": {
+            "0": 6,
+            "1": 4
+          },
+          "rows": 10,
+          "rule": {
+            "fn": 0,
+            "fnr": 0.0,
+            "fp": 6,
+            "fpr": 1.0,
+            "negative_support": 6,
+            "positive_support": 4,
+            "precision": 0.4,
+            "recall": 1.0,
+            "tn": 0,
+            "total": 10,
+            "tp": 4
+          }
+        },
+        "E_only": {
+          "hybrid": {
+            "fn": 0,
+            "fnr": 0.0,
+            "fp": 30,
+            "fpr": 0.9091,
+            "negative_support": 33,
+            "positive_support": 34,
+            "precision": 0.5312,
+            "recall": 1.0,
+            "tn": 3,
+            "total": 67,
+            "tp": 34
+          },
+          "label_counts": {
+            "0": 33,
+            "1": 34
+          },
+          "rows": 67,
+          "rule": {
+            "fn": 0,
+            "fnr": 0.0,
+            "fp": 33,
+            "fpr": 1.0,
+            "negative_support": 33,
+            "positive_support": 34,
+            "precision": 0.5075,
+            "recall": 1.0,
+            "tn": 0,
+            "total": 67,
+            "tp": 34
+          }
+        }
+      },
+      "by_source": {
+        "hard_negative": {
+          "hybrid": {
+            "fn": 0,
+            "fnr": null,
+            "fp": 0,
+            "fpr": 0.0,
+            "negative_support": 136,
+            "positive_support": 0,
+            "precision": null,
+            "recall": null,
+            "tn": 136,
+            "total": 136,
+            "tp": 0
+          },
+          "label_counts": {
+            "0": 136,
+            "1": 0
+          },
+          "rows": 136,
+          "rule": {
+            "fn": 0,
+            "fnr": null,
+            "fp": 0,
+            "fpr": 0.0,
+            "negative_support": 136,
+            "positive_support": 0,
+            "precision": null,
+            "recall": null,
+            "tn": 136,
+            "total": 136,
+            "tp": 0
+          }
+        },
+        "manual_dga": {
+          "hybrid": {
+            "fn": 51,
+            "fnr": 0.6538,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 78,
+            "precision": 1.0,
+            "recall": 0.3462,
+            "tn": 0,
+            "total": 78,
+            "tp": 27
+          },
+          "label_counts": {
+            "0": 0,
+            "1": 78
+          },
+          "rows": 78,
+          "rule": {
+            "fn": 51,
+            "fnr": 0.6538,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 78,
+            "precision": 1.0,
+            "recall": 0.3462,
+            "tn": 0,
+            "total": 78,
+            "tp": 27
+          }
+        },
+        "normal_list": {
+          "hybrid": {
+            "fn": 0,
+            "fnr": null,
+            "fp": 36,
+            "fpr": 0.0094,
+            "negative_support": 3825,
+            "positive_support": 0,
+            "precision": 0.0,
+            "recall": null,
+            "tn": 3789,
+            "total": 3825,
+            "tp": 0
+          },
+          "label_counts": {
+            "0": 3825,
+            "1": 0
+          },
+          "rows": 3825,
+          "rule": {
+            "fn": 0,
+            "fnr": null,
+            "fp": 39,
+            "fpr": 0.0102,
+            "negative_support": 3825,
+            "positive_support": 0,
+            "precision": 0.0,
+            "recall": null,
+            "tn": 3786,
+            "total": 3825,
+            "tp": 0
+          }
+        },
+        "public_dga": {
+          "hybrid": {
+            "fn": 48,
+            "fnr": 0.8136,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 59,
+            "precision": 1.0,
+            "recall": 0.1864,
+            "tn": 0,
+            "total": 59,
+            "tp": 11
+          },
+          "label_counts": {
+            "0": 0,
+            "1": 59
+          },
+          "rows": 59,
+          "rule": {
+            "fn": 48,
+            "fnr": 0.8136,
+            "fp": 0,
+            "fpr": null,
+            "negative_support": 0,
+            "positive_support": 59,
+            "precision": 1.0,
+            "recall": 0.1864,
+            "tn": 0,
+            "total": 59,
+            "tp": 11
+          }
+        }
+      }
+    }
+  },
+  "hybrid": {
+    "test": {
+      "fn": 112,
+      "fnr": 0.8175,
+      "fp": 16,
+      "fpr": 0.004,
+      "negative_support": 3961,
+      "positive_support": 137,
+      "precision": 0.6098,
+      "recall": 0.1825,
+      "tn": 3945,
+      "total": 4098,
+      "tp": 25
+    },
+    "val": {
+      "fn": 99,
+      "fnr": 0.7226,
+      "fp": 36,
+      "fpr": 0.0091,
+      "negative_support": 3961,
+      "positive_support": 137,
+      "precision": 0.5135,
+      "recall": 0.2774,
+      "tn": 3925,
+      "total": 4098,
+      "tp": 38
+    }
+  },
+  "reversal_detail": {
+    "test": {
+      "correct_withdraw_fp": {
+        "count": 5,
+        "samples": [
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.15",
+            "hybrid": 0,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "normal",
+            "source": "normal_list",
+            "window_start": "2026-11-03T14:21:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.18",
+            "hybrid": 0,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "normal",
+            "source": "normal_list",
+            "window_start": "2026-11-03T17:12:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.73",
+            "hybrid": 0,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "normal",
+            "source": "normal_list",
+            "window_start": "2026-11-03T21:49:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.85",
+            "hybrid": 0,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "normal",
+            "source": "normal_list",
+            "window_start": "2026-11-03T14:07:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.98",
+            "hybrid": 0,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "normal",
+            "source": "normal_list",
+            "window_start": "2026-11-03T09:56:00Z"
+          }
+        ]
+      },
+      "no_reversal": {
+        "count": 18,
+        "samples": [
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.10",
+            "hybrid": 1,
+            "label": 1,
+            "llm_fail_reason": "",
+            "llm_verdict": "DGA",
+            "source": "public_dga",
+            "window_start": "2026-11-03T00:31:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.11",
+            "hybrid": 1,
+            "label": 1,
+            "llm_fail_reason": "",
+            "llm_verdict": "DGA",
+            "qname": "icumxnzlivfys.com",
+            "source": "manual_dga",
+            "window_start": "2026-11-03T05:31:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.13",
+            "hybrid": 1,
+            "label": 1,
+            "llm_fail_reason": "",
+            "llm_verdict": "DGA",
+            "qname": "loginbank7904.com",
+            "source": "manual_dga",
+            "window_start": "2026-11-03T00:04:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.15",
+            "hybrid": 1,
+            "label": 1,
+            "llm_fail_reason": "",
+            "llm_verdict": "DGA",
+            "source": "public_dga",
+            "window_start": "2026-11-03T11:50:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.16",
+            "hybrid": 1,
+            "label": 1,
+            "llm_fail_reason": "",
+            "llm_verdict": "DGA",
+            "qname": "eeszzpdxrhbwgaie.com",
+            "source": "manual_dga",
+            "window_start": "2026-11-03T01:20:00Z"
+          }
+        ]
+      },
+      "retained_uncertain_or_fail": {
+        "count": 16,
+        "samples": [
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.1",
+            "hybrid": 1,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "uncertain",
+            "source": "normal_list",
+            "window_start": "2026-11-03T15:16:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.11",
+            "hybrid": 1,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "uncertain",
+            "source": "normal_list",
+            "window_start": "2026-11-03T12:05:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.11",
+            "hybrid": 1,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "uncertain",
+            "source": "normal_list",
+            "window_start": "2026-11-03T23:25:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.13",
+            "hybrid": 1,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "uncertain",
+            "source": "normal_list",
+            "window_start": "2026-11-03T03:45:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.17",
+            "hybrid": 1,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "uncertain",
+            "source": "normal_list",
+            "window_start": "2026-11-03T20:16:00Z"
+          }
+        ]
+      },
+      "wrong_release_tp": {
+        "count": 0,
+        "samples": []
+      }
+    },
+    "val": {
+      "correct_withdraw_fp": {
+        "count": 3,
+        "samples": [
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.18",
+            "hybrid": 0,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "normal",
+            "source": "normal_list",
+            "window_start": "2026-11-02T23:49:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.3",
+            "hybrid": 0,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "normal",
+            "source": "normal_list",
+            "window_start": "2026-11-02T18:16:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.4",
+            "hybrid": 0,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "normal",
+            "source": "normal_list",
+            "window_start": "2026-11-02T19:08:00Z"
+          }
+        ]
+      },
+      "no_reversal": {
+        "count": 25,
+        "samples": [
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.1",
+            "hybrid": 1,
+            "label": 1,
+            "llm_fail_reason": "",
+            "llm_verdict": "DGA",
+            "qname": "downloadpayment077.com",
+            "source": "manual_dga",
+            "window_start": "2026-11-02T18:17:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.11",
+            "hybrid": 1,
+            "label": 1,
+            "llm_fail_reason": "",
+            "llm_verdict": "DGA",
+            "source": "public_dga",
+            "window_start": "2026-11-02T11:20:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.11",
+            "hybrid": 1,
+            "label": 1,
+            "llm_fail_reason": "",
+            "llm_verdict": "DGA",
+            "qname": "ieyvvtkmhewiqhdcxh.com",
+            "source": "manual_dga",
+            "window_start": "2026-11-02T12:17:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.12",
+            "hybrid": 1,
+            "label": 1,
+            "llm_fail_reason": "",
+            "llm_verdict": "DGA",
+            "qname": "vozlstoukqddtiqay.com",
+            "source": "manual_dga",
+            "window_start": "2026-11-02T11:06:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.13",
+            "hybrid": 1,
+            "label": 1,
+            "llm_fail_reason": "",
+            "llm_verdict": "DGA",
+            "qname": "verifybank796.com",
+            "source": "manual_dga",
+            "window_start": "2026-11-02T15:36:00Z"
+          }
+        ]
+      },
+      "retained_uncertain_or_fail": {
+        "count": 39,
+        "samples": [
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.1",
+            "hybrid": 1,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "uncertain",
+            "source": "normal_list",
+            "window_start": "2026-11-02T01:40:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.1",
+            "hybrid": 1,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "uncertain",
+            "source": "normal_list",
+            "window_start": "2026-11-02T16:08:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.13",
+            "hybrid": 1,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "uncertain",
+            "source": "normal_list",
+            "window_start": "2026-11-02T15:09:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.13",
+            "hybrid": 1,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "uncertain",
+            "source": "normal_list",
+            "window_start": "2026-11-02T22:56:00Z"
+          },
+          {
+            "B": 0,
+            "E": 1,
+            "R": 1,
+            "client_ip": "192.0.2.14",
+            "hybrid": 1,
+            "label": 0,
+            "llm_fail_reason": "",
+            "llm_verdict": "uncertain",
+            "source": "normal_list",
+            "window_start": "2026-11-02T15:45:00Z"
+          }
+        ]
+      },
+      "wrong_release_tp": {
+        "count": 0,
+        "samples": []
+      }
+    }
+  },
+  "rule": {
+    "test": {
+      "fn": 112,
+      "fnr": 0.8175,
+      "fp": 21,
+      "fpr": 0.0053,
+      "negative_support": 3961,
+      "positive_support": 137,
+      "precision": 0.5435,
+      "recall": 0.1825,
+      "tn": 3940,
+      "total": 4098,
+      "tp": 25
+    },
+    "val": {
+      "fn": 99,
+      "fnr": 0.7226,
+      "fp": 39,
+      "fpr": 0.0098,
+      "negative_support": 3961,
+      "positive_support": 137,
+      "precision": 0.4935,
+      "recall": 0.2774,
+      "tn": 3922,
+      "total": 4098,
+      "tp": 38
+    }
+  },
+  "splits_evaluated": [
+    "val",
+    "test"
+  ],
+  "subset_assertions": {
+    "test": "passed",
+    "val": "passed"
+  },
+  "unique_domain": {
+    "test": {
+      "hybrid": {
+        "fn": 59,
+        "fnr": 0.7662,
+        "fp": 6,
+        "fpr": 0.0101,
+        "negative_support": 594,
+        "positive_support": 77,
+        "precision": 0.75,
+        "recall": 0.2338,
+        "tn": 588,
+        "total": 671,
+        "tp": 18
+      },
+      "rule": {
+        "fn": 59,
+        "fnr": 0.7662,
+        "fp": 7,
+        "fpr": 0.0118,
+        "negative_support": 594,
+        "positive_support": 77,
+        "precision": 0.72,
+        "recall": 0.2338,
+        "tn": 587,
+        "total": 671,
+        "tp": 18
+      },
+      "unique_domains": 671
+    },
+    "val": {
+      "hybrid": {
+        "fn": 56,
+        "fnr": 0.7179,
+        "fp": 9,
+        "fpr": 0.0152,
+        "negative_support": 594,
+        "positive_support": 78,
+        "precision": 0.7097,
+        "recall": 0.2821,
+        "tn": 585,
+        "total": 672,
+        "tp": 22
+      },
+      "rule": {
+        "fn": 56,
+        "fnr": 0.7179,
+        "fp": 10,
+        "fpr": 0.0168,
+        "negative_support": 594,
+        "positive_support": 78,
+        "precision": 0.6875,
+        "recall": 0.2821,
+        "tn": 584,
+        "total": 672,
+        "tp": 22
+      },
+      "unique_domains": 672
+    }
+  }
+}
