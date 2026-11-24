@@ -1,0 +1,262 @@
+{
+  "generated_at": "2026-11-24T12:14:34.388Z",
+  "nameservers_observed": [
+    "192.168.202.110",
+    "202.116.160.29"
+  ],
+  "stub_resolver_note": "这些是 stub resolver 向配置的递归解析器发送递归查询后，递归解析器返回的完整响应。我们只看到了 stub 与递归解析器的一次交互，看不到递归解析器内部向根/TLD/权威服务器做的迭代查询。",
+  "results": [
+    {
+      "domain": "www.baidu.com",
+      "qtype": "A",
+      "nameservers": [
+        "192.168.202.110",
+        "202.116.160.29"
+      ],
+      "success": true,
+      "error": null,
+      "duration_ms": 3016.0000000032596,
+      "id": 12906,
+      "qr": "response",
+      "opcode": "QUERY",
+      "aa": false,
+      "tc": false,
+      "rd": true,
+      "ra": true,
+      "rcode": "NOERROR",
+      "question": [
+        {
+          "name": "www.baidu.com.",
+          "type": "A",
+          "class": "IN"
+        }
+      ],
+      "answer": [
+        {
+          "name": "www.baidu.com.",
+          "rtype": "CNAME",
+          "ttl": 60,
+          "rdata": "www.a.shifen.com."
+        },
+        {
+          "name": "www.a.shifen.com.",
+          "rtype": "A",
+          "ttl": 60,
+          "rdata": "157.148.69.151"
+        },
+        {
+          "name": "www.a.shifen.com.",
+          "rtype": "A",
+          "ttl": 60,
+          "rdata": "157.148.69.186"
+        }
+      ],
+      "authority": [],
+      "additional": [],
+      "raw_response_b64": "MmqBgAABAAMAAAAAA3d3dwViYWlkdQNjb20AAAEAAcAMAAUAAQAAADwADwN3d3cBYQZzaGlmZW7AFsArAAEAAQAAADwABJ2URZfAKwABAAEAAAA8AASdlEW6"
+    },
+    {
+      "domain": "www.qq.com",
+      "qtype": "A",
+      "nameservers": [
+        "192.168.202.110",
+        "202.116.160.29"
+      ],
+      "success": true,
+      "error": null,
+      "duration_ms": 3014.999999999418,
+      "id": 39899,
+      "qr": "response",
+      "opcode": "QUERY",
+      "aa": false,
+      "tc": false,
+      "rd": true,
+      "ra": true,
+      "rcode": "NOERROR",
+      "question": [
+        {
+          "name": "www.qq.com.",
+          "type": "A",
+          "class": "IN"
+        }
+      ],
+      "answer": [
+        {
+          "name": "www.qq.com.",
+          "rtype": "CNAME",
+          "ttl": 140,
+          "rdata": "ins-ysshqadg.ias.tencent-cloud.net."
+        },
+        {
+          "name": "ins-ysshqadg.ias.tencent-cloud.net.",
+          "rtype": "A",
+          "ttl": 65,
+          "rdata": "157.148.28.54"
+        },
+        {
+          "name": "ins-ysshqadg.ias.tencent-cloud.net.",
+          "rtype": "A",
+          "ttl": 65,
+          "rdata": "27.44.122.58"
+        }
+      ],
+      "authority": [],
+      "additional": [],
+      "raw_response_b64": "m9uBgAABAAMAAAAAA3d3dwJxcQNjb20AAAEAAcAMAAUAAQAAAIwAJAxpbnMteXNzaHFhZGcDaWFzDXRlbmNlbnQtY2xvdWQDbmV0AMAoAAEAAQAAAEEABJ2UHDbAKAABAAEAAABBAAQbLHo6"
+    },
+    {
+      "domain": "www.example.com",
+      "qtype": "A",
+      "nameservers": [
+        "192.168.202.110",
+        "202.116.160.29"
+      ],
+      "success": true,
+      "error": null,
+      "duration_ms": 3000.0,
+      "id": 62172,
+      "qr": "response",
+      "opcode": "QUERY",
+      "aa": false,
+      "tc": false,
+      "rd": true,
+      "ra": true,
+      "rcode": "NOERROR",
+      "question": [
+        {
+          "name": "www.example.com.",
+          "type": "A",
+          "class": "IN"
+        }
+      ],
+      "answer": [
+        {
+          "name": "www.example.com.",
+          "rtype": "A",
+          "ttl": 245,
+          "rdata": "104.20.23.154"
+        },
+        {
+          "name": "www.example.com.",
+          "rtype": "A",
+          "ttl": 245,
+          "rdata": "172.66.147.243"
+        }
+      ],
+      "authority": [],
+      "additional": [],
+      "raw_response_b64": "8tyBgAABAAIAAAAAA3d3dwdleGFtcGxlA2NvbQAAAQABwAwAAQABAAAA9QAErEKT88AMAAEAAQAAAPUABGgUF5o="
+    },
+    {
+      "domain": "mail.cctv.com",
+      "qtype": "A",
+      "nameservers": [
+        "192.168.202.110",
+        "202.116.160.29"
+      ],
+      "success": true,
+      "error": null,
+      "duration_ms": 3015.9999999959837,
+      "id": 43606,
+      "qr": "response",
+      "opcode": "QUERY",
+      "aa": false,
+      "tc": false,
+      "rd": true,
+      "ra": true,
+      "rcode": "NOERROR",
+      "question": [
+        {
+          "name": "mail.cctv.com.",
+          "type": "A",
+          "class": "IN"
+        }
+      ],
+      "answer": [
+        {
+          "name": "mail.cctv.com.",
+          "rtype": "A",
+          "ttl": 545,
+          "rdata": "101.129.1.156"
+        }
+      ],
+      "authority": [],
+      "additional": [],
+      "raw_response_b64": "qlaBgAABAAEAAAAABG1haWwEY2N0dgNjb20AAAEAAcAMAAEAAQAAAiEABGWBAZw="
+    },
+    {
+      "domain": "github.com",
+      "qtype": "A",
+      "nameservers": [
+        "192.168.202.110",
+        "202.116.160.29"
+      ],
+      "success": true,
+      "error": null,
+      "duration_ms": 3016.0000000032596,
+      "id": 32396,
+      "qr": "response",
+      "opcode": "QUERY",
+      "aa": false,
+      "tc": false,
+      "rd": true,
+      "ra": true,
+      "rcode": "NOERROR",
+      "question": [
+        {
+          "name": "github.com.",
+          "type": "A",
+          "class": "IN"
+        }
+      ],
+      "answer": [
+        {
+          "name": "github.com.",
+          "rtype": "A",
+          "ttl": 24,
+          "rdata": "20.247.166.64"
+        }
+      ],
+      "authority": [],
+      "additional": [],
+      "raw_response_b64": "foyBgAABAAEAAAAABmdpdGh1YgNjb20AAAEAAcAMAAEAAQAAABgABBT3pkA="
+    },
+    {
+      "domain": "this-domain-should-not-exist-xyz12345.example",
+      "qtype": "A",
+      "nameservers": [
+        "192.168.202.110",
+        "202.116.160.29"
+      ],
+      "success": true,
+      "error": "NXDOMAIN",
+      "duration_ms": 3014.999999999418,
+      "id": 53618,
+      "qr": "response",
+      "opcode": "QUERY",
+      "aa": false,
+      "tc": false,
+      "rd": true,
+      "ra": true,
+      "rcode": "NXDOMAIN",
+      "question": [
+        {
+          "name": "this-domain-should-not-exist-xyz12345.example.",
+          "type": "A",
+          "class": "IN"
+        }
+      ],
+      "answer": [],
+      "authority": [
+        {
+          "name": ".",
+          "rtype": "SOA",
+          "ttl": 10744,
+          "rdata": "a.root-servers.net. nstld.verisign-grs.com. 2026112400 1800 900 604800 86400"
+        }
+      ],
+      "additional": [],
+      "raw_response_b64": "0XKBgwABAAAAAQAAJXRoaXMtZG9tYWluLXNob3VsZC1ub3QtZXhpc3QteHl6MTIzNDUHZXhhbXBsZQAAAQABAAAGAAEAACn4AEABYQxyb290LXNlcnZlcnMDbmV0AAVuc3RsZAx2ZXJpc2lnbi1ncnMDY29tAHjEBZAAAAcIAAADhAAJOoAAAVGA"
+    }
+  ]
+}

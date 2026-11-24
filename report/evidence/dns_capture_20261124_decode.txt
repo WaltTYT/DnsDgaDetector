@@ -1,0 +1,1601 @@
+﻿Frame 32: Packet, 73 bytes on wire (584 bits), 73 bytes captured (584 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:16.304767500 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:16.304767500 UTC
+    Epoch Arrival Time: 1795522456.304767500
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 100.253000 milliseconds]
+    [Time since reference or first frame: 5.245745700 seconds]
+    Frame Number: 32
+    Frame Length: 73 bytes (584 bits)
+    Capture Length: 73 bytes (584 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89), Dst: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+    Destination: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 172.22.148.204, Dst: 192.168.202.110
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 59
+    Identification: 0x82e5 (33509)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: UDP (17)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 172.22.148.204
+    Destination Address: 192.168.202.110
+    [Stream index: 1]
+User Datagram Protocol, Src Port: 55903, Dst Port: 53
+    Source Port: 55903
+    Destination Port: 53
+    Length: 39
+    Checksum: 0xcc32 [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 1]
+    [Stream Packet Number: 1]
+    [Timestamps]
+        [Time since first frame: 0.000000000 seconds]
+        [Time since previous frame: 0.000000000 seconds]
+    UDP payload (31 bytes)
+Domain Name System (query)
+    Transaction ID: 0x326a
+    Flags: 0x0100 Standard query
+        0... .... .... .... = Response: Message is a query
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        www.baidu.com: type A, class IN
+            Name: www.baidu.com
+            [Name Length: 13]
+            [Label Count: 3]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+
+Frame 33: Packet, 73 bytes on wire (584 bits), 73 bytes captured (584 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:19.319678700 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:19.319678700 UTC
+    Epoch Arrival Time: 1795522459.319678700
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 3.014911200 seconds]
+    [Time delta from previous displayed frame: 3.014911200 seconds]
+    [Time since reference or first frame: 8.260656900 seconds]
+    Frame Number: 33
+    Frame Length: 73 bytes (584 bits)
+    Capture Length: 73 bytes (584 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89), Dst: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+    Destination: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 172.22.148.204, Dst: 202.116.160.29
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 59
+    Identification: 0xb586 (46470)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: UDP (17)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 172.22.148.204
+    Destination Address: 202.116.160.29
+    [Stream index: 0]
+User Datagram Protocol, Src Port: 55980, Dst Port: 53
+    Source Port: 55980
+    Destination Port: 53
+    Length: 39
+    Checksum: 0xabad [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 2]
+    [Stream Packet Number: 1]
+    [Timestamps]
+        [Time since first frame: 0.000000000 seconds]
+        [Time since previous frame: 0.000000000 seconds]
+    UDP payload (31 bytes)
+Domain Name System (query)
+    Transaction ID: 0x326a
+    Flags: 0x0100 Standard query
+        0... .... .... .... = Response: Message is a query
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        www.baidu.com: type A, class IN
+            Name: www.baidu.com
+            [Name Length: 13]
+            [Label Count: 3]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+
+Frame 34: Packet, 132 bytes on wire (1056 bits), 132 bytes captured (1056 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:19.323174200 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:19.323174200 UTC
+    Epoch Arrival Time: 1795522459.323174200
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 3.495500 milliseconds]
+    [Time delta from previous displayed frame: 3.495500 milliseconds]
+    [Time since reference or first frame: 8.264152400 seconds]
+    Frame Number: 34
+    Frame Length: 132 bytes (1056 bits)
+    Capture Length: 132 bytes (1056 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f), Dst: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+    Destination: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 202.116.160.29, Dst: 172.22.148.204
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 118
+    Identification: 0xa267 (41575)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 61
+    Protocol: UDP (17)
+    Header Checksum: 0x2f9b [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 202.116.160.29
+    Destination Address: 172.22.148.204
+    [Stream index: 0]
+User Datagram Protocol, Src Port: 53, Dst Port: 55980
+    Source Port: 53
+    Destination Port: 55980
+    Length: 98
+    Checksum: 0x12f8 [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 2]
+    [Stream Packet Number: 2]
+    [Timestamps]
+        [Time since first frame: 3.495500 milliseconds]
+        [Time since previous frame: 3.495500 milliseconds]
+    UDP payload (90 bytes)
+Domain Name System (response)
+    Transaction ID: 0x326a
+    Flags: 0x8180 Standard query response, No error
+        1... .... .... .... = Response: Message is a response
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... .0.. .... .... = Authoritative: Server is not an authority for domain
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... 1... .... = Recursion available: Server can do recursive queries
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ..0. .... = Answer authenticated: Answer/authority portion was not authenticated by the server
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+        .... .... .... 0000 = Reply code: No error (0)
+    Questions: 1
+    Answer RRs: 3
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        www.baidu.com: type A, class IN
+            Name: www.baidu.com
+            [Name Length: 13]
+            [Label Count: 3]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+    Answers
+        www.baidu.com: type CNAME, class IN, cname www.a.shifen.com
+            Name: www.baidu.com
+            Type: CNAME (5) (Canonical NAME for an alias)
+            Class: IN (0x0001)
+            Time to live: 60 (1 minute)
+            Data length: 15
+            CNAME: www.a.shifen.com
+        www.a.shifen.com: type A, class IN, addr 157.148.69.151
+            Name: www.a.shifen.com
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+            Time to live: 60 (1 minute)
+            Data length: 4
+            Address: 157.148.69.151
+        www.a.shifen.com: type A, class IN, addr 157.148.69.186
+            Name: www.a.shifen.com
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+            Time to live: 60 (1 minute)
+            Data length: 4
+            Address: 157.148.69.186
+    [Request In: 33]
+    [Time: 3.495500 milliseconds]
+
+Frame 35: Packet, 70 bytes on wire (560 bits), 70 bytes captured (560 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:19.328610000 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:19.328610000 UTC
+    Epoch Arrival Time: 1795522459.328610000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 5.435800 milliseconds]
+    [Time delta from previous displayed frame: 5.435800 milliseconds]
+    [Time since reference or first frame: 8.269588200 seconds]
+    Frame Number: 35
+    Frame Length: 70 bytes (560 bits)
+    Capture Length: 70 bytes (560 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89), Dst: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+    Destination: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 172.22.148.204, Dst: 192.168.202.110
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 56
+    Identification: 0x82e6 (33510)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: UDP (17)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 172.22.148.204
+    Destination Address: 192.168.202.110
+    [Stream index: 1]
+User Datagram Protocol, Src Port: 55981, Dst Port: 53
+    Source Port: 55981
+    Destination Port: 53
+    Length: 36
+    Checksum: 0xcc2f [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 3]
+    [Stream Packet Number: 1]
+    [Timestamps]
+        [Time since first frame: 0.000000000 seconds]
+        [Time since previous frame: 0.000000000 seconds]
+    UDP payload (28 bytes)
+Domain Name System (query)
+    Transaction ID: 0x9bdb
+    Flags: 0x0100 Standard query
+        0... .... .... .... = Response: Message is a query
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        www.qq.com: type A, class IN
+            Name: www.qq.com
+            [Name Length: 10]
+            [Label Count: 3]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+
+Frame 60: Packet, 70 bytes on wire (560 bits), 70 bytes captured (560 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:22.332288700 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:22.332288700 UTC
+    Epoch Arrival Time: 1795522462.332288700
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 1.153201800 seconds]
+    [Time delta from previous displayed frame: 3.003678700 seconds]
+    [Time since reference or first frame: 11.273266900 seconds]
+    Frame Number: 60
+    Frame Length: 70 bytes (560 bits)
+    Capture Length: 70 bytes (560 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89), Dst: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+    Destination: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 172.22.148.204, Dst: 202.116.160.29
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 56
+    Identification: 0xb594 (46484)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: UDP (17)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 172.22.148.204
+    Destination Address: 202.116.160.29
+    [Stream index: 0]
+User Datagram Protocol, Src Port: 58959, Dst Port: 53
+    Source Port: 58959
+    Destination Port: 53
+    Length: 36
+    Checksum: 0xabaa [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 5]
+    [Stream Packet Number: 1]
+    [Timestamps]
+        [Time since first frame: 0.000000000 seconds]
+        [Time since previous frame: 0.000000000 seconds]
+    UDP payload (28 bytes)
+Domain Name System (query)
+    Transaction ID: 0x9bdb
+    Flags: 0x0100 Standard query
+        0... .... .... .... = Response: Message is a query
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        www.qq.com: type A, class IN
+            Name: www.qq.com
+            [Name Length: 10]
+            [Label Count: 3]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+
+Frame 61: Packet, 150 bytes on wire (1200 bits), 150 bytes captured (1200 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:22.337329700 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:22.337329700 UTC
+    Epoch Arrival Time: 1795522462.337329700
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 5.041000 milliseconds]
+    [Time delta from previous displayed frame: 5.041000 milliseconds]
+    [Time since reference or first frame: 11.278307900 seconds]
+    Frame Number: 61
+    Frame Length: 150 bytes (1200 bits)
+    Capture Length: 150 bytes (1200 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f), Dst: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+    Destination: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 202.116.160.29, Dst: 172.22.148.204
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 136
+    Identification: 0xa60e (42510)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 61
+    Protocol: UDP (17)
+    Header Checksum: 0x2be2 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 202.116.160.29
+    Destination Address: 172.22.148.204
+    [Stream index: 0]
+User Datagram Protocol, Src Port: 53, Dst Port: 58959
+    Source Port: 53
+    Destination Port: 58959
+    Length: 116
+    Checksum: 0x0143 [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 5]
+    [Stream Packet Number: 2]
+    [Timestamps]
+        [Time since first frame: 5.041000 milliseconds]
+        [Time since previous frame: 5.041000 milliseconds]
+    UDP payload (108 bytes)
+Domain Name System (response)
+    Transaction ID: 0x9bdb
+    Flags: 0x8180 Standard query response, No error
+        1... .... .... .... = Response: Message is a response
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... .0.. .... .... = Authoritative: Server is not an authority for domain
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... 1... .... = Recursion available: Server can do recursive queries
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ..0. .... = Answer authenticated: Answer/authority portion was not authenticated by the server
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+        .... .... .... 0000 = Reply code: No error (0)
+    Questions: 1
+    Answer RRs: 3
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        www.qq.com: type A, class IN
+            Name: www.qq.com
+            [Name Length: 10]
+            [Label Count: 3]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+    Answers
+        www.qq.com: type CNAME, class IN, cname ins-ysshqadg.ias.tencent-cloud.net
+            Name: www.qq.com
+            Type: CNAME (5) (Canonical NAME for an alias)
+            Class: IN (0x0001)
+            Time to live: 140 (2 minutes, 20 seconds)
+            Data length: 36
+            CNAME: ins-ysshqadg.ias.tencent-cloud.net
+        ins-ysshqadg.ias.tencent-cloud.net: type A, class IN, addr 157.148.28.54
+            Name: ins-ysshqadg.ias.tencent-cloud.net
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+            Time to live: 65 (1 minute, 5 seconds)
+            Data length: 4
+            Address: 157.148.28.54
+        ins-ysshqadg.ias.tencent-cloud.net: type A, class IN, addr 27.44.122.58
+            Name: ins-ysshqadg.ias.tencent-cloud.net
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+            Time to live: 65 (1 minute, 5 seconds)
+            Data length: 4
+            Address: 27.44.122.58
+    [Request In: 60]
+    [Time: 5.041000 milliseconds]
+
+Frame 62: Packet, 75 bytes on wire (600 bits), 75 bytes captured (600 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:22.338504600 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:22.338504600 UTC
+    Epoch Arrival Time: 1795522462.338504600
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 1.174900 milliseconds]
+    [Time delta from previous displayed frame: 1.174900 milliseconds]
+    [Time since reference or first frame: 11.279482800 seconds]
+    Frame Number: 62
+    Frame Length: 75 bytes (600 bits)
+    Capture Length: 75 bytes (600 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89), Dst: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+    Destination: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 172.22.148.204, Dst: 192.168.202.110
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 61
+    Identification: 0x82e7 (33511)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: UDP (17)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 172.22.148.204
+    Destination Address: 192.168.202.110
+    [Stream index: 1]
+User Datagram Protocol, Src Port: 58960, Dst Port: 53
+    Source Port: 58960
+    Destination Port: 53
+    Length: 41
+    Checksum: 0xcc34 [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 6]
+    [Stream Packet Number: 1]
+    [Timestamps]
+        [Time since first frame: 0.000000000 seconds]
+        [Time since previous frame: 0.000000000 seconds]
+    UDP payload (33 bytes)
+Domain Name System (query)
+    Transaction ID: 0xf2dc
+    Flags: 0x0100 Standard query
+        0... .... .... .... = Response: Message is a query
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        www.example.com: type A, class IN
+            Name: www.example.com
+            [Name Length: 15]
+            [Label Count: 3]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+
+Frame 85: Packet, 75 bytes on wire (600 bits), 75 bytes captured (600 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:25.342020200 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:25.342020200 UTC
+    Epoch Arrival Time: 1795522465.342020200
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 327.179200 milliseconds]
+    [Time delta from previous displayed frame: 3.003515600 seconds]
+    [Time since reference or first frame: 14.282998400 seconds]
+    Frame Number: 85
+    Frame Length: 75 bytes (600 bits)
+    Capture Length: 75 bytes (600 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89), Dst: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+    Destination: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 172.22.148.204, Dst: 202.116.160.29
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 61
+    Identification: 0xb5a1 (46497)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: UDP (17)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 172.22.148.204
+    Destination Address: 202.116.160.29
+    [Stream index: 0]
+User Datagram Protocol, Src Port: 49675, Dst Port: 53
+    Source Port: 49675
+    Destination Port: 53
+    Length: 41
+    Checksum: 0xabaf [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 7]
+    [Stream Packet Number: 1]
+    [Timestamps]
+        [Time since first frame: 0.000000000 seconds]
+        [Time since previous frame: 0.000000000 seconds]
+    UDP payload (33 bytes)
+Domain Name System (query)
+    Transaction ID: 0xf2dc
+    Flags: 0x0100 Standard query
+        0... .... .... .... = Response: Message is a query
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        www.example.com: type A, class IN
+            Name: www.example.com
+            [Name Length: 15]
+            [Label Count: 3]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+
+Frame 86: Packet, 107 bytes on wire (856 bits), 107 bytes captured (856 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:25.342948700 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:25.342948700 UTC
+    Epoch Arrival Time: 1795522465.342948700
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 928.500 microseconds]
+    [Time delta from previous displayed frame: 928.500 microseconds]
+    [Time since reference or first frame: 14.283926900 seconds]
+    Frame Number: 86
+    Frame Length: 107 bytes (856 bits)
+    Capture Length: 107 bytes (856 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f), Dst: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+    Destination: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 202.116.160.29, Dst: 172.22.148.204
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 93
+    Identification: 0xaca0 (44192)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 61
+    Protocol: UDP (17)
+    Header Checksum: 0x257b [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 202.116.160.29
+    Destination Address: 172.22.148.204
+    [Stream index: 0]
+User Datagram Protocol, Src Port: 53, Dst Port: 49675
+    Source Port: 53
+    Destination Port: 49675
+    Length: 73
+    Checksum: 0xdfa8 [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 7]
+    [Stream Packet Number: 2]
+    [Timestamps]
+        [Time since first frame: 928.500 microseconds]
+        [Time since previous frame: 928.500 microseconds]
+    UDP payload (65 bytes)
+Domain Name System (response)
+    Transaction ID: 0xf2dc
+    Flags: 0x8180 Standard query response, No error
+        1... .... .... .... = Response: Message is a response
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... .0.. .... .... = Authoritative: Server is not an authority for domain
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... 1... .... = Recursion available: Server can do recursive queries
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ..0. .... = Answer authenticated: Answer/authority portion was not authenticated by the server
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+        .... .... .... 0000 = Reply code: No error (0)
+    Questions: 1
+    Answer RRs: 2
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        www.example.com: type A, class IN
+            Name: www.example.com
+            [Name Length: 15]
+            [Label Count: 3]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+    Answers
+        www.example.com: type A, class IN, addr 104.20.23.154
+            Name: www.example.com
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+            Time to live: 245 (4 minutes, 5 seconds)
+            Data length: 4
+            Address: 104.20.23.154
+        www.example.com: type A, class IN, addr 172.66.147.243
+            Name: www.example.com
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+            Time to live: 245 (4 minutes, 5 seconds)
+            Data length: 4
+            Address: 172.66.147.243
+    [Request In: 85]
+    [Time: 928.500 microseconds]
+
+Frame 87: Packet, 73 bytes on wire (584 bits), 73 bytes captured (584 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:25.343999200 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:25.343999200 UTC
+    Epoch Arrival Time: 1795522465.343999200
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 1.050500 milliseconds]
+    [Time delta from previous displayed frame: 1.050500 milliseconds]
+    [Time since reference or first frame: 14.284977400 seconds]
+    Frame Number: 87
+    Frame Length: 73 bytes (584 bits)
+    Capture Length: 73 bytes (584 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89), Dst: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+    Destination: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 172.22.148.204, Dst: 192.168.202.110
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 59
+    Identification: 0x82e8 (33512)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: UDP (17)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 172.22.148.204
+    Destination Address: 192.168.202.110
+    [Stream index: 1]
+User Datagram Protocol, Src Port: 49676, Dst Port: 53
+    Source Port: 49676
+    Destination Port: 53
+    Length: 39
+    Checksum: 0xcc32 [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 8]
+    [Stream Packet Number: 1]
+    [Timestamps]
+        [Time since first frame: 0.000000000 seconds]
+        [Time since previous frame: 0.000000000 seconds]
+    UDP payload (31 bytes)
+Domain Name System (query)
+    Transaction ID: 0xaa56
+    Flags: 0x0100 Standard query
+        0... .... .... .... = Response: Message is a query
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        mail.cctv.com: type A, class IN
+            Name: mail.cctv.com
+            [Name Length: 13]
+            [Label Count: 3]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+
+Frame 88: Packet, 73 bytes on wire (584 bits), 73 bytes captured (584 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:28.358407000 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:28.358407000 UTC
+    Epoch Arrival Time: 1795522468.358407000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 3.014407800 seconds]
+    [Time delta from previous displayed frame: 3.014407800 seconds]
+    [Time since reference or first frame: 17.299385200 seconds]
+    Frame Number: 88
+    Frame Length: 73 bytes (584 bits)
+    Capture Length: 73 bytes (584 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89), Dst: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+    Destination: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 172.22.148.204, Dst: 202.116.160.29
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 59
+    Identification: 0xb5a2 (46498)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: UDP (17)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 172.22.148.204
+    Destination Address: 202.116.160.29
+    [Stream index: 0]
+User Datagram Protocol, Src Port: 58303, Dst Port: 53
+    Source Port: 58303
+    Destination Port: 53
+    Length: 39
+    Checksum: 0xabad [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 9]
+    [Stream Packet Number: 1]
+    [Timestamps]
+        [Time since first frame: 0.000000000 seconds]
+        [Time since previous frame: 0.000000000 seconds]
+    UDP payload (31 bytes)
+Domain Name System (query)
+    Transaction ID: 0xaa56
+    Flags: 0x0100 Standard query
+        0... .... .... .... = Response: Message is a query
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        mail.cctv.com: type A, class IN
+            Name: mail.cctv.com
+            [Name Length: 13]
+            [Label Count: 3]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+
+Frame 89: Packet, 89 bytes on wire (712 bits), 89 bytes captured (712 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:28.359658400 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:28.359658400 UTC
+    Epoch Arrival Time: 1795522468.359658400
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 1.251400 milliseconds]
+    [Time delta from previous displayed frame: 1.251400 milliseconds]
+    [Time since reference or first frame: 17.300636600 seconds]
+    Frame Number: 89
+    Frame Length: 89 bytes (712 bits)
+    Capture Length: 89 bytes (712 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f), Dst: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+    Destination: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 202.116.160.29, Dst: 172.22.148.204
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 75
+    Identification: 0xb65d (46685)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 61
+    Protocol: UDP (17)
+    Header Checksum: 0x1bd0 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 202.116.160.29
+    Destination Address: 172.22.148.204
+    [Stream index: 0]
+User Datagram Protocol, Src Port: 53, Dst Port: 58303
+    Source Port: 53
+    Destination Port: 58303
+    Length: 55
+    Checksum: 0xd48e [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 9]
+    [Stream Packet Number: 2]
+    [Timestamps]
+        [Time since first frame: 1.251400 milliseconds]
+        [Time since previous frame: 1.251400 milliseconds]
+    UDP payload (47 bytes)
+Domain Name System (response)
+    Transaction ID: 0xaa56
+    Flags: 0x8180 Standard query response, No error
+        1... .... .... .... = Response: Message is a response
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... .0.. .... .... = Authoritative: Server is not an authority for domain
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... 1... .... = Recursion available: Server can do recursive queries
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ..0. .... = Answer authenticated: Answer/authority portion was not authenticated by the server
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+        .... .... .... 0000 = Reply code: No error (0)
+    Questions: 1
+    Answer RRs: 1
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        mail.cctv.com: type A, class IN
+            Name: mail.cctv.com
+            [Name Length: 13]
+            [Label Count: 3]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+    Answers
+        mail.cctv.com: type A, class IN, addr 101.129.1.156
+            Name: mail.cctv.com
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+            Time to live: 545 (9 minutes, 5 seconds)
+            Data length: 4
+            Address: 101.129.1.156
+    [Request In: 88]
+    [Time: 1.251400 milliseconds]
+
+Frame 90: Packet, 70 bytes on wire (560 bits), 70 bytes captured (560 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:28.360555000 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:28.360555000 UTC
+    Epoch Arrival Time: 1795522468.360555000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 896.600 microseconds]
+    [Time delta from previous displayed frame: 896.600 microseconds]
+    [Time since reference or first frame: 17.301533200 seconds]
+    Frame Number: 90
+    Frame Length: 70 bytes (560 bits)
+    Capture Length: 70 bytes (560 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89), Dst: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+    Destination: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 172.22.148.204, Dst: 192.168.202.110
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 56
+    Identification: 0x82e9 (33513)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: UDP (17)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 172.22.148.204
+    Destination Address: 192.168.202.110
+    [Stream index: 1]
+User Datagram Protocol, Src Port: 58304, Dst Port: 53
+    Source Port: 58304
+    Destination Port: 53
+    Length: 36
+    Checksum: 0xcc2f [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 10]
+    [Stream Packet Number: 1]
+    [Timestamps]
+        [Time since first frame: 0.000000000 seconds]
+        [Time since previous frame: 0.000000000 seconds]
+    UDP payload (28 bytes)
+Domain Name System (query)
+    Transaction ID: 0x7e8c
+    Flags: 0x0100 Standard query
+        0... .... .... .... = Response: Message is a query
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        github.com: type A, class IN
+            Name: github.com
+            [Name Length: 10]
+            [Label Count: 2]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+
+Frame 91: Packet, 70 bytes on wire (560 bits), 70 bytes captured (560 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:31.373207700 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:31.373207700 UTC
+    Epoch Arrival Time: 1795522471.373207700
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 3.012652700 seconds]
+    [Time delta from previous displayed frame: 3.012652700 seconds]
+    [Time since reference or first frame: 20.314185900 seconds]
+    Frame Number: 91
+    Frame Length: 70 bytes (560 bits)
+    Capture Length: 70 bytes (560 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89), Dst: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+    Destination: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 172.22.148.204, Dst: 202.116.160.29
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 56
+    Identification: 0xb5a3 (46499)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: UDP (17)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 172.22.148.204
+    Destination Address: 202.116.160.29
+    [Stream index: 0]
+User Datagram Protocol, Src Port: 65330, Dst Port: 53
+    Source Port: 65330
+    Destination Port: 53
+    Length: 36
+    Checksum: 0xabaa [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 11]
+    [Stream Packet Number: 1]
+    [Timestamps]
+        [Time since first frame: 0.000000000 seconds]
+        [Time since previous frame: 0.000000000 seconds]
+    UDP payload (28 bytes)
+Domain Name System (query)
+    Transaction ID: 0x7e8c
+    Flags: 0x0100 Standard query
+        0... .... .... .... = Response: Message is a query
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        github.com: type A, class IN
+            Name: github.com
+            [Name Length: 10]
+            [Label Count: 2]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+
+Frame 92: Packet, 86 bytes on wire (688 bits), 86 bytes captured (688 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:31.373968700 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:31.373968700 UTC
+    Epoch Arrival Time: 1795522471.373968700
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 761.000 microseconds]
+    [Time delta from previous displayed frame: 761.000 microseconds]
+    [Time since reference or first frame: 20.314946900 seconds]
+    Frame Number: 92
+    Frame Length: 86 bytes (688 bits)
+    Capture Length: 86 bytes (688 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f), Dst: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+    Destination: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 202.116.160.29, Dst: 172.22.148.204
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 72
+    Identification: 0xbc60 (48224)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 61
+    Protocol: UDP (17)
+    Header Checksum: 0x15d0 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 202.116.160.29
+    Destination Address: 172.22.148.204
+    [Stream index: 0]
+User Datagram Protocol, Src Port: 53, Dst Port: 65330
+    Source Port: 53
+    Destination Port: 65330
+    Length: 52
+    Checksum: 0xce71 [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 11]
+    [Stream Packet Number: 2]
+    [Timestamps]
+        [Time since first frame: 761.000 microseconds]
+        [Time since previous frame: 761.000 microseconds]
+    UDP payload (44 bytes)
+Domain Name System (response)
+    Transaction ID: 0x7e8c
+    Flags: 0x8180 Standard query response, No error
+        1... .... .... .... = Response: Message is a response
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... .0.. .... .... = Authoritative: Server is not an authority for domain
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... 1... .... = Recursion available: Server can do recursive queries
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ..0. .... = Answer authenticated: Answer/authority portion was not authenticated by the server
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+        .... .... .... 0000 = Reply code: No error (0)
+    Questions: 1
+    Answer RRs: 1
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        github.com: type A, class IN
+            Name: github.com
+            [Name Length: 10]
+            [Label Count: 2]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+    Answers
+        github.com: type A, class IN, addr 20.247.166.64
+            Name: github.com
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+            Time to live: 24 (24 seconds)
+            Data length: 4
+            Address: 20.247.166.64
+    [Request In: 91]
+    [Time: 761.000 microseconds]
+
+Frame 93: Packet, 105 bytes on wire (840 bits), 105 bytes captured (840 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:31.374798700 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:31.374798700 UTC
+    Epoch Arrival Time: 1795522471.374798700
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 830.000 microseconds]
+    [Time delta from previous displayed frame: 830.000 microseconds]
+    [Time since reference or first frame: 20.315776900 seconds]
+    Frame Number: 93
+    Frame Length: 105 bytes (840 bits)
+    Capture Length: 105 bytes (840 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89), Dst: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+    Destination: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 172.22.148.204, Dst: 192.168.202.110
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 91
+    Identification: 0x82ea (33514)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: UDP (17)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 172.22.148.204
+    Destination Address: 192.168.202.110
+    [Stream index: 1]
+User Datagram Protocol, Src Port: 65331, Dst Port: 53
+    Source Port: 65331
+    Destination Port: 53
+    Length: 71
+    Checksum: 0xcc52 [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 12]
+    [Stream Packet Number: 1]
+    [Timestamps]
+        [Time since first frame: 0.000000000 seconds]
+        [Time since previous frame: 0.000000000 seconds]
+    UDP payload (63 bytes)
+Domain Name System (query)
+    Transaction ID: 0xd172
+    Flags: 0x0100 Standard query
+        0... .... .... .... = Response: Message is a query
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        this-domain-should-not-exist-xyz12345.example: type A, class IN
+            Name: this-domain-should-not-exist-xyz12345.example
+            [Name Length: 45]
+            [Label Count: 2]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+
+Frame 98: Packet, 105 bytes on wire (840 bits), 105 bytes captured (840 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:34.387557700 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:34.387557700 UTC
+    Epoch Arrival Time: 1795522474.387557700
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 69.572100 milliseconds]
+    [Time delta from previous displayed frame: 3.012759000 seconds]
+    [Time since reference or first frame: 23.328535900 seconds]
+    Frame Number: 98
+    Frame Length: 105 bytes (840 bits)
+    Capture Length: 105 bytes (840 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89), Dst: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+    Destination: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 172.22.148.204, Dst: 202.116.160.29
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 91
+    Identification: 0xb5a6 (46502)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: UDP (17)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 172.22.148.204
+    Destination Address: 202.116.160.29
+    [Stream index: 0]
+User Datagram Protocol, Src Port: 51934, Dst Port: 53
+    Source Port: 51934
+    Destination Port: 53
+    Length: 71
+    Checksum: 0xabcd [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 13]
+    [Stream Packet Number: 1]
+    [Timestamps]
+        [Time since first frame: 0.000000000 seconds]
+        [Time since previous frame: 0.000000000 seconds]
+    UDP payload (63 bytes)
+Domain Name System (query)
+    Transaction ID: 0xd172
+    Flags: 0x0100 Standard query
+        0... .... .... .... = Response: Message is a query
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 0
+    Additional RRs: 0
+    Queries
+        this-domain-should-not-exist-xyz12345.example: type A, class IN
+            Name: this-domain-should-not-exist-xyz12345.example
+            [Name Length: 45]
+            [Label Count: 2]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+
+Frame 99: Packet, 180 bytes on wire (1440 bits), 180 bytes captured (1440 bits) on interface \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}, id 0
+    Section number: 1
+    Interface id: 0 (\Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE})
+        Interface name: \Device\NPF_{C6739A9D-955A-49A2-A37A-E8A879BFD5FE}
+        Interface description: 以太网
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 24, 2026 20:14:34.388285500 中国标准时间
+    UTC Arrival Time: Nov 24, 2026 12:14:34.388285500 UTC
+    Epoch Arrival Time: 1795522474.388285500
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 727.800 microseconds]
+    [Time delta from previous displayed frame: 727.800 microseconds]
+    [Time since reference or first frame: 23.329263700 seconds]
+    Frame Number: 99
+    Frame Length: 180 bytes (1440 bits)
+    Capture Length: 180 bytes (1440 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:udp:dns]
+    Character encoding: ASCII (0)
+Ethernet II, Src: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f), Dst: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+    Destination: HefeiBitland_ca:e3:89 (1c:83:41:ca:e3:89)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: RuijieNetwor_f0:69:0f (10:5f:02:f0:69:0f)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 202.116.160.29, Dst: 172.22.148.204
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 166
+    Identification: 0xc2b9 (49849)
+    000. .... = Flags: 0x0
+        0... .... = Reserved bit: Not set
+        .0.. .... = Don't fragment: Not set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 61
+    Protocol: UDP (17)
+    Header Checksum: 0x0f19 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 202.116.160.29
+    Destination Address: 172.22.148.204
+    [Stream index: 0]
+User Datagram Protocol, Src Port: 53, Dst Port: 51934
+    Source Port: 53
+    Destination Port: 51934
+    Length: 146
+    Checksum: 0x9aad [unverified]
+    [Checksum Status: Unverified]
+    [Stream index: 13]
+    [Stream Packet Number: 2]
+    [Timestamps]
+        [Time since first frame: 727.800 microseconds]
+        [Time since previous frame: 727.800 microseconds]
+    UDP payload (138 bytes)
+Domain Name System (response)
+    Transaction ID: 0xd172
+    Flags: 0x8183 Standard query response, No such name
+        1... .... .... .... = Response: Message is a response
+        .000 0... .... .... = Opcode: Standard query (0)
+        .... .0.. .... .... = Authoritative: Server is not an authority for domain
+        .... ..0. .... .... = Truncated: Message is not truncated
+        .... ...1 .... .... = Recursion desired: Do query recursively
+        .... .... 1... .... = Recursion available: Server can do recursive queries
+        .... .... .0.. .... = Z: reserved (0)
+        .... .... ..0. .... = Answer authenticated: Answer/authority portion was not authenticated by the server
+        .... .... ...0 .... = Non-authenticated data: Unacceptable
+        .... .... .... 0011 = Reply code: No such name (3)
+    Questions: 1
+    Answer RRs: 0
+    Authority RRs: 1
+    Additional RRs: 0
+    Queries
+        this-domain-should-not-exist-xyz12345.example: type A, class IN
+            Name: this-domain-should-not-exist-xyz12345.example
+            [Name Length: 45]
+            [Label Count: 2]
+            Type: A (1) (Host Address)
+            Class: IN (0x0001)
+    Authoritative nameservers
+        <Root>: type SOA, class IN, mname a.root-servers.net
+            Name: <Root>
+            Type: SOA (6) (Start Of a zone of Authority)
+            Class: IN (0x0001)
+            Time to live: 10744 (2 hours, 59 minutes, 4 seconds)
+            Data length: 64
+            Primary name server: a.root-servers.net
+            Responsible authority's mailbox: nstld.verisign-grs.com
+            [Responsible authority's mailbox name: nstld@verisign-grs.com]
+            Serial Number: 2026112400
+            Refresh Interval: 1800 (30 minutes)
+            Retry Interval: 900 (15 minutes)
+            Expire limit: 604800 (7 days)
+            Minimum TTL: 86400 (1 day)
+    [Request In: 98]
+    [Time: 727.800 microseconds]
+
