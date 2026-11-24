@@ -2,7 +2,7 @@
 
 DNS 异常查询检测的规则 + LLM 混合方案，实施范围见 [项目路线图](docs/specs/project-roadmap.md)。
 
-**当前状态（2026-11-06）**：D1–D12 已完成，D13 报告未在本仓库生成。最终流水线使用冻结配置跑通：50,000 行合成 DNS 日志、20,483 个聚合样本、最终口径 87 个唯一域名完成复核（全部命中缓存）、337 项测试通过，离线重放指标与在线结果一致。
+**当前状态（2026-11-08）**：D1–D12 已完成，D13 报告未在本仓库生成。最终流水线使用冻结配置跑通：50,000 行合成 DNS 日志、20,483 个聚合样本、最终口径 87 个唯一域名完成复核（全部命中缓存）、337 项测试通过，离线重放指标与在线结果一致。
 
 ## 项目文档
 
@@ -120,6 +120,8 @@ $python = 'D:\study\miniconda\envs\dns-dga\python.exe'
 
 混合方案在测试集正确撤回 5 个误报、错误放行 0 个告警；验证集正确撤回 3 个、错误放行 0 个。冻结后离线重放 87/87 命中缓存，测试与验证缓存覆盖均为 100%。
 
+`results/baseline.json` 中的 `freeze_check` 是基线拟合阶段由生成器写入的占位标注，不参与运行时判断；冻结状态以 `results/run_manifest.json` 的 `freeze_check=frozen` 为准。
+
 主要局限：
 
 - 整体召回偏低；`md5_date` 在测试集召回 0%、验证集 5.9%，短 MD5 截断串熵值低于 `H` 阈值，H 分支基本无法命中。
@@ -130,3 +132,24 @@ $python = 'D:\study\miniconda\envs\dns-dga\python.exe'
 ## 复现与演示
 
 最小离线复现命令为 `run_all.py --from features --offline`，约 14 秒完成特征复算、冻结基线校验、规则判定、缓存复核与双口径评估。完整从数据或日志重跑会重新生成 `data/` 与 `results/` 产物；演示前建议先备份 `results/`，避免覆盖冻结结果。
+
+## 仓库内容边界与重建步骤
+
+仓库不包含全部输入数据。以下文件已被 `.gitignore` 忽略，原因是第三方数据许可尚未确认，或单文件超出 GitHub 限制：
+
+- `data/raw/snapshots/mendeley/dga_legit.csv`：Mendeley 上游原始快照，133,777,367 字节。
+- `data/raw/normal_list__mendeley_majestic.txt`、`data/raw/public_dga__mendeley.csv`：由该快照派生的正常域名清单与公开 DGA 样本。
+- `data/normal_domains.txt`、`data/splits.csv`、`data/dns_log.csv`：生成产物，含 Mendeley 派生样本。
+
+由于 `--from features` 仍会从 `data/dns_log.csv` 重新计算特征，仅克隆仓库无法直接运行流水线。复现边界如下：
+
+| 起点 | 需要的本地文件 | 可达到的结果 |
+|---|---|---|
+| 完整项目目录 | 无额外文件 | 全部阶段与最终指标 |
+| `--from features` | `data/dns_log.csv` | 特征复算、冻结基线校验、规则与缓存复核、双口径指标 |
+| `--from log` | `data/splits.csv` 及 `data/raw/` 下的榜单与 PSL 快照 | 重建 `dns_log.csv` 后再复算特征与指标 |
+| `--from data` | 上述文件加 Mendeley 原始快照 | 从域名清单重建划分、日志与指标 |
+
+完整重建顺序为数据准备、日志生成，再进入特征阶段。重建后可用 `results/run_manifest.json` 的 `input_sha256` 校验产物；当前本机 `splits.csv`、`dns_log.csv`、PSL 快照、两个 Mendeley 派生输入与 `config.json` 的 SHA-256 均与清单一致。
+
+课程交付采用完整项目目录或另附数据包；GitHub 版本本身不包含上述数据，不能直接从零重建日志。
