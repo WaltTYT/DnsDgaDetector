@@ -25,7 +25,7 @@
     "cache_sha256": "0919284b13843465aa8537b7f45b80f70ed7805a2965c4552b96bbf6203bf7a9",
     "config_snapshot_sha256": "e82291887fc187fb0afe9dcd1e664709bf2002ede9a3e8aca966c76eae4d6b18",
     "features_sha256": "04592956c8f11573256d5800f8a35703c0d2519a8a77bbce95f1fce5e78d900d",
-    "generated_at": "2026-11-24T12:24:44.278Z",
+    "generated_at": "2026-11-24T12:46:39.813Z",
     "splits_evaluated": [
       "val",
       "test"
@@ -39,7 +39,7 @@
       "test": "passed"
     }
   },
-  "finished_at": "2026-11-24T12:24:44Z",
+  "finished_at": "2026-11-24T12:46:40Z",
   "freeze_check": "frozen",
   "frozen_at": "2026-11-06T03:56:24.908Z",
   "input_sha256": {
@@ -115,7 +115,7 @@
       "figure": "D:\\study\\AgentWorkPlace\\CodexWorkPlace\\DnsDgaDetector\\results\\figures\\metric_comparison.png"
     }
   ],
-  "started_at": "2026-11-24T12:24:39Z",
+  "started_at": "2026-11-24T12:46:30Z",
   "thresholds": {
     "F": 12.0,
     "F_quantile": 0.99,
