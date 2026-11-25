@@ -30,21 +30,28 @@ from features import FEATURES_COLUMNS
 
 
 def compute_rules(features_df: pd.DataFrame, baseline: dict) -> pd.DataFrame:
+    # 用基线阈值给特征表打 E/B/R 三列，返回副本，不修改输入
     _validate_baseline(baseline)
     _validate_features_input(features_df)
 
+    # 在副本上写入判定列，保持调用方数据不变
     out = features_df.copy()
 
+    # 三项阈值全部来自基线，判定口径固定为严格比较
     h_thr = baseline["features"]["H"]["threshold"]
     f_thr = baseline["features"]["F"]["threshold"]
     i_thr = baseline["features"]["I"]["threshold"]
 
+    # 熵规则：H 严格大于阈值才置 1；H 为 NaN 时比较结果为 False，自动不命中
     out["E"] = (out["H"] > h_thr).astype(int)
 
+    # 行为规则 = 频率规则 OR 间隔规则；notna 保证缺失值不会被误判为命中
     freq_hit = out["F"].notna() & (out["F"] > f_thr)
+    # 间隔规则方向相反：I 严格小于阈值才异常；I 为 NaN 时跳过
     interval_hit = out["I"].notna() & (out["I"] < i_thr)
     out["B"] = (freq_hit | interval_hit).astype(int)
 
+    # 最终规则 R = E OR B
     out["R"] = ((out["E"] == 1) | (out["B"] == 1)).astype(int)
 
     return out
@@ -54,8 +61,10 @@ def compute_rules_thresholded(features_df: pd.DataFrame,
                                H_threshold: float,
                                F_threshold: float,
                                I_threshold: float) -> pd.DataFrame:
+    # 直接传入阈值的打标版本，判定口径与 compute_rules 完全一致，便于网格搜索
     out = features_df.copy()
     out["E"] = (out["H"] > H_threshold).astype(int)
+    # 缺失值同样不参与命中判定
     freq_hit = out["F"].notna() & (out["F"] > F_threshold)
     interval_hit = out["I"].notna() & (out["I"] < I_threshold)
     out["B"] = (freq_hit | interval_hit).astype(int)
@@ -64,8 +73,10 @@ def compute_rules_thresholded(features_df: pd.DataFrame,
 
 
 def _validate_baseline(baseline: dict) -> None:
+    # 校验基线结构：类型、schema 版本、H/F/I 三项及各自的 threshold
     if not isinstance(baseline, dict):
         raise ValueError("baseline must be a dict")
+    # 版本不符说明字段口径可能已变，直接拒绝
     if baseline.get("version") != BASELINE_SCHEMA_VERSION:
         raise ValueError(
             f"baseline version mismatch: expected {BASELINE_SCHEMA_VERSION}, "
@@ -80,6 +91,7 @@ def _validate_baseline(baseline: dict) -> None:
 
 
 def _validate_features_input(df: pd.DataFrame) -> None:
+    # 特征表列顺序必须与契约一致，且 H/F/I 三列实际存在
     actual = list(df.columns)
     if actual != FEATURES_COLUMNS:
         raise ValueError(
@@ -93,12 +105,14 @@ def _validate_features_input(df: pd.DataFrame) -> None:
 
 
 def _confusion_matrix(df: pd.DataFrame, truth_col: str, pred_col: str) -> dict:
+    # 统计二分类混淆矩阵与四项指标；分母为 0 时返回 NaN 而不是抛错
     tp = int(((df[truth_col] == 1) & (df[pred_col] == 1)).sum())
     fp = int(((df[truth_col] == 0) & (df[pred_col] == 1)).sum())
     fn = int(((df[truth_col] == 1) & (df[pred_col] == 0)).sum())
     tn = int(((df[truth_col] == 0) & (df[pred_col] == 0)).sum())
     total = tp + fp + fn + tn
 
+    # 各指标分别做除零保护，无样本时保持 NaN 以区别于 0
     fpr = fp / (fp + tn) if (fp + tn) > 0 else float("nan")
     fnr = fn / (fn + tp) if (fn + tp) > 0 else float("nan")
     precision = tp / (tp + fp) if (tp + fp) > 0 else float("nan")
@@ -115,14 +129,18 @@ def evaluate_candidates(features_df: pd.DataFrame,
                         H_values: list[float],
                         F_values: list[float],
                         I_values: list[float]) -> list[dict]:
+    # 阈值候选网格搜索：每组 H/F/I 阈值在验证集上算一遍指标
     _validate_features_input(features_df)
 
+    # 数据隔离红线：候选比较只用 split=val，测试集不参与选择
     val_df = features_df[features_df["split"] == "val"].copy()
     if val_df.empty:
         raise ValueError("No split=val samples found for candidate evaluation")
 
     results = []
+    # 三个阈值列表的笛卡尔积，逐组评估
     for h_q, f_q, i_q in itertools.product(H_values, F_values, I_values):
+        # 临时拼一个最小基线结构，复用 compute_rules 的判定逻辑
         temp_baseline = {
             "version": BASELINE_SCHEMA_VERSION,
             "features": {
@@ -144,13 +162,16 @@ def evaluate_candidates(features_df: pd.DataFrame,
 
 def summarize_client_contamination(features_df: pd.DataFrame,
                                     baseline: dict) -> dict:
+    # 统计客户端级行为规则 B 对正常域名的连带标记情况，按 split 与总体汇总
     scored = compute_rules(features_df, baseline)
 
     summary_by_split = {}
+    # 三个划分分别统计；某划分缺失时跳过
     for split in ["train", "val", "test"]:
         sdf = scored[scored["split"] == split]
         if sdf.empty:
             continue
+        # B 是窗口级判定，同窗口内正常域名会继承相同的 F/I 而被连带标记
         normal_total = int((sdf["label"] == 0).sum())
         dga_total = int((sdf["label"] == 1).sum())
 
@@ -164,6 +185,7 @@ def summarize_client_contamination(features_df: pd.DataFrame,
             "normal_with_B_hit": normal_b_hit,
             "normal_with_R_hit": normal_r_hit,
             "normal_with_B_only_hit": normal_b_only,
+            # 无正常样本时命中率记 0.0，避免除零
             "normal_B_hit_rate": (normal_b_hit / normal_total) if normal_total > 0 else 0.0,
         }
 
@@ -184,6 +206,7 @@ def summarize_client_contamination(features_df: pd.DataFrame,
 
 
 def get_rule_evidence(row: pd.Series, baseline: dict) -> str:
+    # 生成单条样本的规则证据字符串，供报告与人工复核使用
     ev = []
     h_thr = baseline["features"]["H"]["threshold"]
     f_thr = baseline["features"]["F"]["threshold"]
@@ -193,6 +216,7 @@ def get_rule_evidence(row: pd.Series, baseline: dict) -> str:
     f_val = row.get("F")
     i_val = row.get("I")
 
+    # 命中判定显式排除 None/NaN，缺失值不算命中
     e_hit = (h_val is not None and pd.notna(h_val) and h_val > h_thr)
     freq_hit = (f_val is not None and pd.notna(f_val) and f_val > f_thr)
     interval_hit = (i_val is not None and pd.notna(i_val) and i_val < i_thr)
@@ -209,4 +233,5 @@ def get_rule_evidence(row: pd.Series, baseline: dict) -> str:
     r_hit = e_hit or b_hit
     ev.append(f"B={'1' if b_hit else '0'}, R={'1' if r_hit else '0'}")
 
+    # 各段证据用分号拼接，便于直接写入 CSV 字段
     return "; ".join(ev)

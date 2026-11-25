@@ -1,16 +1,21 @@
+# 演示脚本：读取 results 下的指标与运行清单，打印规则/混合方案在聚合与唯一域名两种口径下的指标摘要
 import json
 from pathlib import Path
 
 
 def as_percent(value):
+    # 百分比格式化：None 显示“无数据”，否则保留两位小数
     return "无数据" if value is None else f"{value:.2%}"
 
 
 def main():
+    # 汇总入口：定位项目根目录，读取 metrics.json 与 run_manifest.json，按测试集输出指标与改判统计
     root = Path(__file__).resolve().parents[1]
     metrics = json.loads((root / "results" / "metrics.json").read_text(encoding="utf-8"))
     manifest = json.loads((root / "results" / "run_manifest.json").read_text(encoding="utf-8"))
+    # 以阶段名为键索引运行清单，便于取特征行数与规则告警数
     stages = {stage["name"]: stage for stage in manifest["stages"]}
+    # 以下四项分别对应：规则/混合的聚合口径与唯一域名口径指标
     rule = metrics["rule"]["test"]
     hybrid = metrics["hybrid"]["test"]
     unique_rule = metrics["unique_domain"]["test"]["rule"]

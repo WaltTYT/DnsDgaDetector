@@ -16,17 +16,23 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
+# 三种教学用 DGA 算法：纯随机字母、词根拼接数字、MD5 摘要截断
 ALGORITHMS = ("rand_alpha", "word_digit", "md5_date")
+# 统一使用的顶级域，以及 md5_date 算法绑定的日期
 TLD = ".com"
 DATE = "2026-11-01"
+# 随机字母表与数字表，供前两种算法逐字符取样
 _ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 _DIGITS = "0123456789"
+# 词根白名单规则：小写字母开头，后接字母/数字/连字符，总长 1 到 20
 _WORD_ROOT_PATTERN = re.compile(r"[a-z][a-z0-9-]{0,19}")
+# 种子格式 master_seed:algorithm:index，序号固定 4 位数字，用于完整复现生成过程
 _SEED_PATTERN = re.compile(
     r"(?P<master_seed>-?(?:0|[1-9][0-9]*)):(?P<algorithm>[^:]+):(?P<index>[0-9]{4})"
 )
 
 
+# 单条合成 DGA 记录：域名、算法、可复现种子与生成参数（参数会写入 CSV 的 params 列）
 @dataclass(frozen=True)
 class DgaRecord:
     domain: str
@@ -36,11 +42,13 @@ class DgaRecord:
 
 
 def _validate_algorithm(algorithm: str) -> None:
+    # 校验算法名属于 ALGORITHMS，非法或非字符串直接抛错
     if not isinstance(algorithm, str) or algorithm not in ALGORITHMS:
         raise ValueError(f"unknown algorithm: {algorithm!r}")
 
 
 def _parse_seed(seed: str, algorithm: str) -> int:
+    # 解析并校验种子串：格式、算法一致、主种子为规范十进制、序号在 1 到 9999 之间，返回序号
     if not isinstance(seed, str):
         raise ValueError("seed must be a string")
     match = _SEED_PATTERN.fullmatch(seed)
@@ -57,6 +65,7 @@ def _parse_seed(seed: str, algorithm: str) -> int:
 
 
 def _load_word_roots(word_roots_path: Path) -> tuple[list[str], str]:
+    # 读取词根表：必须可按 UTF-8 解码、无空白行、每行匹配白名单且不以连字符结尾、至少两个唯一词根；返回 (词根列表, 原文 SHA-256)
     try:
         raw_bytes = Path(word_roots_path).read_bytes()
         contents = raw_bytes.decode("utf-8")
@@ -82,13 +91,16 @@ def _derive_domain(
     seed: str,
     wordlist: tuple[list[str], str] | None = None,
 ) -> tuple[str, dict[str, int | str]]:
+    # 由算法与种子派生域名及生成参数：random.Random(seed) 保证同种子必然得到同一结果
     rng = random.Random(seed)
 
     if algorithm == "rand_alpha":
+        # 纯随机字母：长度 12 到 18 的小写字母串
         length = rng.randint(12, 18)
         label = "".join(rng.choice(_ALPHABET) for _ in range(length))
         params = {"length": length, "tld": TLD}
     elif algorithm == "word_digit":
+        # 词根拼接数字：随机取 1 到 2 个词根，后接 2 到 4 位数字；参数记录词根表哈希以便校验复现
         if wordlist is None:
             raise ValueError("wordlist is required for word_digit")
         roots, wordlist_sha256 = wordlist
@@ -104,6 +116,7 @@ def _derive_domain(
             "tld": TLD,
         }
     elif algorithm == "md5_date":
+        # MD5 截断：对 "日期|完整种子" 求 MD5 十六进制摘要，再截取 12 到 16 个字符作为标签
         truncation_length = rng.randint(12, 16)
         digest = hashlib.md5(f"20261101|{seed}".encode("utf-8")).hexdigest()
         label = digest[:truncation_length]
@@ -121,6 +134,7 @@ def _derive_domain(
 def _validate_params(
     params: Mapping[str, object], expected: Mapping[str, int | str]
 ) -> None:
+    # 校验传入参数与种子派生结果完全一致：键集合相同，且每项类型与取值都相同
     if not isinstance(params, Mapping) or set(params) != set(expected):
         raise ValueError("params do not match the algorithm contract")
     for key, expected_value in expected.items():
@@ -136,6 +150,7 @@ def generate_dga_domains(
     count_per_algorithm: int = 100,
     collision_retry_limit: int = 100,
 ) -> list[DgaRecord]:
+    # 批量生成合成域名：每种算法生成 count_per_algorithm 条，跳过与已用域名（含保留域名）冲突的样本，碰撞超限即报错
     if type(master_seed) is not int:
         raise ValueError("master_seed must be an integer")
     if type(count_per_algorithm) is not int or count_per_algorithm < 0:
@@ -162,6 +177,7 @@ def generate_dga_domains(
         index = 1
         for _ in range(count_per_algorithm):
             collisions = 0
+            # 碰撞时序号继续递增直到得到未占用域名，超过重试上限即中止
             while True:
                 if index > 9999:
                     raise ValueError("sample index exceeds 9999")
@@ -186,6 +202,7 @@ def rebuild_dga_domain(
     params: Mapping[str, int | str],
     word_roots_path: Path | None = None,
 ) -> str:
+    # 按算法/种子/参数重建域名并校验一致性，word_digit 额外比对词根表哈希，用于校验 CSV 可复现
     _validate_algorithm(algorithm)
     _parse_seed(seed, algorithm)
     wordlist = (
@@ -209,6 +226,7 @@ def write_dga_csv(
     target: Path,
     word_roots_path: Path | None = None,
 ) -> None:
+    # 将记录按 (算法顺序, 序号) 排序后原子写入 CSV；写前逐条重建域名，确保 CSV 内容可复现
     target_path = Path(target)
     prepared = []
     for record in records:

@@ -26,6 +26,7 @@ SPLIT_DOMAIN_COUNTS = {"train": 2135, "val": 712, "test": 711}
 
 
 def make_config():
+    # 构造与 config.json 一致的默认日志生成配置（seed=20261101、约 50000 行、DGA 占 5%）
     return {
         "seed": 20261101,
         "window_seconds": 60,
@@ -57,12 +58,14 @@ def make_config():
 
 
 def load_config_data(tmp_path, data):
+    # 将给定字典写入临时 config.json 后交给 gen_log.load_config，便于验证配置校验规则
     path = tmp_path / "config.json"
     path.write_text(json.dumps(data), encoding="utf-8")
     return gen_log.load_config(path)
 
 
 def test_default_event_quotas_conserve_every_allocation_layer():
+    # 验证默认配额逐层守恒：总行 50000、DGA 2500、正常 47500，且 total 等于 normal 加 dga
     quotas = gen_log.allocate_event_quotas(SPLIT_DOMAIN_COUNTS, 50000, 0.05)
 
     assert {split: quota["total"] for split, quota in quotas.items()} == {
@@ -85,6 +88,7 @@ def test_default_event_quotas_conserve_every_allocation_layer():
 
 
 def test_largest_remainder_uses_supplied_order_for_equal_remainders():
+    # 验证余数相同时按传入 tie_order 决定归属（third 优先），且分配总数不变
     result = gen_log.largest_remainder(
         2,
         {"first": 0.5, "second": 0.25, "third": 0.25},
@@ -96,6 +100,7 @@ def test_largest_remainder_uses_supplied_order_for_equal_remainders():
 
 
 def test_event_quotas_round_half_up_for_global_dga_total():
+    # 验证全局 DGA 总量按四舍五入取整：1 行乘 0.5 得 1，并落在 train
     quotas = gen_log.allocate_event_quotas(SPLIT_DOMAIN_COUNTS, 1, 0.5)
 
     assert sum(quota["dga"] for quota in quotas.values()) == 1
@@ -103,6 +108,7 @@ def test_event_quotas_round_half_up_for_global_dga_total():
 
 
 def test_event_quotas_use_exact_domain_count_ties():
+    # 验证 total 配额在域名数相同时用精确值打破平局（train 1、val 0、test 2）
     quotas = gen_log.allocate_event_quotas(
         {"train": 1, "val": 1, "test": 7}, 3, 0.05
     )
@@ -115,6 +121,7 @@ def test_event_quotas_use_exact_domain_count_ties():
 
 
 def test_event_quotas_use_exact_dga_split_ties():
+    # 验证 DGA 总量 3 在三个 split 平局时按精确比较均分（各 1）
     quotas = gen_log.allocate_event_quotas(
         {"train": 2, "val": 1, "test": 3}, 6, 0.5
     )
@@ -127,6 +134,7 @@ def test_event_quotas_use_exact_dga_split_ties():
 
 
 def test_event_quotas_reject_zero_total_rows():
+    # 验证总行数为 0 时抛 ValueError
     with pytest.raises(ValueError):
         gen_log.allocate_event_quotas(SPLIT_DOMAIN_COUNTS, 0, 0.05)
 
@@ -136,6 +144,7 @@ def test_event_quotas_reject_zero_total_rows():
     [("first", "unknown"), ("first", "first", "second")],
 )
 def test_largest_remainder_rejects_unknown_or_duplicate_tie_order(tie_order):
+    # 参数化验证 tie_order 含未知键或重复键时抛 ValueError
     with pytest.raises(ValueError):
         gen_log.largest_remainder(
             1, {"first": 0.5, "second": 0.5}, tie_order
@@ -144,12 +153,14 @@ def test_largest_remainder_rejects_unknown_or_duplicate_tie_order(tie_order):
 
 @pytest.mark.parametrize("total", [-1, 1.5, True])
 def test_largest_remainder_rejects_negative_or_non_integer_total(total):
+    # 参数化验证 total 为负数、小数或布尔值时抛 ValueError
     with pytest.raises(ValueError):
         gen_log.largest_remainder(total, {"first": 1.0}, ("first",))
 
 
 @pytest.mark.parametrize("weight", [float("nan"), float("inf"), -float("inf")])
 def test_largest_remainder_rejects_non_finite_weights(weight):
+    # 参数化验证权重为 NaN 或正负无穷时抛 ValueError
     with pytest.raises(ValueError):
         gen_log.largest_remainder(
             1, {"first": weight, "second": 0.5}, ("first", "second")
@@ -157,6 +168,7 @@ def test_largest_remainder_rejects_non_finite_weights(weight):
 
 
 def test_largest_remainder_rejects_weights_that_do_not_sum_to_one():
+    # 验证权重之和不为 1 时抛 ValueError
     with pytest.raises(ValueError):
         gen_log.largest_remainder(
             10, {"first": 0.6, "second": 0.3}, ("first", "second")
@@ -165,11 +177,13 @@ def test_largest_remainder_rejects_weights_that_do_not_sum_to_one():
 
 @pytest.mark.parametrize("total", [-1, 1.5, True])
 def test_event_quotas_reject_negative_or_non_integer_total(total):
+    # 参数化验证 allocate_event_quotas 拒绝负数、小数或布尔 total
     with pytest.raises(ValueError):
         gen_log.allocate_event_quotas(SPLIT_DOMAIN_COUNTS, total, 0.05)
 
 
 def test_load_config_reads_d3_defaults_as_immutable_values():
+    # 验证默认配置各字段取值正确，且配置对象与嵌套权重映射均不可变
     config = gen_log.load_config(CONFIG_PATH)
 
     assert config.seed == 20261101
@@ -202,6 +216,7 @@ def test_load_config_reads_d3_defaults_as_immutable_values():
 
 
 def test_generator_config_copies_and_freezes_direct_mapping_inputs():
+    # 验证 GeneratorConfig 复制传入映射：改动原字典不影响配置，配置内映射不可写
     normal_weights = {"routine": 0.80, "burst": 0.20}
     dga_weights = {
         "high_frequency": 0.40,
@@ -260,6 +275,7 @@ def test_generator_config_copies_and_freezes_direct_mapping_inputs():
     assert config_mutations_rejected == [True, True, True]
 
 
+# 覆盖 root 与 log 两级的非法类型与范围：布尔充整数、字符串、0 或越界比例等
 @pytest.mark.parametrize(
     ("section", "key", "value"),
     [
@@ -276,6 +292,7 @@ def test_generator_config_copies_and_freezes_direct_mapping_inputs():
     ],
 )
 def test_load_config_rejects_invalid_types_and_ranges(tmp_path, section, key, value):
+    # 参数化验证配置项类型错误（布尔、字符串、浮点整数）或取值越界时加载失败
     data = make_config()
     target = data if section == "root" else data["log"]
     target[key] = value
@@ -285,6 +302,7 @@ def test_load_config_rejects_invalid_types_and_ranges(tmp_path, section, key, va
 
 
 def test_load_config_rejects_excess_timestamp_fractional_precision(tmp_path):
+    # 验证时间戳小数秒超过毫秒精度（9 位）时被拒绝
     data = make_config()
     data["log"]["simulation_start_utc"] = "2026-11-01T00:00:00.0000000001Z"
 
@@ -304,6 +322,7 @@ def test_load_config_rejects_excess_timestamp_fractional_precision(tmp_path):
     ],
 )
 def test_load_config_requires_exact_weight_keys(tmp_path, key, value):
+    # 参数化验证权重映射的键集合必须与契约完全一致，缺键或多键均报错
     data = make_config()
     data["log"][key] = value
 
@@ -326,6 +345,7 @@ def test_load_config_requires_exact_weight_keys(tmp_path, key, value):
     ],
 )
 def test_load_config_rejects_invalid_weight_sums(tmp_path, key, value):
+    # 参数化验证三类权重映射之和不为 1 时报错
     data = make_config()
     data["log"][key] = value
 
@@ -337,6 +357,7 @@ SPLIT_HEADER = ["domain", "label", "source", "algorithm", "split"]
 
 
 def make_split_rows():
+    # 构造 splits 样例：train/val/test 各含 normal、public_dga 与 manual_dga(word_digit) 三行
     rows = []
     for split in ("train", "val", "test"):
         rows.extend(
@@ -350,6 +371,7 @@ def make_split_rows():
 
 
 def write_split_csv(path, rows, header=None):
+    # 按指定表头写出 splits.csv，默认使用契约表头
     with path.open("w", encoding="utf-8", newline="") as stream:
         writer = csv.writer(stream, lineterminator="\n")
         writer.writerow(SPLIT_HEADER if header is None else header)
@@ -359,6 +381,7 @@ def write_split_csv(path, rows, header=None):
 
 @pytest.fixture
 def local_psl(tmp_path):
+    # 提供包含 ICANN 段（com、uk、co.uk）与 PRIVATE 段（blogspot.com）的本地 PSL 快照
     path = tmp_path / "public_suffix_list.dat"
     path.write_text(
         "\n".join(
@@ -382,6 +405,7 @@ def local_psl(tmp_path):
 def test_read_split_records_accepts_exact_contract_header_and_preserves_values(
     tmp_path,
 ):
+    # 验证契约表头的 splits.csv 能被完整读入，各字段原样保留
     rows = make_split_rows()
     path = write_split_csv(tmp_path / "splits.csv", rows)
 
@@ -406,12 +430,14 @@ def test_read_split_records_accepts_exact_contract_header_and_preserves_values(
     ],
 )
 def test_read_split_records_rejects_any_non_contract_header(tmp_path, header):
+    # 参数化验证列顺序变化、多列、重复列或缺少列的表头都被拒绝
     path = write_split_csv(tmp_path / "splits.csv", make_split_rows(), header)
 
     with pytest.raises(ValueError):
         gen_log.read_split_records(path)
 
 
+# mutation 表示要篡改的列，expected_value 为写入的非法值
 @pytest.mark.parametrize(
     ("mutation", "expected_value"),
     [
@@ -431,6 +457,7 @@ def test_read_split_records_rejects_any_non_contract_header(tmp_path, header):
 def test_read_split_records_rejects_invalid_contract_semantics(
     tmp_path, mutation, expected_value
 ):
+    # 参数化验证标签、来源、算法与 split 的语义非法时（如 label=2、normal 行带算法）报错
     rows = make_split_rows()
     row_index, column_index = {
         "label": (0, 1),
@@ -450,6 +477,7 @@ def test_read_split_records_rejects_invalid_contract_semantics(
 
 
 def test_read_split_records_rejects_duplicate_domains(tmp_path):
+    # 验证 splits.csv 内出现重复域名时报错
     rows = make_split_rows()
     rows.append(rows[0].copy())
     path = write_split_csv(tmp_path / "splits.csv", rows)
@@ -463,6 +491,7 @@ def test_read_split_records_rejects_duplicate_domains(tmp_path):
     [[], ["only-domain"], ["a.com", "0", "normal_list", "", "train", "extra"]],
 )
 def test_read_split_records_rejects_malformed_rows(tmp_path, bad_row):
+    # 参数化验证空行、列数不足或列数过多的数据行报错
     rows = make_split_rows()
     rows.insert(0, bad_row)
     path = write_split_csv(tmp_path / "splits.csv", rows)
@@ -472,6 +501,7 @@ def test_read_split_records_rejects_malformed_rows(tmp_path, bad_row):
 
 
 def test_read_split_records_rejects_empty_file(tmp_path):
+    # 验证空文件因缺少表头报错
     path = tmp_path / "splits.csv"
     path.write_text("", encoding="utf-8")
 
@@ -480,6 +510,7 @@ def test_read_split_records_rejects_empty_file(tmp_path):
 
 
 def test_read_split_records_rejects_header_without_data_rows(tmp_path):
+    # 验证只有表头没有数据行时报错
     path = write_split_csv(tmp_path / "splits.csv", [])
 
     with pytest.raises(ValueError, match="data row|empty|records"):
@@ -487,6 +518,7 @@ def test_read_split_records_rejects_header_without_data_rows(tmp_path):
 
 
 def test_read_split_records_accepts_every_manual_algorithm(tmp_path):
+    # 验证 rand_alpha 与 md5_date 等全部手工 DGA 算法行均可被接受
     rows = make_split_rows()
     rows.extend(
         [
@@ -502,6 +534,7 @@ def test_read_split_records_accepts_every_manual_algorithm(tmp_path):
 
 
 def test_read_split_records_accepts_hard_negative_rows(tmp_path):
+    # 验证 hard_negative 行可被接受且其算法列必须为空
     rows = make_split_rows()
     rows.extend(
         [
@@ -520,6 +553,7 @@ def test_read_split_records_accepts_hard_negative_rows(tmp_path):
 
 @pytest.mark.parametrize("domain", ["Normal-train.com", "normal-train.com."])
 def test_read_split_records_rejects_domains_that_need_normalization(tmp_path, domain):
+    # 参数化验证大写或带根点的未归一化域名被拒绝
     rows = make_split_rows()
     rows[0][0] = domain
     path = write_split_csv(tmp_path / "splits.csv", rows)
@@ -533,6 +567,7 @@ def test_read_split_records_rejects_domains_that_need_normalization(tmp_path, do
 def test_validate_domain_pools_requires_both_labels_in_every_split(
     tmp_path, local_psl, split, missing_label
 ):
+    # 参数化验证每个 split 必须同时包含正负样本，缺任一类即报错
     rows = [
         row
         for row in make_split_rows()
@@ -550,6 +585,7 @@ def test_validate_domain_pools_requires_both_labels_in_every_split(
 def test_validate_domain_pools_requires_word_digit_in_each_split(
     tmp_path, local_psl, split
 ):
+    # 参数化验证每个 split 都必须含 word_digit 手工样本
     rows = [
         row
         for row in make_split_rows()
@@ -562,6 +598,7 @@ def test_validate_domain_pools_requires_word_digit_in_each_split(
 
 
 def test_validate_domain_pools_rejects_boolean_labels(tmp_path, local_psl):
+    # 验证标签被替换为布尔值时按语义校验报错（True 不等同于 1）
     records = gen_log.read_split_records(
         write_split_csv(tmp_path / "splits.csv", make_split_rows())
     )
@@ -574,6 +611,7 @@ def test_validate_domain_pools_rejects_boolean_labels(tmp_path, local_psl):
 def test_validate_domain_pools_rejects_domain_without_registrable_suffix(
     tmp_path, local_psl
 ):
+    # 验证无法解析 eTLD+1 的域名（localhost）在池校验时报错
     rows = make_split_rows()
     rows[0][0] = "localhost"
     records = gen_log.read_split_records(
@@ -584,6 +622,7 @@ def test_validate_domain_pools_rejects_domain_without_registrable_suffix(
         gen_log.validate_domain_pools(records, local_psl)
 
 
+# must_reject 表示该域名组合是否应判定为跨 split 冲突
 @pytest.mark.parametrize(
     ("train_domain", "val_domain", "must_reject"),
     [
@@ -595,6 +634,7 @@ def test_validate_domain_pools_rejects_domain_without_registrable_suffix(
 def test_validate_domain_pools_uses_ordinary_and_private_psl_rules(
     tmp_path, local_psl, train_domain, val_domain, must_reject
 ):
+    # 参数化验证普通 PSL（co.uk）与私有 PSL（blogspot.com）规则分别决定跨 split 冲突判定
     rows = make_split_rows()
     rows[0][0] = train_domain
     rows[3][0] = val_domain
@@ -612,6 +652,7 @@ def test_validate_domain_pools_uses_ordinary_and_private_psl_rules(
 def test_split_parsing_and_pool_validation_do_not_use_network(
     tmp_path, local_psl, monkeypatch
 ):
+    # 验证读取 splits 与池校验全程不访问网络（socket 被替换后仍通过）
     def fail_network(*_args, **_kwargs):
         raise AssertionError("network access attempted")
 
@@ -625,6 +666,7 @@ def test_split_parsing_and_pool_validation_do_not_use_network(
 
 
 def make_behavior_records():
+    # 构造每个 split 三条记录（normal、public_dga、manual_dga/word_digit），供行为分组测试使用
     records = []
     for split in ("train", "val", "test"):
         records.extend(
@@ -662,6 +704,7 @@ def make_behavior_records():
 
 
 def make_behavior_config(tmp_path, total_rows=6000, **log_overrides):
+    # 在默认配置上覆盖总行数与 log 字段后加载，得到行为生成测试用配置
     data = make_config()
     data["log"]["total_rows_approx"] = total_rows
     data["log"].update(log_overrides)
@@ -669,10 +712,12 @@ def make_behavior_config(tmp_path, total_rows=6000, **log_overrides):
 
 
 def flatten_drafts(groups):
+    # 展平分组，取出全部事件草稿
     return [event for group in groups for event in group.events]
 
 
 def test_derive_rng_uses_stable_big_endian_sha256_child_seed():
+    # 验证 derive_rng 以 seed|d3|split|label|behavior|purpose 的 SHA-256 大端整数为种子，结果可复现
     seed, split, label, behavior, purpose = (
         20261101,
         "val",
@@ -696,6 +741,7 @@ def test_derive_rng_uses_stable_big_endian_sha256_child_seed():
     ]
 
 
+# (事件数, 每组下限, 每组上限) 组合，期望组数为 ceil(事件数/上限)
 @pytest.mark.parametrize(
     ("event_count", "minimum", "maximum"),
     [(37, 1, 2), (41, 3, 12), (47, 5, 12), (39, 1, 4)],
@@ -703,6 +749,7 @@ def test_derive_rng_uses_stable_big_endian_sha256_child_seed():
 def test_partition_event_groups_conserves_events_within_feasible_bounds(
     event_count, minimum, maximum
 ):
+    # 参数化验证分组数为 ceil(事件数/上限)，事件总数守恒且每组大小落在区间内
     sizes = gen_log.partition_event_groups(
         event_count, minimum, maximum, random.Random(2026)
     )
@@ -713,12 +760,14 @@ def test_partition_event_groups_conserves_events_within_feasible_bounds(
 
 
 def test_partition_event_groups_handles_empty_and_rejects_infeasible_counts():
+    # 验证 0 个事件返回空列表，而无法满足最小分组大小时报错
     assert gen_log.partition_event_groups(0, 5, 12, random.Random(1)) == []
     with pytest.raises(ValueError, match="infeasible|minimum|group"):
         gen_log.partition_event_groups(1, 5, 12, random.Random(1))
 
 
 def test_allocate_behavior_quotas_uses_fixed_orders_and_conserves_each_label():
+    # 验证行为配额按固定顺序用最大余数分配，且各 split 的 normal/dga 总量守恒
     event_quotas = {
         "train": {"total": 11, "normal": 6, "dga": 5},
         "val": {"total": 7, "normal": 4, "dga": 3},
@@ -753,6 +802,7 @@ def test_allocate_behavior_quotas_uses_fixed_orders_and_conserves_each_label():
 
 
 def test_allocate_qtype_quotas_uses_fixed_ties_and_separate_split_label_buckets():
+    # 验证 QTYPE 配额按 split 与标签分别分桶，并按固定平局顺序分配
     counts = {
         "train": {0: 1, 1: 2},
         "val": {0: 3, 1: 1},
@@ -791,6 +841,7 @@ def test_allocate_qtype_quotas_uses_fixed_ties_and_separate_split_label_buckets(
 def test_allocate_qtype_quotas_rejects_bool_or_non_integer_label_keys(
     invalid_label_counts,
 ):
+    # 参数化验证标签键为布尔或非整数（1.0）时抛 ValueError
     counts = {
         "train": invalid_label_counts,
         "val": {0: 0, 1: 0},
@@ -803,6 +854,7 @@ def test_allocate_qtype_quotas_rejects_bool_or_non_integer_label_keys(
 
 
 def test_build_behavior_groups_conserves_per_split_quotas_and_group_bounds(tmp_path):
+    # 验证行为组在各 split/标签/行为上的事件数满足配额，组大小在上下界内，总行数等于配置
     config = make_behavior_config(tmp_path)
     records = make_behavior_records()
     split_domain_counts = {split: 3 for split in ("train", "val", "test")}
@@ -847,6 +899,7 @@ def test_build_behavior_groups_conserves_per_split_quotas_and_group_bounds(tmp_p
 def test_groups_share_qname_client_and_utc_minute_and_nonpairs_do_not_collide(
     tmp_path,
 ):
+    # 验证同组共享 qname、客户端 IP 与整分钟 UTC 窗口；同一窗口至多两条异标签组且不碰撞
     config = make_behavior_config(tmp_path)
     groups = gen_log.build_behavior_groups(make_behavior_records(), config)
     groups_by_window = {}
@@ -877,6 +930,7 @@ def test_groups_share_qname_client_and_utc_minute_and_nonpairs_do_not_collide(
 
 
 def test_mixed_windows_pair_reserved_routine_singletons_without_adding_rows(tmp_path):
+    # 验证混合窗口把预留的单事件 routine 组与 high_frequency 组配对，且不增加总行数
     config = make_behavior_config(tmp_path, mixed_window_fraction=0.2)
     records = make_behavior_records()
     event_quotas = gen_log.allocate_event_quotas(
@@ -927,6 +981,7 @@ def test_mixed_windows_pair_reserved_routine_singletons_without_adding_rows(tmp_
 def test_behavior_group_construction_is_repeatable_and_split_order_independent(
     tmp_path,
 ):
+    # 验证构建结果可重复，且 train 记录顺序变化不影响 val/test 分组
     config = make_behavior_config(tmp_path)
     records = make_behavior_records()
 
@@ -946,6 +1001,7 @@ def test_behavior_group_construction_is_repeatable_and_split_order_independent(
 
 
 def test_each_draft_copies_metadata_from_its_same_split_label_input_record(tmp_path):
+    # 验证每条事件草稿的元数据复制自同 split 同标签的输入记录
     config = make_behavior_config(tmp_path)
     records = make_behavior_records()
     record_by_key = {
@@ -967,6 +1023,7 @@ def test_each_draft_copies_metadata_from_its_same_split_label_input_record(tmp_p
 
 
 def test_high_frequency_and_word_digit_groups_select_from_eligible_split_pools(tmp_path):
+    # 验证高频组只取同 split 的 DGA 记录，word_digit 组只取同 split 的手工 word_digit 记录
     records = make_behavior_records()
     config = make_behavior_config(tmp_path)
     groups = gen_log.build_behavior_groups(records, config)
@@ -998,6 +1055,7 @@ def test_high_frequency_and_word_digit_groups_select_from_eligible_split_pools(t
 def test_clients_use_test_net_addresses_and_active_clients_carry_configured_share(
     tmp_path,
 ):
+    # 验证客户端 IP 全在 192.0.2.0/24 等文档网段，活跃客户端承载的事件占比与配置相差不超过 2 个百分点
     config = make_behavior_config(tmp_path)
     groups = gen_log.build_behavior_groups(make_behavior_records(), config)
     pool = gen_log._client_pool(config.client_pool_size)
@@ -1026,15 +1084,18 @@ def test_clients_use_test_net_addresses_and_active_clients_carry_configured_shar
 
 
 def test_active_client_count_uses_exact_half_up_fraction_rounding():
+    # 验证活跃客户端数按四舍五入计算：100 乘 0.145 得 15
     assert gen_log._active_client_count(100, 0.145) == 15
 
 
 def test_active_event_share_accepts_exact_two_percentage_point_boundary():
+    # 验证活跃事件占比恰好超出 2 个百分点边界时不在容差内（50/100 通过、49/100 不通过）
     assert gen_log._active_event_share_within_tolerance(50, 100, 0.52)
     assert not gen_log._active_event_share_within_tolerance(49, 100, 0.52)
 
 
 def test_full_active_client_pool_accepts_target_event_share_of_098(tmp_path):
+    # 验证活跃客户端比例 1.0、目标事件占比 0.98 时仍可生成，且 IP 数不超过客户端池大小
     config = make_behavior_config(
         tmp_path,
         active_client_fraction=1.0,
@@ -1048,6 +1109,7 @@ def test_full_active_client_pool_accepts_target_event_share_of_098(tmp_path):
 
 
 def test_client_window_counts_and_behavior_intervals_have_intended_overlap(tmp_path):
+    # 验证同窗口同 qname 计数、burst/高频事件间隔 1 到 5 秒且整组跨度不超过 55 秒
     config = make_behavior_config(tmp_path)
     groups = gen_log.build_behavior_groups(make_behavior_records(), config)
     events = flatten_drafts(groups)
@@ -1119,6 +1181,7 @@ def test_client_window_counts_and_behavior_intervals_have_intended_overlap(tmp_p
 
 
 def test_behavior_group_windows_stay_inside_each_split_period(tmp_path):
+    # 验证各 split 的窗口起点都落在其 24 小时时段内
     config = make_behavior_config(tmp_path)
     groups = gen_log.build_behavior_groups(make_behavior_records(), config)
 
@@ -1134,6 +1197,7 @@ def test_behavior_group_windows_stay_inside_each_split_period(tmp_path):
 
 
 def test_all_behavior_group_event_offsets_stay_inside_their_minute(tmp_path):
+    # 验证所有事件偏移量都在 0 到 60000 毫秒之间
     config = make_behavior_config(tmp_path)
     groups = gen_log.build_behavior_groups(make_behavior_records(), config)
     events = flatten_drafts(groups)
@@ -1148,6 +1212,7 @@ def test_all_behavior_group_event_offsets_stay_inside_their_minute(tmp_path):
 def test_maximum_sequence_offset_stays_inside_its_minute(
     tmp_path, monkeypatch, behavior, label
 ):
+    # 验证间隔取上界 5 秒时 12 条事件的最后一个偏移仍小于 60000 毫秒
     class UpperBoundRng:
         def randint(self, lower, upper):
             return 5000 if lower == 1000 else upper
@@ -1176,6 +1241,7 @@ def test_maximum_sequence_offset_stays_inside_its_minute(
 def test_assign_qtypes_uses_exact_split_label_quotas_without_behavior_binding(
     tmp_path,
 ):
+    # 验证 QTYPE 分配按 split 与标签精确满足配额，重复调用结果一致且不受行为类型绑定
     weights = {qtype: 0.2 for qtype in ("A", "AAAA", "CNAME", "TXT", "NS")}
     config = make_behavior_config(tmp_path, qtype_weights=weights)
     records = make_behavior_records()
@@ -1244,6 +1310,7 @@ def test_assign_qtypes_uses_exact_split_label_quotas_without_behavior_binding(
 def test_build_events_assigns_utc_epoch_aligned_non_overlapping_split_times(
     tmp_path,
 ):
+    # 验证事件时间戳为 UTC 毫秒对齐、按时间与 stable_order 排序、三个 split 时段不重叠，且内容与草稿一致
     config = make_behavior_config(tmp_path, total_rows=6000)
     records = make_behavior_records()
     groups = gen_log.build_behavior_groups(records, config)
@@ -1327,6 +1394,7 @@ def test_build_events_assigns_utc_epoch_aligned_non_overlapping_split_times(
 
 
 def test_build_events_offsets_splits_by_configured_period(tmp_path):
+    # 验证 split_period_hours=12 时三个 split 的时段依次偏移 12 小时
     config = make_behavior_config(
         tmp_path,
         total_rows=6000,
@@ -1347,6 +1415,7 @@ def test_build_events_offsets_splits_by_configured_period(tmp_path):
 
 
 def test_build_events_qtype_counts_match_each_split_label_quota(tmp_path):
+    # 验证事件 QTYPE 统计与 allocate_qtype_quotas 计算的配额一致
     config = make_behavior_config(tmp_path, total_rows=6000)
 
     events = gen_log.build_events(make_behavior_records(), config)
@@ -1372,6 +1441,7 @@ def test_build_events_qtype_counts_match_each_split_label_quota(tmp_path):
 
 
 def test_serialize_log_emits_sorted_contract_v1_csv_bytes(tmp_path):
+    # 验证输出为无 BOM、LF 换行、固定九列表头的契约 CSV，按时间排序且不含内部字段
     config = make_behavior_config(tmp_path, total_rows=6000)
     records = make_behavior_records()
     events = gen_log.build_events(records, config)
@@ -1463,6 +1533,7 @@ def test_serialize_log_emits_sorted_contract_v1_csv_bytes(tmp_path):
     assert b"offset_ms" not in raw
 
 
+# changes 为对合法事件的字段篡改，message 为期望的错误关键字
 @pytest.mark.parametrize(
     ("changes", "message"),
     [
@@ -1484,6 +1555,7 @@ def test_serialize_log_emits_sorted_contract_v1_csv_bytes(tmp_path):
     ],
 )
 def test_serialize_log_rejects_invalid_query_events(changes, message):
+    # 参数化验证非 TEST-NET 地址、非法 QTYPE、非 UTC 时间与标签来源冲突的事件被拒绝
     valid_event = gen_log.QueryEvent(
         timestamp=datetime(2026, 11, 1, tzinfo=timezone.utc),
         client_ip="192.0.2.1",
@@ -1502,6 +1574,7 @@ def test_serialize_log_rejects_invalid_query_events(changes, message):
 
 
 def test_serialize_log_accepts_hard_negative_events():
+    # 验证 hard_negative 来源的事件可被序列化且算法列为空
     event = gen_log.QueryEvent(
         timestamp=datetime(2026, 11, 1, tzinfo=timezone.utc),
         client_ip="192.0.2.1",
@@ -1521,6 +1594,7 @@ def test_serialize_log_accepts_hard_negative_events():
 
 
 def test_serialize_log_rejects_non_string_qtype_that_compares_equal_to_valid_value():
+    # 验证与 A 相等但不是字符串的 qtype 会被拒绝（按类型而非相等性判定）
     class QtypeLikeA:
         def __eq__(self, other):
             return other == "A"
@@ -1546,6 +1620,7 @@ def test_serialize_log_rejects_non_string_qtype_that_compares_equal_to_valid_val
 
 
 def test_serialize_log_rejects_non_string_split_that_compares_equal_to_valid_value():
+    # 验证与 train 相等但不是字符串的 split 会被拒绝
     class SplitLikeTrain:
         def __eq__(self, other):
             return other == "train"
@@ -1576,6 +1651,7 @@ def test_serialize_log_rejects_non_string_split_that_compares_equal_to_valid_val
 def test_assign_qtypes_rejects_non_string_split_that_compares_equal_to_valid_value(
     tmp_path,
 ):
+    # 验证 assign_qtypes 同样拒绝与 train 相等但非字符串的 split
     class SplitLikeTrain:
         def __eq__(self, other):
             return other == "train"
@@ -1594,6 +1670,7 @@ def test_assign_qtypes_rejects_non_string_split_that_compares_equal_to_valid_val
 
 
 def _task5_summary_events():
+    # 构造 7 条固定事件（跨三个 split，含一个混合窗口）供摘要测试
     start = datetime(2026, 11, 1, tzinfo=timezone.utc)
     return [
         gen_log.QueryEvent(
@@ -1629,6 +1706,7 @@ def _task5_summary_events():
 
 @pytest.fixture
 def task5_summary_case(tmp_path):
+    # 提供摘要测试夹具：配置、事件、CSV 字节与输入文件哈希
     config = make_behavior_config(tmp_path, total_rows=7)
     events = _task5_summary_events()
     csv_bytes = gen_log.serialize_log(events)
@@ -1641,12 +1719,14 @@ def task5_summary_case(tmp_path):
 
 
 def _task5_require_api(*names):
+    # 检查 Task 5 所需 API 是否存在，缺失时直接判定失败
     missing = [name for name in names if not hasattr(gen_log, name)]
     if missing:
         pytest.fail(f"Task 5 API missing: {', '.join(missing)}", pytrace=False)
 
 
 def _task5_build_summary(case):
+    # 调用 build_summary 生成摘要，返回摘要、事件与 CSV 字节
     config, events, csv_bytes, input_hashes = case
     _task5_require_api("build_summary", "validate_summary")
     summary = gen_log.build_summary(
@@ -1656,6 +1736,7 @@ def _task5_build_summary(case):
 
 
 def _task5_write_project(tmp_path, total_rows=6000):
+    # 在临时目录搭建最小 D3 项目：config.json、splits.csv 与本地 PSL
     project_root = tmp_path / "d3-project"
     (project_root / "data" / "raw").mkdir(parents=True)
     config_data = make_config()
@@ -1673,6 +1754,7 @@ def _task5_write_project(tmp_path, total_rows=6000):
 
 
 def _task5_block_network(monkeypatch):
+    # 把 socket 相关函数替换为直接断言失败，确保测试离线
     def fail_network(*_args, **_kwargs):
         raise AssertionError("network access attempted")
 
@@ -1682,6 +1764,7 @@ def _task5_block_network(monkeypatch):
 
 
 def _task5_run_cli(project_root):
+    # 借助 sitecustomize 在子进程内阻断网络后运行 gen_log CLI，并检查阻断自检标记
     repository_root = Path(__file__).resolve().parents[1]
     bootstrap_dir = project_root / "_test_bootstrap"
     bootstrap_dir.mkdir(exist_ok=True)
@@ -1739,6 +1822,7 @@ def _task5_run_cli(project_root):
 def test_task5_summary_reports_counts_and_independently_recomputes_csv(
     task5_summary_case,
 ):
+    # 验证摘要的计数、时间范围与 sha256 正确，并能通过 validate_summary 独立复算 CSV
     summary, events, csv_bytes = _task5_build_summary(task5_summary_case)
 
     gen_log.validate_summary(summary, events, csv_bytes)
@@ -1798,6 +1882,7 @@ def test_task5_summary_reports_counts_and_independently_recomputes_csv(
 def test_task5_validation_rejects_stale_csv_reconstructible_summary_fields(
     task5_summary_case, field, wrong_value
 ):
+    # 参数化验证哈希、行数或各类计数与 CSV 可复算结果不符时校验失败
     summary, events, csv_bytes = _task5_build_summary(task5_summary_case)
 
     with pytest.raises(ValueError):
@@ -1809,6 +1894,7 @@ def test_task5_validation_rejects_stale_csv_reconstructible_summary_fields(
 def test_task5_validation_rejects_csv_bytes_that_disagree_with_summary(
     task5_summary_case,
 ):
+    # 验证 CSV 内容与摘要不一致（改动域名）时校验失败
     summary, events, csv_bytes = _task5_build_summary(task5_summary_case)
     changed_csv = csv_bytes.replace(b"oak-train.com", b"birch-train.com", 1)
 
@@ -1819,6 +1905,7 @@ def test_task5_validation_rejects_csv_bytes_that_disagree_with_summary(
 def test_task5_validation_rejects_csv_row_changes_even_when_summary_matches(
     task5_summary_case,
 ):
+    # 验证即使更新摘要哈希，CSV 行与内存事件不符仍会失败
     summary, events, csv_bytes = _task5_build_summary(task5_summary_case)
     original_row_fragment = b",normal_list,,train\n"
     assert original_row_fragment in csv_bytes
@@ -1837,6 +1924,7 @@ def test_task5_validation_rejects_csv_row_changes_even_when_summary_matches(
 def test_task5_validation_checks_behavior_only_against_in_memory_events(
     task5_summary_case,
 ):
+    # 验证行为字段只与内存事件比对（CSV 无该列），改动内存事件即失败
     summary, events, csv_bytes = _task5_build_summary(task5_summary_case)
     changed_events = [replace(events[0], behavior="low_frequency"), *events[1:]]
 
@@ -1847,6 +1935,7 @@ def test_task5_validation_checks_behavior_only_against_in_memory_events(
 def test_task5_write_log_preserves_target_and_cleans_temp_on_replace_failure(
     tmp_path, monkeypatch
 ):
+    # 验证 write_log 替换失败时保留原目标文件并清理临时文件
     _task5_require_api("write_log")
     target = tmp_path / "data" / "dns_log.csv"
     target.parent.mkdir()
@@ -1864,6 +1953,7 @@ def test_task5_write_log_preserves_target_and_cleans_temp_on_replace_failure(
 
 
 def test_task5_write_log_returns_verified_sha256_after_replace(tmp_path):
+    # 验证 write_log 成功后返回所写内容的 sha256，且文件内容一致
     _task5_require_api("write_log")
     target = tmp_path / "data" / "dns_log.csv"
     target.parent.mkdir()
@@ -1878,6 +1968,7 @@ def test_task5_write_log_returns_verified_sha256_after_replace(tmp_path):
 def test_task5_run_generation_is_offline_repeatable_and_hashes_only_inputs(
     tmp_path, monkeypatch
 ):
+    # 验证 run_log_generation 离线且可重复，输入哈希只覆盖 config、splits 与 PSL 三个文件
     _task5_require_api("run_log_generation")
     _task5_block_network(monkeypatch)
     project_root = _task5_write_project(tmp_path)
@@ -1915,6 +2006,7 @@ def test_task5_run_generation_is_offline_repeatable_and_hashes_only_inputs(
 def test_task5_run_generation_does_not_replace_target_when_summary_fails(
     tmp_path, monkeypatch
 ):
+    # 验证摘要校验失败时不替换已有 dns_log.csv，且不留临时文件
     _task5_require_api("run_log_generation", "validate_summary")
     _task5_block_network(monkeypatch)
     project_root = _task5_write_project(tmp_path)
@@ -1937,6 +2029,7 @@ def test_task5_run_generation_does_not_replace_target_when_summary_fails(
 
 
 def test_task5_cli_success_writes_project_local_log_and_only_json_stdout(tmp_path):
+    # 验证 CLI 成功时写出 data/dns_log.csv，stdout 仅输出 JSON 摘要
     project_root = _task5_write_project(tmp_path)
 
     result = _task5_run_cli(project_root)
@@ -1955,6 +2048,7 @@ def test_task5_cli_success_writes_project_local_log_and_only_json_stdout(tmp_pat
 def test_task5_cli_failure_is_nonzero_quiet_on_stdout_and_preserves_target(
     tmp_path,
 ):
+    # 验证 CLI 失败时退出码非零、stdout 为空、stderr 有错误信息且不泄露域名、不覆盖既有文件
     project_root = _task5_write_project(tmp_path)
     splits_path = project_root / "data" / "splits.csv"
     splits_path.write_text("incorrect header\n", encoding="utf-8")

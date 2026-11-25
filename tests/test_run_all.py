@@ -10,6 +10,7 @@ from src.features import FEATURES_COLUMNS
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
+# 构造已冻结的运行清单片段：阈值、模型、模板哈希等冻结字段
 def _frozen_manifest():
     return {
         "freeze_check": "frozen",
@@ -36,6 +37,7 @@ def _frozen_manifest():
     }
 
 
+# 构造含 H/F/I 三特征阈值的基线文件内容
 def _baseline():
     return {
         "version": 1,
@@ -64,6 +66,7 @@ def _baseline():
     }
 
 
+# 构造 val/test 各一行特征，用于流水线测试
 def _features_df():
     rows = [
         {
@@ -106,6 +109,7 @@ def _features_df():
     return pd.DataFrame(rows, columns=FEATURES_COLUMNS)
 
 
+# 在临时目录搭出 data/results/config.json，并写入冻结清单与基线
 def _prepare_root(tmp_path):
     root = tmp_path
     (root / "results").mkdir()
@@ -124,6 +128,7 @@ def _prepare_root(tmp_path):
 
 
 def test_merge_manifest_preserves_frozen_fields():
+    # 合并清单时冻结字段（阈值/模型/模板哈希/校验）不被覆盖，只更新运行态字段
     existing = _frozen_manifest()
     updates = {
         "mode": "offline",
@@ -143,8 +148,10 @@ def test_merge_manifest_preserves_frozen_fields():
     assert merged["llm"] == {"mode": "offline", "cache_hits": 2}
 
 
+# 三种离线情形：缓存文件缺失、空缓存、已有部分缓存
 @pytest.mark.parametrize("case", ["offline", "cache_missing", "existing_cache"])
 def test_run_all_offline_paths(tmp_path, monkeypatch, case):
+    # 离线流水线：阶段顺序固定、基线取冻结值、评估结果写回清单
     root = _prepare_root(tmp_path)
     cache_path = root / "results" / "llm_cache.jsonl"
     if case == "cache_missing":
@@ -169,6 +176,7 @@ def test_run_all_offline_paths(tmp_path, monkeypatch, case):
     }
     calls = {}
 
+    # 伪造 LLM 复核阶段：返回预设的离线汇总并记录传入路径
     def fake_judging(features_path, mode, config_path=None):
         calls["mode"] = mode
         calls["features_path"] = Path(features_path)
@@ -183,6 +191,7 @@ def test_run_all_offline_paths(tmp_path, monkeypatch, case):
         },
     }
 
+    # 伪造评估阶段：改写清单 evaluation 字段并返回指标摘要
     def fake_evaluate(features_path, cache_path, config_path=None):
         manifest_path = Path(features_path).parent / "run_manifest.json"
         current = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -238,6 +247,7 @@ def test_run_all_offline_paths(tmp_path, monkeypatch, case):
 
 
 def test_seed_mismatch_returns_nonzero(tmp_path, capsys):
+    # seed 与清单记录不一致时返回非零，并在 stderr 提示 seed mismatch
     root = _prepare_root(tmp_path)
     assert run_all.main(["--from", "features", "--offline", "--seed", "1"], root=root) == 1
     assert "seed mismatch" in capsys.readouterr().err

@@ -19,6 +19,7 @@ ENDPOINT = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 TEMPLATE = "判断 {{qname}} 的可注册标签 {{registrable_label}} 是否为 DGA。"
 
 
+# 构造一行特征记录：label=1 时补 manual_dga/rand_alpha 元数据，H/F/I 取固定值
 def _row(qname, label, e, b, r, split="test", client_ip="10.0.0.1",
          window_start="2026-11-01T00:00:00Z"):
     return {
@@ -41,10 +42,12 @@ def _row(qname, label, e, b, r, split="test", client_ip="10.0.0.1",
     }
 
 
+# 按 FEATURES_COLUMNS 契约列顺序把字典列表转成 DataFrame
 def _features(rows):
     return pd.DataFrame(rows, columns=FEATURES_COLUMNS)
 
 
+# 构造最小 LLM 配置：模型、端点、模板哈希、生成参数、缓存路径与重试次数
 def _cfg(cache_path, max_retries=2, params=None):
     return {
         "model": "glm-4-flash",
@@ -59,6 +62,7 @@ def _cfg(cache_path, max_retries=2, params=None):
     }
 
 
+# 用官方缓存条目构造函数写入一条伪造缓存记录（attempt=1、HTTP 200）
 def _write_cache(path, qname, label, verdict, cfg):
     entry = llm_judge._cache_entry(
         qname, label, cfg["model"], llm_judge.sanitize_endpoint(cfg["endpoint"]),
@@ -70,6 +74,7 @@ def _write_cache(path, qname, label, verdict, cfg):
 
 
 def test_select_judgeable_only_e_and_not_b():
+    # 只有 E=1 且 B=0 的行进入 LLM 复核，重复 qname 去重后仅保留一条 q1.com
     df = _features([
         _row("q0.com", 0, 0, 0, 0),
         _row("q1.com", 0, 1, 0, 1),
@@ -82,6 +87,7 @@ def test_select_judgeable_only_e_and_not_b():
 
 
 def test_r0_and_b1_do_not_call_llm():
+    # R=0 与 B=1 的行都不请求 LLM：结论记 na，hybrid 直接等于 R
     df = _features([
         _row("q0.com", 0, 0, 0, 0),
         _row("q1.com", 0, 1, 1, 1),
@@ -93,6 +99,7 @@ def test_r0_and_b1_do_not_call_llm():
 
 
 def test_e1_b0_normal_is_withdrawn():
+    # E=1、B=0 且 verdict=normal 时撤销告警：hybrid 由 1 变为 0
     df = _features([_row("q1.com", 0, 1, 0, 1)])
     out = evaluate.apply_hybrid(df, {
         "q1.com": {"verdict": "normal", "fail_reason": None},
@@ -103,6 +110,7 @@ def test_e1_b0_normal_is_withdrawn():
 
 @pytest.mark.parametrize("verdict", ["DGA", "uncertain"])
 def test_e1_b0_dga_or_uncertain_is_retained(verdict):
+    # E=1、B=0 下 DGA 与 uncertain 都不撤销，告警保持 hybrid=1
     df = _features([_row("q1.com", 1, 1, 0, 1)])
     out = evaluate.apply_hybrid(df, {
         "q1.com": {"verdict": verdict, "fail_reason": None},
@@ -111,6 +119,7 @@ def test_e1_b0_dga_or_uncertain_is_retained(verdict):
 
 
 def test_b1_normal_verdict_cannot_release():
+    # B=1 时 LLM 判 normal 也不能撤销，告警保持 hybrid=1
     df = _features([_row("q1.com", 0, 1, 1, 1)])
     out = evaluate.apply_hybrid(df, {
         "q1.com": {"verdict": "normal", "fail_reason": None},
@@ -119,6 +128,7 @@ def test_b1_normal_verdict_cannot_release():
 
 
 def test_failed_verdict_is_uncertain_and_retained():
+    # 调用失败按 uncertain 保留告警，并原样记录失败原因 timeout
     df = _features([_row("q1.com", 1, 1, 0, 1)])
     out = evaluate.apply_hybrid(df, {
         "q1.com": {"verdict": "uncertain", "fail_reason": "timeout"},
@@ -129,6 +139,7 @@ def test_failed_verdict_is_uncertain_and_retained():
 
 
 def test_offline_without_cache_keeps_alert_and_no_network(tmp_path, monkeypatch):
+    # 离线且无缓存：返回 uncertain/no_cache、cache_hit=False，且 HTTP 被拦截证明未联网
     def _blocked(*args, **kwargs):
         raise AssertionError("offline mode must not call the API")
 
@@ -141,6 +152,7 @@ def test_offline_without_cache_keeps_alert_and_no_network(tmp_path, monkeypatch)
 
 
 def test_offline_cache_hit_returns_verdict(tmp_path, monkeypatch):
+    # 离线命中缓存时直接返回缓存结论 normal，cache_hit=True，同样不联网
     def _blocked(*args, **kwargs):
         raise AssertionError("offline mode must not call the API")
 
@@ -155,6 +167,7 @@ def test_offline_cache_hit_returns_verdict(tmp_path, monkeypatch):
 
 
 def test_cache_key_change_invalidates_old_entry(tmp_path):
+    # 模板哈希或生成参数变化都会改变缓存键，旧缓存失效后离线只能返回 uncertain/no_cache
     cache_path = tmp_path / "llm_cache.jsonl"
     cfg = _cfg(cache_path)
     _write_cache(cache_path, "q1.com", "q1", "normal", cfg)
@@ -172,6 +185,7 @@ def test_cache_key_change_invalidates_old_entry(tmp_path):
 
 
 def test_format_error_returns_uncertain(tmp_path, monkeypatch):
+    # 模型返回非 JSON 时记为 format_error/uncertain，且失败结果不写入缓存文件
     monkeypatch.setattr(
         llm_judge, "call_llm",
         lambda prompt, cfg: ("not json", 7),
@@ -184,6 +198,7 @@ def test_format_error_returns_uncertain(tmp_path, monkeypatch):
 
 
 def test_retry_exhausted_timeout_returns_uncertain(tmp_path, monkeypatch):
+    # 可重试错误耗尽重试上限（max_retries=2 即共 3 次调用）后返回 uncertain/timeout
     attempts = []
 
     def _counting_timeout(prompt, cfg):
@@ -200,6 +215,7 @@ def test_retry_exhausted_timeout_returns_uncertain(tmp_path, monkeypatch):
 
 
 def test_parse_verdict_rejects_extra_fields():
+    # 解析结果包含非白名单字段（如泄漏的 source 元数据）时抛 ValueError
     with pytest.raises(ValueError):
         llm_judge.parse_verdict(
             '{"verdict": "normal", "reason": "ok", "source": "normal_list"}'

@@ -12,6 +12,7 @@ from src.gen_dga import DgaRecord
 
 
 def write_psl(path):
+    # 写入最小 PSL 快照：com/uk/co.uk 属 ICANN 段，blogspot.com 属 PRIVATE 段
     path.write_text(
         "com\nuk\nco.uk\n// ===BEGIN PRIVATE DOMAINS===\nblogspot.com\n",
         encoding="utf-8",
@@ -29,6 +30,7 @@ def make_source_row(
     line_number=2,
     family="family-a",
 ):
+    # 构造原始源行 SourceRow，默认属于 public_dga（label=1），可覆盖来源、标签、算法与行号
     return prepare_data.SourceRow(
         raw_domain=raw_domain,
         label=label,
@@ -50,6 +52,7 @@ def make_normalized_row(
     line_number=2,
     family="family-a",
 ):
+    # 构造已归一化的源行 NormalizedSourceRow，用于合并与抽样测试
     return prepare_data.NormalizedSourceRow(
         domain=domain,
         label=label,
@@ -70,6 +73,7 @@ def make_domain_record(
     etld_plus_one="",
     split="",
 ):
+    # 构造 DomainRecord，默认取 normal_list 负样本（label=0）且未分配 split
     return prepare_data.DomainRecord(
         domain=domain,
         label=label,
@@ -83,10 +87,12 @@ def make_domain_record(
 
 @pytest.fixture
 def local_extractor(tmp_path):
+    # 基于临时 PSL 快照创建离线可注册域提取器，测试全程不联网
     return prepare_data.create_extractor(write_psl(tmp_path / "public_suffix_list.dat"))
 
 
 def write_source_files(raw_dir, normal="normal.example\n", hard="hard.example\n", public=None):
+    # 在 raw 目录写入 normal、hard_negative、public_dga 三类源文件，并返回 public CSV 路径
     raw_dir.mkdir(parents=True, exist_ok=True)
     (raw_dir / "normal_list__popular.txt").write_text(
         normal, encoding="utf-8", newline=""
@@ -105,6 +111,7 @@ def write_source_files(raw_dir, normal="normal.example\n", hard="hard.example\n"
 def make_preparation_project(
     project_root, normal_domains, hard_negative_domains, public_domains
 ):
+    # 搭建完整准备项目：三类源文件、PSL 快照、词根文件与 config.json，返回配置路径
     raw_dir = project_root / "data" / "raw"
     normal_text = "".join(f"{domain}\n" for domain in normal_domains)
     hard_text = "".join(f"{domain}\n" for domain in hard_negative_domains)
@@ -134,12 +141,14 @@ def make_preparation_project(
 
 
 def read_csv_output(path):
+    # 读取 CSV 输出文件，返回表头字段名与行字典列表
     with path.open("r", encoding="utf-8", newline="") as stream:
         reader = csv.DictReader(stream)
         return reader.fieldnames, list(reader)
 
 
 def test_normalize_domain_trims_case_root_dot_and_encodes_idna():
+    # 验证域名归一化：去空白、转小写、去末尾根点并把 Unicode 转成 IDNA（bücher.example 变 xn--bcher-kva.example）
     assert prepare_data.normalize_domain("  BÜCHER.Example.  ") == (
         "xn--bcher-kva.example"
     )
@@ -162,11 +171,13 @@ def test_normalize_domain_trims_case_root_dot_and_encodes_idna():
     ],
 )
 def test_normalize_domain_rejects_invalid_values(value):
+    # 参数化验证空值、IP、通配符、空标签、超长标签与超长域名等非法输入统一抛 ValueError
     with pytest.raises(ValueError):
         prepare_data.normalize_domain(value)
 
 
 def test_normalize_source_rows_separates_invalid_domains_with_provenance():
+    # 验证归一化时剔除非法行，并在排除记录中保留来源 id 与行号溯源信息
     rows = [
         make_source_row("Normal.Example.", source="normal_list", label=0),
         make_source_row("bad..example", source="normal_list", label=0, line_number=3),
@@ -183,6 +194,7 @@ def test_normalize_source_rows_separates_invalid_domains_with_provenance():
 
 
 def test_load_source_rows_reads_only_contract_files_and_maps_semantics(tmp_path):
+    # 验证只按契约读取三类源文件、忽略非契约文件，并映射出正确的 source_id、行号、label 与 family
     raw_dir = tmp_path / "raw"
     public_path = write_source_files(
         raw_dir,
@@ -215,6 +227,7 @@ def test_load_source_rows_reads_only_contract_files_and_maps_semantics(tmp_path)
 
 
 def test_load_source_rows_rejects_public_dga_family_named_legit(tmp_path):
+    # 验证 public_dga 家族名若为保留语义 legit 则报错，且错误信息定位到文件与行号
     raw_dir = tmp_path / "raw"
     write_source_files(raw_dir, public=[("dga.example", " LeGiT ")])
 
@@ -225,6 +238,7 @@ def test_load_source_rows_rejects_public_dga_family_named_legit(tmp_path):
         prepare_data.load_source_rows(raw_dir)
 
 
+# 三类 public_dga CSV 结构错误：缺家族值、缺 family 列、列数过多
 @pytest.mark.parametrize(
     ("filename", "content", "message"),
     [
@@ -240,6 +254,7 @@ def test_load_source_rows_rejects_public_dga_family_named_legit(tmp_path):
 def test_load_source_rows_reports_public_csv_structure_errors(
     tmp_path, filename, content, message
 ):
+    # 参数化验证 public_dga CSV 的缺家族值、缺 family 列、列数过多等结构问题会带定位信息报错
     raw_dir = tmp_path / "raw"
     write_source_files(raw_dir)
     (raw_dir / filename).write_text(content, encoding="utf-8", newline="")
@@ -249,6 +264,7 @@ def test_load_source_rows_reports_public_csv_structure_errors(
 
 
 def test_load_source_rows_requires_each_input_category(tmp_path):
+    # 验证缺少任一类输入源（如 normal_list）时立即报错
     raw_dir = tmp_path / "raw"
     raw_dir.mkdir()
 
@@ -257,6 +273,7 @@ def test_load_source_rows_requires_each_input_category(tmp_path):
 
 
 def test_public_dga_sampling_uses_largest_remainder_and_hash_order():
+    # 验证 public_dga 按家族用最大余数法分配 300 个配额（92/82/72/54），并按 seed 哈希排序取前若干条
     family_sizes = {"family-a": 101, "family-b": 90, "family-c": 79, "family-d": 60}
     rows = [
         make_normalized_row(
@@ -291,6 +308,7 @@ def test_public_dga_sampling_uses_largest_remainder_and_hash_order():
 
 
 def test_public_dga_sampling_is_input_order_independent_and_deduplicates():
+    # 验证抽样与输入顺序无关、重复域名会被去重，结果长度等于去重后的数量
     rows = [
         make_normalized_row(f"dga{index:03d}.example", family="family-a", line_number=index)
         for index in range(12)
@@ -307,6 +325,7 @@ def test_public_dga_sampling_is_input_order_independent_and_deduplicates():
 
 
 def test_public_dga_sampling_rejects_family_conflicts_and_rejects_bad_limit():
+    # 验证同一域名归属不同家族时报错，且 limit 小于等于 0 时报错
     rows = [
         make_normalized_row("same.example", source_id="source-a", family="family-a"),
         make_normalized_row("same.example", source_id="source-b", family="family-b"),
@@ -321,6 +340,7 @@ def test_public_dga_sampling_rejects_family_conflicts_and_rejects_bad_limit():
 def test_create_extractor_uses_local_psl_with_private_domains_and_no_network(
     tmp_path, monkeypatch
 ):
+    # 验证提取器仅用本地 PSL（含 PRIVATE 段）解析 eTLD+1，且完全不发起网络连接
     psl_path = write_psl(tmp_path / "public_suffix_list.dat")
 
     def fail_network(*args, **kwargs):
@@ -338,6 +358,7 @@ def test_create_extractor_uses_local_psl_with_private_domains_and_no_network(
 
 @pytest.mark.parametrize("contents", ["", "not-a-suffix-rule\n"])
 def test_create_extractor_rejects_missing_or_invalid_local_psl(tmp_path, contents):
+    # 参数化验证空文件或无有效后缀规则的 PSL 快照会被拒绝
     psl_path = tmp_path / "bad.dat"
     psl_path.write_text(contents, encoding="utf-8", newline="")
 
@@ -346,6 +367,7 @@ def test_create_extractor_rejects_missing_or_invalid_local_psl(tmp_path, content
 
 
 def test_merge_and_validate_folds_duplicate_semantics_and_retains_provenance(tmp_path):
+    # 验证合并去重同名 public_dga 记录，并在 sources 中保留两条溯源信息
     rows = [
         make_normalized_row(
             "duplicate.example",
@@ -382,6 +404,7 @@ def test_merge_and_validate_folds_duplicate_semantics_and_retains_provenance(tmp
 
 
 def test_merge_and_validate_promotes_hard_negative_and_retains_provenance(tmp_path):
+    # 验证同名 normal_list 与 hard_negative 合并时提升为 hard_negative，并保留两种来源溯源
     rows = [
         make_normalized_row(
             "shared.example",
@@ -422,6 +445,7 @@ def test_merge_and_validate_promotes_hard_negative_and_retains_provenance(tmp_pa
 
 
 def test_merge_and_validate_rejects_cross_label_conflict_with_provenance(tmp_path):
+    # 验证同名域名的标签冲突（0 与 1）会报错，且错误信息包含双方来源文件与行号
     rows = [
         make_normalized_row(
             "collision.example",
@@ -462,6 +486,7 @@ def test_merge_and_validate_rejects_cross_label_conflict_with_provenance(tmp_pat
 
 
 def test_merge_and_validate_rejects_public_family_conflict_with_provenance(tmp_path):
+    # 验证同名 public_dga 域名归属不同家族时报错，并带双方溯源信息
     rows = [
         make_normalized_row(
             "family-collision.example",
@@ -496,6 +521,7 @@ def test_merge_and_validate_rejects_public_family_conflict_with_provenance(tmp_p
 
 
 def test_manual_domain_records_maps_dga_records_to_shared_schema():
+    # 验证手工 DGA 记录映射到共享 schema：label=1、source=manual_dga，保留算法且 sources 为空
     dga_records = [
         DgaRecord("random.example.com", "rand_alpha", "7:rand_alpha:0001", {}),
         DgaRecord("roots.example.com", "word_digit", "7:word_digit:0001", {}),
@@ -517,6 +543,7 @@ def test_manual_domain_records_maps_dga_records_to_shared_schema():
 def test_assign_splits_keeps_etld_plus_one_groups_together_and_distinguishes_suffixes(
     local_extractor,
 ):
+    # 验证按 eTLD+1 分组：同组域名进入同一 split，不同公共后缀（com 与 co.uk）互不混同
     records = [
         make_domain_record("one.example.com"),
         make_domain_record("two.example.com"),
@@ -541,6 +568,7 @@ def test_assign_splits_keeps_etld_plus_one_groups_together_and_distinguishes_suf
 def test_assign_splits_uses_seeded_hash_ties_and_d2_loss_independent_of_input_order(
     local_extractor,
 ):
+    # 验证 split 分配由 seed 哈希与 D2 损失决定且与输入顺序无关（5 组域名落到预期 split）
     records = [
         make_domain_record(f"host.{group}.com")
         for group in ("a", "b", "c", "d", "e")
@@ -565,6 +593,7 @@ def test_assign_splits_uses_seeded_hash_ties_and_d2_loss_independent_of_input_or
 
 
 def test_assign_splits_uses_d2_loss_for_uneven_group_sizes_and_strata(local_extractor):
+    # 验证组大小与标签分层不均时按 D2 损失分配，得到预期的 train/val/test 组合
     group_rows = {
         "a": [("normal_list", 0)] * 4,
         "b": [("normal_list", 0)],
@@ -598,6 +627,7 @@ def test_assign_splits_uses_d2_loss_for_uneven_group_sizes_and_strata(local_extr
 def test_assign_splits_keeps_large_groups_intact_without_ratio_threshold(
     local_extractor,
 ):
+    # 验证大组（8 个同组域名）不会被拆散，并允许实际比例偏离理想 60/20/20
     records = [
         make_domain_record(f"host{index}.large.com") for index in range(8)
     ] + [
@@ -626,6 +656,7 @@ def test_assign_splits_keeps_large_groups_intact_without_ratio_threshold(
 
 
 def test_assign_splits_covers_each_manual_algorithm_in_every_split(local_extractor):
+    # 验证每种手工 DGA 算法在 train/val/test 三个 split 中都至少出现一次
     algorithms = ("rand_alpha", "word_digit", "md5_date")
     records = [
         make_domain_record(
@@ -651,6 +682,7 @@ def test_assign_splits_covers_each_manual_algorithm_in_every_split(local_extract
 def test_assign_splits_rejects_manual_coverage_impossible_with_one_etld_group(
     local_extractor,
 ):
+    # 验证所有手工算法同属一个 eTLD+1 时无法满足三 split 覆盖，报错并列出算法与 split
     records = [
         make_domain_record(
             f"{algorithm.replace('_', '-')}.shared.com",
@@ -670,6 +702,7 @@ def test_assign_splits_rejects_manual_coverage_impossible_with_one_etld_group(
 
 
 def test_assign_splits_rejects_domain_without_registered_domain(local_extractor):
+    # 验证无公共后缀（如 localhost）的域名无法确定 eTLD+1，直接报错
     records = [make_domain_record("localhost")]
 
     with pytest.raises(ValueError, match="localhost"):
@@ -677,6 +710,7 @@ def test_assign_splits_rejects_domain_without_registered_domain(local_extractor)
 
 
 def test_assign_splits_normalizes_domain_records_before_grouping(local_extractor):
+    # 验证分组前先归一化域名，大小写不同的重复记录会被检测为重复并报错
     records = [make_domain_record("EXAMPLE.COM"), make_domain_record("example.com")]
 
     with pytest.raises(ValueError, match="duplicate domain record: 'example.com'"):
@@ -684,6 +718,7 @@ def test_assign_splits_normalizes_domain_records_before_grouping(local_extractor
 
 
 def test_assign_splits_normalizes_single_record_before_grouping(local_extractor):
+    # 验证单条记录也会被归一化：EXAMPLE.COM. 输出 example.com
     records = [make_domain_record("EXAMPLE.COM.")]
 
     assigned = prepare_data.assign_splits(records, local_extractor, master_seed=17)
@@ -693,6 +728,7 @@ def test_assign_splits_normalizes_single_record_before_grouping(local_extractor)
 
 
 def test_assign_splits_rejects_malformed_domain_records(local_extractor):
+    # 验证非法域名（如 bad..example.com）在分配 split 前报错
     records = [make_domain_record("bad..example.com")]
 
     with pytest.raises(ValueError, match="invalid domain"):
@@ -702,6 +738,7 @@ def test_assign_splits_rejects_malformed_domain_records(local_extractor):
 def test_run_data_preparation_is_offline_deterministic_and_preserves_dns_log(
     tmp_path, monkeypatch
 ):
+    # 端到端验证离线可复现的数据准备：产物内容、排除原因、DGA 重试计数正确，且不覆盖已有 dns_log.csv
     word_roots = tmp_path / "roots.txt"
     word_roots.write_text("alpha\nbeta\n", encoding="utf-8", newline="")
     collision_candidate = gen_dga.generate_dga_domains(
@@ -742,6 +779,7 @@ def test_run_data_preparation_is_offline_deterministic_and_preserves_dns_log(
     monkeypatch.setattr(socket.socket, "connect", fail_network)
     monkeypatch.setattr(socket.socket, "connect_ex", fail_network)
 
+    # 运行离线数据准备，随后逐项核对产物内容与统计摘要
     summary = prepare_data.run_data_preparation(project_root, config_path)
     output_paths = (
         data_dir / "normal_domains.txt",
@@ -750,6 +788,7 @@ def test_run_data_preparation_is_offline_deterministic_and_preserves_dns_log(
     )
     first_output_bytes = [path.read_bytes() for path in output_paths]
 
+    # normal_domains.txt 应为去重排序结果：硬负样本被提升，非法域名被剔除
     normal_domains = (data_dir / "normal_domains.txt").read_text(
         encoding="utf-8"
     ).splitlines()
@@ -787,6 +826,7 @@ def test_run_data_preparation_is_offline_deterministic_and_preserves_dns_log(
         "family-b": {"available": 1, "quota": 1, "selected": 1},
     }
 
+    # dga_domains.csv 三个算法各 100 条，seed 携带重试序号
     dga_header, dga_rows = read_csv_output(data_dir / "dga_domains.csv")
     assert dga_header == ["domain", "algorithm", "seed", "params"]
     assert len(dga_rows) == 300
@@ -802,6 +842,7 @@ def test_run_data_preparation_is_offline_deterministic_and_preserves_dns_log(
     )
     assert first_rand_alpha["seed"].endswith(":0002")
 
+    # splits.csv 四种来源齐全，且同一 eTLD+1 只出现在一个 split
     split_header, split_rows = read_csv_output(data_dir / "splits.csv")
     assert split_header == ["domain", "label", "source", "algorithm", "split"]
     assert len({row["domain"] for row in split_rows}) == len(split_rows)
@@ -857,12 +898,14 @@ def test_run_data_preparation_is_offline_deterministic_and_preserves_dns_log(
         ]
     assert dns_log_path.read_bytes() == b"dns-log sentinel\n"
 
+    # 重复运行应产出完全相同的字节（幂等）
     prepare_data.run_data_preparation(project_root, config_path)
     assert [path.read_bytes() for path in output_paths] == first_output_bytes
     assert dns_log_path.read_bytes() == b"dns-log sentinel\n"
 
 
 def test_run_data_preparation_conflict_preserves_all_existing_outputs(tmp_path):
+    # 验证生成阶段发现标签冲突时抛错，且所有既有产物与 dns_log.csv 均未被改写
     project_root = tmp_path / "project"
     config_path = make_preparation_project(
         project_root,
@@ -891,6 +934,7 @@ def test_run_data_preparation_conflict_preserves_all_existing_outputs(tmp_path):
 def test_write_output_bundle_restores_all_outputs_when_second_promotion_fails(
     tmp_path, monkeypatch
 ):
+    # 验证输出提交流程在第二次替换失败时回滚，已有文件内容与临时/备份文件都被清理
     outputs = {
         tmp_path / f"output-{index}.csv": f"new-{index}\n".encode("ascii")
         for index in range(3)
@@ -930,6 +974,7 @@ def test_write_output_bundle_restores_all_outputs_when_second_promotion_fails(
 def test_write_output_bundle_removes_new_outputs_when_second_promotion_fails(
     tmp_path, monkeypatch
 ):
+    # 验证目标文件原本不存在时，提交流程中途失败会删除已写入的新文件与临时文件
     outputs = {
         tmp_path / f"new-output-{index}.csv": f"new-{index}\n".encode("ascii")
         for index in range(3)
@@ -965,6 +1010,7 @@ def test_write_output_bundle_removes_new_outputs_when_second_promotion_fails(
 def test_write_output_bundle_restores_dangling_symlink_on_promotion_failure(
     tmp_path, monkeypatch
 ):
+    # 验证提交流程失败时能恢复指向缺失目标的悬空符号链接（无符号链接权限时退化为普通文件校验）
     link_path = tmp_path / "dangling-link.csv"
     expected_link_target = "missing-target.csv"
     try:
@@ -1040,6 +1086,7 @@ def test_write_output_bundle_restores_dangling_symlink_on_promotion_failure(
 def test_write_output_bundle_reports_recoverable_backup_when_rollback_fails(
     tmp_path, monkeypatch
 ):
+    # 验证回滚本身失败时抛出 RuntimeError，并报告可恢复的 .bak 备份路径与内容
     outputs = {
         tmp_path / f"output-{index}.csv": f"new-{index}\n".encode("ascii")
         for index in range(3)
@@ -1057,6 +1104,7 @@ def test_write_output_bundle_reports_recoverable_backup_when_rollback_fails(
     promotion_failure_injected = False
     rollback_failure_injected = False
 
+    # 注入两次失败：第二次提交抛错，随后第一次回滚也抛错
     def fail_promotion_and_one_restore(source, destination):
         nonlocal promotion_count
         nonlocal promotion_failure_injected, rollback_failure_injected
@@ -1091,6 +1139,7 @@ def test_write_output_bundle_reports_recoverable_backup_when_rollback_fails(
 def test_main_runs_from_current_project_root_and_prints_json_summary(
     tmp_path, monkeypatch, capsys
 ):
+    # 验证 main 以当前目录为项目根读取 config.json，并把摘要以 JSON 打印到 stdout
     summary = prepare_data.RunSummary(
         source_counts={"normal": {"raw": 1, "valid": 1, "excluded": 0, "deduplicated": 0}},
         excluded_rows=[],
@@ -1139,6 +1188,7 @@ def test_main_runs_from_current_project_root_and_prints_json_summary(
 def test_main_reports_pipeline_error_and_returns_nonzero(
     tmp_path, monkeypatch, capsys
 ):
+    # 验证流水线异常时 main 返回非零码，stdout 为空且错误信息写入 stderr
     def fail_run(project_root, config_path):
         raise ValueError("source conflict")
 

@@ -39,6 +39,7 @@ except ImportError:
 
 def get_api_key() -> str:
     """优先环境变量，其次根目录 api.txt；两者都没有时报错，不静默返回空。"""
+    # 读取后统一去除首尾空白，空字符串视为未配置
     key = os.environ.get("ZHIPU_API_KEY", "").strip()
     if not key:
         env_file = Path(__file__).resolve().parent.parent / "api.txt"
@@ -50,6 +51,7 @@ def get_api_key() -> str:
 
 
 def _smoke_result(model: str | None = None, endpoint: str | None = None) -> dict:
+    # 冒烟测试结果骨架：先全部置空或失败，后续按执行阶段逐项填充
     return {
         "checked_at": datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
         "model": model,
@@ -65,12 +67,15 @@ def _smoke_result(model: str | None = None, endpoint: str | None = None) -> dict
 
 
 def _write_smoke_result(path: Path, result: dict) -> dict:
+    # 以 UTF-8 JSON 写入证据文件（自动建目录）并原样返回结果
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return result
 
 
 def _sanitize_endpoint(value: str) -> str:
+    # 端点白名单校验：仅允许 https 的 open.bigmodel.cn 指定路径，拒绝控制字符与查询串，
+    # 通过后返回去掉 query/fragment 的规范 URL
     if re.search(r"[\s\x00-\x1f\x7f]", value):
         raise ValueError("invalid endpoint")
     parts = urlsplit(value)
@@ -91,6 +96,7 @@ def _sanitize_endpoint(value: str) -> str:
 
 
 def _safe_usage(value: object) -> dict | None:
+    # 只保留整型 token 统计字段（排除 bool），没有任何有效字段时返回 None
     if not isinstance(value, dict):
         return None
     usage = {
@@ -102,6 +108,7 @@ def _safe_usage(value: object) -> dict | None:
 
 
 def _request_id(headers: object) -> str | None:
+    # 从响应头取 request-id 或 x-request-id，仅接受受限字符格式，不符则返回 None
     if not isinstance(headers, Mapping):
         return None
     lowered = {str(name).lower(): str(value) for name, value in headers.items()}
@@ -112,6 +119,7 @@ def _request_id(headers: object) -> str | None:
 
 
 def _http_error_category(status: int) -> str:
+    # 把 HTTP 状态码归类为鉴权、模型/端点、限流、服务端与其他错误
     if status in (401, 403):
         return "auth_error"
     if status == 404:
@@ -124,6 +132,7 @@ def _http_error_category(status: int) -> str:
 
 
 def run_smoke_test(config_path: str | Path | None = None, evidence_path: str | Path | None = None) -> dict:
+    # 联网冒烟测试：按“读配置→取 Key→发请求→校验响应”分阶段执行，任一阶段失败即落盘并返回
     project_root = Path(__file__).resolve().parent.parent
     config_file = Path(config_path) if config_path is not None else project_root / "config.json"
     output_file = Path(evidence_path) if evidence_path is not None else project_root / "report" / "evidence" / "d1_glm_smoke.json"
@@ -132,6 +141,7 @@ def run_smoke_test(config_path: str | Path | None = None, evidence_path: str | P
     try:
         config = json.loads(config_file.read_text(encoding="utf-8"))
         model_config = config["model"]
+        # 读取并逐项校验模型配置，任何一项不合法都归为 config_error
         model = model_config["name"]
         endpoint = model_config["base_url"]
         timeout = model_config["timeout_seconds"]
@@ -156,6 +166,7 @@ def run_smoke_test(config_path: str | Path | None = None, evidence_path: str | P
     try:
         api_key = get_api_key()
     except RuntimeError:
+        # Key 未配置与 Key 文件读取失败分别记为不同类别，便于排查
         result["error_category"] = "no_api_key"
         return _write_smoke_result(output_file, result)
     except (OSError, UnicodeError):
@@ -172,6 +183,7 @@ def run_smoke_test(config_path: str | Path | None = None, evidence_path: str | P
         "max_tokens": max_tokens,
         "response_format": {"type": "json_object"},
     }
+    # 只发一次请求且不跟随重定向，避免把凭证带到其他主机
     started = time.perf_counter()
     try:
         response = requests.post(
@@ -199,6 +211,7 @@ def run_smoke_test(config_path: str | Path | None = None, evidence_path: str | P
 
     try:
         payload = response.json()
+        # 校验响应模型名、choices 与 message 结构，并要求 content 解析后为 {"status":"ok"}
         if not isinstance(payload, dict) or not isinstance(payload.get("model"), str):
             raise ValueError("invalid response model")
         if payload["model"].casefold() != model.casefold():
@@ -222,9 +235,13 @@ def run_smoke_test(config_path: str | Path | None = None, evidence_path: str | P
     return _write_smoke_result(output_file, result)
 
 
+# 判定结果允许的枚举值
 VERDICTS = ("DGA", "normal", "uncertain")
+# 可重试的失败类别：仅这些会触发退避重试
 RETRYABLE_REASONS = {"timeout", "rate_limit", "server_error", "network_error"}
+# 指数退避等待秒数，按尝试次数依次取用，超出则复用最后一档
 BACKOFF_SECONDS = (1, 2, 4)
+# 缓存条目必须且只能包含的字段集合，用于校验缓存文件结构与完整性
 CACHE_REQUIRED_KEYS = {
     "cache_key", "input", "model", "endpoint", "prompt_template_hash",
     "params", "attempt_count", "http_status", "raw_response", "parsed",
@@ -234,6 +251,7 @@ CACHE_REQUIRED_KEYS = {
 
 @dataclass(frozen=True)
 class VerdictResult:
+    # 单域名判定结果：fail_reason 非空表示无缓存或调用失败，cache_hit 标记是否命中缓存
     verdict: str
     reason: str = ""
     fail_reason: str | None = None
@@ -243,20 +261,24 @@ class VerdictResult:
 
 
 class LLMCallError(Exception):
+    # 调用异常，category 携带错误类别，供上层判断是否重试
     def __init__(self, category: str, message: str = "") -> None:
         super().__init__(message or category)
         self.category = category
 
 
 def _clock() -> float:
+    # 统一计时入口
     return time.perf_counter()
 
 
 def _sleep(seconds: float) -> None:
+    # 统一休眠入口，供重试退避使用
     time.sleep(seconds)
 
 
 def load_template(path: str | Path) -> str:
+    # 读取模板文件，只返回分隔行 --- 之后的正文，分隔行前的内容不计入模板
     text = Path(path).read_text(encoding="utf-8")
     match = re.search(r"(?m)^---\s*$", text)
     if not match:
@@ -268,11 +290,13 @@ def load_template(path: str | Path) -> str:
 
 
 def template_hash(path: str | Path) -> str:
+    # 对模板正文取 SHA-256，模板一改哈希即变，从而使旧缓存自动失效
     body = load_template(path)
     return hashlib.sha256(body.encode("utf-8")).hexdigest()
 
 
 def _validate_features(df: pd.DataFrame) -> None:
+    # 要求列名与顺序严格等于特征契约，不满足即报错
     actual = list(df.columns)
     if actual != FEATURES_COLUMNS:
         raise ValueError(
@@ -283,6 +307,7 @@ def _validate_features(df: pd.DataFrame) -> None:
 
 
 def select_judgeable(features_df: pd.DataFrame) -> pd.DataFrame:
+    # 只挑可复核样本：E=1 且 B=0；同一 qname 去重保留首条，保证每个域名只请求一次
     _validate_features(features_df)
     selected = features_df[
         (features_df["E"] == 1) & (features_df["B"] == 0)
@@ -292,6 +317,7 @@ def select_judgeable(features_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_prompt(qname: str, registrable_label: str, template: str) -> str:
+    # 渲染提示模板：校验入参无换行与占位符注入，拒绝未知变量、残留占位符和元数据泄漏
     if not isinstance(qname, str) or not qname:
         raise ValueError("qname must be a non-empty string")
     if not isinstance(registrable_label, str):
@@ -300,6 +326,7 @@ def build_prompt(qname: str, registrable_label: str, template: str) -> str:
         if "\n" in value or "\r" in value or "{{" in value or "}}" in value:
             raise ValueError("invalid render value")
     unknown = set(re.findall(r"\{\{([^{}]+)\}\}", template)) - {
+        # 模板只允许这两个变量，其他占位符一律视为错误
         "qname", "registrable_label"
     }
     if unknown:
@@ -310,6 +337,7 @@ def build_prompt(qname: str, registrable_label: str, template: str) -> str:
     if "{{" in prompt or "}}" in prompt:
         raise ValueError("unrendered template placeholder remains")
     for token in ("source=", "algorithm=", "split="):
+        # 元数据字段不得进入提示词，否则构成标签泄漏
         if token in prompt:
             raise ValueError(f"metadata token leaked into prompt: {token}")
     return prompt
@@ -317,6 +345,7 @@ def build_prompt(qname: str, registrable_label: str, template: str) -> str:
 
 def cache_key(qname: str, registrable_label: str, model: str,
               template_hash_value: str, params: dict, endpoint: str) -> str:
+    # 缓存键：把输入、模型、端点、模板哈希与生成参数序列化为规范 JSON 后取 SHA-256
     payload = {
         "input": {"qname": qname, "registrable_label": registrable_label},
         "model": model,
@@ -324,6 +353,7 @@ def cache_key(qname: str, registrable_label: str, model: str,
         "prompt_template_hash": template_hash_value,
         "params": params,
     }
+    # sort_keys 与紧凑分隔符保证同样输入得到同一串字节
     canonical = json.dumps(
         payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
     )
@@ -331,6 +361,8 @@ def cache_key(qname: str, registrable_label: str, model: str,
 
 
 def parse_verdict(raw_text: str) -> tuple[str, str]:
+    # 解析模型输出：先剥离 Markdown 代码围栏，再校验恰好包含 verdict/reason 两字段；
+    # verdict 必须在枚举内，reason 去空白后截断到 120 字符
     if not isinstance(raw_text, str):
         raise ValueError("raw verdict must be a string")
     text = raw_text.strip()
@@ -352,6 +384,7 @@ def parse_verdict(raw_text: str) -> tuple[str, str]:
 
 
 def generation_params(model_cfg: dict) -> dict:
+    # 提取参与缓存键的生成参数，仅保留配置中实际存在的项
     return {
         name: model_cfg[name]
         for name in ("temperature", "max_tokens")
@@ -360,10 +393,13 @@ def generation_params(model_cfg: dict) -> dict:
 
 
 def sanitize_endpoint(value: str) -> str:
+    # 公开包装，供评估等模块复用同一套端点校验
     return _sanitize_endpoint(value)
 
 
 def _call_llm_once(prompt: str, cfg: dict) -> tuple[str, int, int]:
+    # 执行一次请求：校验配置与 Key，发送 POST 后校验响应结构与模型名；
+    # 任一步失败都抛 LLMCallError 并携带错误类别，返回 (内容, 耗时毫秒, HTTP 状态码)
     try:
         model = cfg["model"]
         endpoint = _sanitize_endpoint(cfg["endpoint"])
@@ -379,6 +415,7 @@ def _call_llm_once(prompt: str, cfg: dict) -> tuple[str, int, int]:
         if isinstance(max_tokens, bool) or not isinstance(max_tokens, int) or max_tokens <= 0:
             raise ValueError("invalid max_tokens")
     except (KeyError, TypeError, ValueError, AttributeError):
+        # 配置缺失或取值不合法统一归为 config_error，不做重试
         raise LLMCallError("config_error")
 
     try:
@@ -389,6 +426,7 @@ def _call_llm_once(prompt: str, cfg: dict) -> tuple[str, int, int]:
         raise LLMCallError("credential_error")
 
     request_body = {
+        # 请求体固定 temperature/max_tokens 并要求返回 JSON 对象
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": temperature,
@@ -413,6 +451,7 @@ def _call_llm_once(prompt: str, cfg: dict) -> tuple[str, int, int]:
         raise LLMCallError(_http_error_category(response.status_code))
     try:
         payload = response.json()
+        # 响应必须为对象、携带同名模型、choices 首项含字符串 content，否则视为格式错误
         if not isinstance(payload, dict) or not isinstance(payload.get("model"), str):
             raise ValueError("invalid response model")
         if payload["model"].casefold() != model.casefold():
@@ -424,6 +463,7 @@ def _call_llm_once(prompt: str, cfg: dict) -> tuple[str, int, int]:
         if not isinstance(message, dict) or not isinstance(message.get("content"), str):
             raise ValueError("invalid message")
         content = message["content"]
+        # 空内容视为格式错误，避免把空串当有效回答缓存
         if not content.strip():
             raise ValueError("empty content")
     except (ValueError, TypeError, KeyError, IndexError, AttributeError):
@@ -432,11 +472,13 @@ def _call_llm_once(prompt: str, cfg: dict) -> tuple[str, int, int]:
 
 
 def call_llm(prompt: str, cfg: dict) -> tuple[str, int]:
+    # 对外封装：只返回响应内容与耗时，丢弃状态码
     content, latency_ms, _ = _call_llm_once(prompt, cfg)
     return content, latency_ms
 
 
 def load_cache(path: str | Path) -> dict[str, dict]:
+    # 逐行读取 JSONL 缓存并校验字段集合、input/parsed 结构与缓存键唯一性，返回 cache_key 到条目映射
     cache_path = Path(path)
     if not cache_path.exists():
         return {}
@@ -444,6 +486,7 @@ def load_cache(path: str | Path) -> dict[str, dict]:
     with cache_path.open("r", encoding="utf-8") as handle:
         for line_no, line in enumerate(handle, 1):
             text = line.strip()
+            # 跳过空行，其余每行必须是一个完整条目对象
             if not text:
                 continue
             entry = json.loads(text)
@@ -465,6 +508,7 @@ def load_cache(path: str | Path) -> dict[str, dict]:
             if not isinstance(parsed, dict) or set(parsed) != {"verdict", "reason"}:
                 raise ValueError(f"cache entry line {line_no} parsed fields mismatch")
             key = entry["cache_key"]
+            # 缓存键重复说明文件被写脏，直接报错而不是静默覆盖
             if key in entries:
                 raise ValueError(f"duplicate cache_key: {key}")
             entries[key] = entry
@@ -472,6 +516,7 @@ def load_cache(path: str | Path) -> dict[str, dict]:
 
 
 def append_cache(entry: dict, path: str | Path) -> None:
+    # 追加一条缓存：先校验字段集合，已存在相同缓存键则跳过，否则以单行 JSON 追加
     missing = CACHE_REQUIRED_KEYS - set(entry)
     extra = set(entry) - CACHE_REQUIRED_KEYS
     if missing or extra:
@@ -480,6 +525,7 @@ def append_cache(entry: dict, path: str | Path) -> None:
         )
     cache_path = Path(path)
     cache_path.parent.mkdir(parents=True, exist_ok=True)
+    # 幂等写入：同一缓存键只保留首次结果
     if entry["cache_key"] in load_cache(cache_path):
         return
     with cache_path.open("a", encoding="utf-8") as handle:
@@ -490,6 +536,7 @@ def _cache_entry(qname: str, registrable_label: str, model: str, endpoint: str,
                  template_hash_value: str, params: dict, attempt_count: int,
                  http_status: int, raw_response: str,
                  parsed: dict, latency_ms: int) -> dict:
+    # 组装一条缓存记录：重算缓存键，并记录生成参数、尝试次数、原始响应、解析结果与时间戳
     created_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
     return {
         "cache_key": cache_key(
@@ -510,6 +557,7 @@ def _cache_entry(qname: str, registrable_label: str, model: str, endpoint: str,
 
 
 def judge_domain(qname: str, registrable_label: str, mode: str, cfg: dict) -> VerdictResult:
+    # 单域名改判：校验配置后先查缓存；离线模式缺缓存即告警，在线模式按上限指数退避重试
     if mode not in {"online", "offline"}:
         raise ValueError("mode must be online or offline")
     if not isinstance(cfg, dict):
@@ -525,10 +573,12 @@ def judge_domain(qname: str, registrable_label: str, mode: str, cfg: dict) -> Ve
         if isinstance(max_retries, bool) or not isinstance(max_retries, int) or max_retries < 0:
             raise ValueError("invalid max_retries")
     except (KeyError, TypeError, ValueError, AttributeError):
+        # 配置不合法时不发请求，直接按 uncertain 保留告警
         return VerdictResult("uncertain", "", "config_error", 0, False, "")
 
     key = cache_key(qname, registrable_label, model, template_hash_value, params, endpoint)
     cache = load_cache(cache_path)
+    # 命中缓存直接返回，cache_hit 标记为 True 且不计耗时
     if key in cache:
         parsed = cache[key]["parsed"]
         return VerdictResult(
@@ -536,6 +586,7 @@ def judge_domain(qname: str, registrable_label: str, mode: str, cfg: dict) -> Ve
             cache[key].get("raw_response", ""),
         )
     if mode == "offline":
+        # 离线模式绝不请求 API，缺缓存即记 no_cache
         return VerdictResult("uncertain", "", "no_cache", 0, False, "")
 
     prompt = build_prompt(qname, registrable_label, template)
@@ -545,12 +596,14 @@ def judge_domain(qname: str, registrable_label: str, mode: str, cfg: dict) -> Ve
     for attempt in range(max_retries + 1):
         attempt_count = attempt + 1
         try:
+            # 每轮重新调用一次接口；调用异常按类别决定是否退避重试
             content, _ = call_llm(prompt, cfg)
             http_status = 200
             last_raw = content
             try:
                 verdict, reason = parse_verdict(content)
             except ValueError:
+                # 输出 JSON 校验失败不重试，直接按 uncertain 保留原始响应
                 latency_ms = round((_clock() - started) * 1000)
                 return VerdictResult("uncertain", "", "format_error", latency_ms, False, last_raw)
             latency_ms = round((_clock() - started) * 1000)
@@ -562,24 +615,30 @@ def judge_domain(qname: str, registrable_label: str, mode: str, cfg: dict) -> Ve
             try:
                 append_cache(entry, cache_path)
             except OSError:
+                # 缓存写盘失败不影响本次判定结果
                 pass
             return VerdictResult(verdict, reason, None, latency_ms, False, content)
         except LLMCallError as exc:
+            # 仅可重试类别且仍有剩余次数时按退避表等待后重试，否则直接保留告警
             if exc.category in RETRYABLE_REASONS and attempt < max_retries:
                 _sleep(BACKOFF_SECONDS[min(attempt, len(BACKOFF_SECONDS) - 1)])
                 continue
             latency_ms = round((_clock() - started) * 1000)
             return VerdictResult("uncertain", "", exc.category, latency_ms, False, last_raw)
+    # 循环内各分支都会返回，此处仅作兜底
     return VerdictResult("uncertain", "", "server_error", 0, False, last_raw)
 
 
 def budget_guard(qnames: list[str], max_unique: int, seed: int,
                  strata: dict[str, str] | None = None) -> tuple[list[str], dict]:
+    # 请求预算控制：去重后未超上限则全取；超限时按分层或确定性抽样缩小规模，
+    # 返回选中域名与抽样规则描述（供运行清单记录）
     unique = sorted(set(qnames))
     total = len(unique)
     if isinstance(max_unique, bool) or not isinstance(max_unique, int) or max_unique <= 0:
         raise ValueError("max_unique must be a positive integer")
     if total <= max_unique:
+        # 未超预算：全部保留，不触发抽样
         return unique, {
             "applied": False,
             "max_unique": max_unique,
@@ -591,6 +650,7 @@ def budget_guard(qnames: list[str], max_unique: int, seed: int,
 
     rng = random.Random(seed)
     if not strata:
+        # 无分层信息时用固定 seed 做确定性随机抽样，保证可复现
         selected = sorted(rng.sample(unique, max_unique))
         return selected, {
             "applied": True,
@@ -603,6 +663,7 @@ def budget_guard(qnames: list[str], max_unique: int, seed: int,
         }
 
     groups: dict[str, list[str]] = {}
+    # 按分层键分组，缺失分层的域名归入 unknown
     for qname in unique:
         groups.setdefault(strata.get(qname, "unknown"), []).append(qname)
     for name in groups:
@@ -610,6 +671,7 @@ def budget_guard(qnames: list[str], max_unique: int, seed: int,
 
     allocations: dict[str, int] = {}
     remainders = []
+    # 按各层占比分配名额并向下取整，余数留待后续按最大余数补齐
     for name in sorted(groups):
         group_size = len(groups[name])
         exact = max_unique * group_size / total
@@ -617,6 +679,7 @@ def budget_guard(qnames: list[str], max_unique: int, seed: int,
         remainders.append((exact - int(exact), name))
 
     remaining = max_unique - sum(allocations.values())
+    # 第一轮按余数从大到小补名额，余数相同按层名排序以保证确定性
     for _, name in sorted(remainders, key=lambda item: (-item[0], item[1])):
         if remaining <= 0:
             break
@@ -624,6 +687,7 @@ def budget_guard(qnames: list[str], max_unique: int, seed: int,
             allocations[name] += 1
             remaining -= 1
     for name in sorted(groups):
+        # 第二轮把仍未分配完的名额按层序补入有余量的组
         if remaining <= 0:
             break
         spare = len(groups[name]) - allocations[name]
@@ -633,6 +697,7 @@ def budget_guard(qnames: list[str], max_unique: int, seed: int,
 
     selected_qnames: list[str] = []
     for name in sorted(groups):
+        # 在每层内用同一随机源抽取分配到的数量，最后统一排序
         if allocations[name]:
             selected_qnames.extend(rng.sample(groups[name], allocations[name]))
     selected_qnames.sort()
@@ -652,6 +717,7 @@ def budget_guard(qnames: list[str], max_unique: int, seed: int,
 
 def run_judging(features_path: str | Path, mode: str,
                 config_path: str | Path | None = None) -> dict:
+    # 批量复核流程：读配置与特征表，筛出可复核样本并按预算抽样，逐域名判定后汇总统计
     project_root = Path(__file__).resolve().parent.parent
     config_file = Path(config_path) if config_path is not None else project_root / "config.json"
     config = json.loads(config_file.read_text(encoding="utf-8"))
@@ -663,6 +729,7 @@ def run_judging(features_path: str | Path, mode: str,
     selected = select_judgeable(features_df)
 
     strata = {
+        # 分层键：有 algorithm 时用 source|algorithm，否则退化为 source
         row.qname: (
             f"{row.source}|{row.algorithm}"
             if pd.notna(row.algorithm) and str(row.algorithm)
@@ -671,12 +738,14 @@ def run_judging(features_path: str | Path, mode: str,
         for row in selected.itertuples(index=False)
     }
     max_unique = int(config.get("budget", {}).get("max_unique_requests", 800))
+    # 超预算时按固定 seed 抽样，并把最终选中的样本作为实际复核范围
     chosen, rule = budget_guard(
         selected["qname"].tolist(), max_unique, int(config.get("seed", 0)), strata
     )
     selected = selected[selected["qname"].isin(chosen)].copy()
 
     template_path = project_root / "prompts" / "dga_judge_prompt.md"
+    # 模板正文与其哈希同时载入，哈希会进入缓存键
     template = load_template(template_path)
     template_hash_value = template_hash(template_path)
     cfg = {
@@ -692,11 +761,13 @@ def run_judging(features_path: str | Path, mode: str,
     }
 
     results = []
+    # 串行逐个域名复核，注册域标签取自域名解析结果
     for qname in selected["qname"]:
         registrable_label = extract_label(qname)[0]
         results.append(judge_domain(qname, registrable_label, mode, cfg))
 
     requested = len(results)
+    # 命中缓存数、各判定值计数与失败原因计数用于评估缓存覆盖率与调用健康度
     cache_hits = sum(1 for result in results if result.cache_hit)
     verdict_counts = {verdict: 0 for verdict in VERDICTS}
     fail_reason_counts: dict[str, int] = {}
@@ -707,6 +778,7 @@ def run_judging(features_path: str | Path, mode: str,
                 fail_reason_counts.get(result.fail_reason, 0) + 1
             )
     covered = sum(1 for result in results if result.fail_reason is None)
+    # 无失败原因的样本视为被有效覆盖，用于报告离线覆盖率
     return {
         "mode": mode,
         "requested_unique": requested,
@@ -729,6 +801,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     if args.smoke:
+        # 冒烟模式只发一次最小请求，成功与否以退出码体现
         result = run_smoke_test()
         if result["success"]:
             print("GLM smoke succeeded")
@@ -736,10 +809,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"GLM smoke failed: {result['error_category']}")
         return 1
 
+    # 默认离线，只有显式指定 --online 才允许发请求
     mode = "online" if args.online else "offline"
     try:
         summary = run_judging(args.features, mode)
     except (OSError, ValueError, KeyError, TypeError) as exc:
+        # 预期异常只输出错误类型名并返回非零码，不打印堆栈
         print(json.dumps({"error": type(exc).__name__}, ensure_ascii=False))
         return 1
     print(json.dumps(summary, ensure_ascii=False, sort_keys=True))

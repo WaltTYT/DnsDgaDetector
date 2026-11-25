@@ -12,6 +12,7 @@ PROMPT_PATH = PROJECT_ROOT / "prompts" / "dga_judge_prompt.md"
 ENDPOINT = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 
 
+# 构造一行特征记录，默认正常来源；E/B/R 由调用方指定
 def _row(qname, label, e, b, r, source="normal_list", algorithm=None,
          split="test", client_ip="10.0.0.1", window_start="2026-11-01T00:00:00Z"):
     return {
@@ -34,10 +35,12 @@ def _row(qname, label, e, b, r, source="normal_list", algorithm=None,
     }
 
 
+# 按 FEATURES_COLUMNS 契约列顺序构造 DataFrame
 def _features(rows):
     return pd.DataFrame(rows, columns=FEATURES_COLUMNS)
 
 
+# 读取真实提示模板生成配置：模型、端点、超时、重试、生成参数与临时缓存路径
 def _cfg(tmp_path, max_retries=2, cache_name="cache.jsonl"):
     return {
         "model": "GLM-4-Flash",
@@ -52,6 +55,7 @@ def _cfg(tmp_path, max_retries=2, cache_name="cache.jsonl"):
     }
 
 
+# 构造一条合法缓存条目（HTTP 200、累计尝试 10 次）
 def _entry(qname, registrable_label, cfg, verdict="normal", reason="ok"):
     return llm_judge._cache_entry(
         qname, registrable_label, cfg["model"],
@@ -63,6 +67,7 @@ def _entry(qname, registrable_label, cfg, verdict="normal", reason="ok"):
 
 
 def test_template_hash_matches_header():
+    # 代码计算的模板哈希与提示文件头部记录的 template_hash 一致（冻结校验）
     recorded = __import__("re").search(
         r"(?m)^- template_hash: (\S+)$",
         PROMPT_PATH.read_text(encoding="utf-8"),
@@ -71,6 +76,7 @@ def test_template_hash_matches_header():
 
 
 def test_select_judgeable_filters_and_dedupes():
+    # 仅 E=1 且 B=0 的行进入复核，重复 qname 去重后只剩 q1.example
     df = _features([
         _row("q1.example", 1, 1, 0, 1, source="manual_dga", algorithm="word_digit"),
         _row("q1.example", 1, 1, 0, 1, source="manual_dga", algorithm="word_digit"),
@@ -82,12 +88,14 @@ def test_select_judgeable_filters_and_dedupes():
 
 
 def test_select_judgeable_rejects_bad_columns():
+    # 缺少契约列时 select_judgeable 抛 ValueError
     df = _features([_row("q1.example", 1, 1, 0, 1)]).drop(columns=["llm_fail_reason"])
     with pytest.raises(ValueError, match="features columns mismatch"):
         llm_judge.select_judgeable(df)
 
 
 def test_build_prompt_renders_without_leakage():
+    # 渲染后无残留占位符，且不出现 source/algorithm/split 元数据
     template = llm_judge.load_template(PROMPT_PATH)
     prompt = llm_judge.build_prompt("xkqzmtvp8f.net", "xkqzmtvp8f", template)
     assert "xkqzmtvp8f.net" in prompt
@@ -98,6 +106,7 @@ def test_build_prompt_renders_without_leakage():
 
 
 def test_build_prompt_rejects_unknown_variable_and_metadata():
+    # 未知变量、元数据 token 与换行注入都被 build_prompt 拒绝
     with pytest.raises(ValueError, match="unknown template variables"):
         llm_judge.build_prompt("a.com", "a", "{{qname}} {{unknown}}")
     with pytest.raises(ValueError, match="metadata token leaked"):
@@ -107,6 +116,7 @@ def test_build_prompt_rejects_unknown_variable_and_metadata():
 
 
 def test_parse_verdict_accepts_fence_and_truncates():
+    # 支持 ```json 围栏解析，reason 超长截断为 120 字符
     verdict, reason = llm_judge.parse_verdict(
         '```json\n{"verdict": "DGA", "reason": "' + "x" * 130 + '"}\n```'
     )
@@ -117,6 +127,7 @@ def test_parse_verdict_accepts_fence_and_truncates():
     )
 
 
+# 非法输出用例：非 JSON、缺 reason、多余字段、枚举越界、空 reason
 @pytest.mark.parametrize("raw", [
     "not json",
     '{"verdict":"DGA"}',
@@ -125,11 +136,13 @@ def test_parse_verdict_accepts_fence_and_truncates():
     '{"verdict":"DGA","reason":""}',
 ])
 def test_parse_verdict_rejects_invalid(raw):
+    # 五类非法输出都应抛 ValueError
     with pytest.raises(ValueError):
         llm_judge.parse_verdict(raw)
 
 
 def test_cache_key_is_deterministic_and_param_sensitive():
+    # 缓存键可复现，且对 temperature 等生成参数敏感
     base = dict(qname="a.com", registrable_label="a", model="GLM-4-Flash",
                 template_hash_value="abc", params={"temperature": 0, "max_tokens": 32},
                 endpoint=ENDPOINT)
@@ -139,6 +152,7 @@ def test_cache_key_is_deterministic_and_param_sensitive():
 
 
 def test_cache_roundtrip_and_no_duplicate(tmp_path):
+    # 同一缓存键重复写入只保留一行，读取后可还原 verdict
     cfg = _cfg(tmp_path)
     entry = _entry("a.com", "a", cfg)
     llm_judge.append_cache(entry, cfg["cache_path"])
@@ -151,12 +165,14 @@ def test_cache_roundtrip_and_no_duplicate(tmp_path):
 
 
 def test_append_cache_rejects_bad_fields(tmp_path):
+    # 字段不完整的缓存条目拒绝写入
     bad = {"cache_key": "k"}
     with pytest.raises(ValueError, match="fields mismatch"):
         llm_judge.append_cache(bad, tmp_path / "cache.jsonl")
 
 
 def test_load_cache_rejects_duplicate_keys(tmp_path):
+    # 缓存文件出现重复 cache_key 时报错
     cfg = _cfg(tmp_path)
     entry = _entry("a.com", "a", cfg)
     path = cfg["cache_path"]
@@ -169,6 +185,7 @@ def test_load_cache_rejects_duplicate_keys(tmp_path):
 
 
 def test_judge_domain_offline_never_calls_api(tmp_path, monkeypatch):
+    # 离线模式绝不发起 HTTP，无缓存时返回 uncertain/no_cache
     cfg = _cfg(tmp_path)
     monkeypatch.setattr(
         llm_judge.requests, "post",
@@ -181,6 +198,7 @@ def test_judge_domain_offline_never_calls_api(tmp_path, monkeypatch):
 
 
 def test_judge_domain_online_retries_and_caches(tmp_path, monkeypatch):
+    # 前两次超时第三次成功：共调用 3 次，退避 1s/2s，缓存记录尝试次数与结果
     cfg = _cfg(tmp_path, max_retries=2)
     calls = []
     sleeps = []
@@ -205,6 +223,7 @@ def test_judge_domain_online_retries_and_caches(tmp_path, monkeypatch):
 
 
 def test_judge_domain_format_error_is_not_retried(tmp_path, monkeypatch):
+    # 返回非 JSON 时记 format_error、只调 1 次且不写缓存
     cfg = _cfg(tmp_path, max_retries=3)
     calls = []
 
@@ -220,6 +239,7 @@ def test_judge_domain_format_error_is_not_retried(tmp_path, monkeypatch):
 
 
 def test_judge_domain_auth_error_is_not_retried(tmp_path, monkeypatch):
+    # 鉴权错误不可重试，只调 1 次即返回 auth_error
     cfg = _cfg(tmp_path, max_retries=3)
     calls = []
 
@@ -235,6 +255,7 @@ def test_judge_domain_auth_error_is_not_retried(tmp_path, monkeypatch):
 
 @pytest.mark.parametrize("category", ["timeout", "rate_limit", "server_error"])
 def test_judge_domain_retryable_failure_exhausts_budget(tmp_path, monkeypatch, category):
+    # timeout/rate_limit/server_error 属可重试错误：重试到 3 次并退避 1s/2s 后仍失败
     cfg = _cfg(tmp_path, max_retries=2)
     calls = []
     sleeps = []
@@ -253,6 +274,7 @@ def test_judge_domain_retryable_failure_exhausts_budget(tmp_path, monkeypatch, c
 
 
 def test_http_status_category_mapping(tmp_path, monkeypatch):
+    # HTTP 状态码映射错误类别：401/403→auth_error、404→model_or_endpoint_error、429→rate_limit、5xx→server_error、400→http_error
     cfg = _cfg(tmp_path)
 
     class FakeResponse:
@@ -279,6 +301,7 @@ def test_http_status_category_mapping(tmp_path, monkeypatch):
 
 
 def test_judge_domain_cache_hit_skips_api(tmp_path, monkeypatch):
+    # 命中缓存时直接返回，不调用 API
     cfg = _cfg(tmp_path)
     llm_judge.append_cache(_entry("a.com", "a", cfg, verdict="normal"), cfg["cache_path"])
     monkeypatch.setattr(
@@ -291,12 +314,14 @@ def test_judge_domain_cache_hit_skips_api(tmp_path, monkeypatch):
 
 
 def test_budget_guard_all_when_under_limit():
+    # 未超预算时全量选入，不触发抽样
     selected, rule = llm_judge.budget_guard(["a", "b", "c"], 800, 1)
     assert selected == ["a", "b", "c"]
     assert rule["applied"] is False
 
 
 def test_budget_guard_stratified_is_deterministic():
+    # 超预算时按 source/algorithm 分层抽样，结果可复现且总数等于预算
     qnames = [f"q{i:02d}" for i in range(10)]
     strata = {q: ("A" if i < 5 else "B") for i, q in enumerate(qnames)}
     first, rule = llm_judge.budget_guard(qnames, 4, 7, strata)
@@ -309,6 +334,7 @@ def test_budget_guard_stratified_is_deterministic():
 
 
 def test_run_judging_offline_summary(tmp_path, monkeypatch):
+    # 离线汇总请求数、结论/失败原因计数、覆盖率与预算字段
     features_path = tmp_path / "features.csv"
     _features([
         _row("q1.example", 1, 1, 0, 1, source="manual_dga", algorithm="word_digit"),

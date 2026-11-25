@@ -17,12 +17,15 @@ from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 import sys
 
+# 公共后缀解析库：只使用外部传入的本地 PSL 快照，不联网更新
 import tldextract
 
+# 复用 DGA 生成模块的算法枚举、记录结构与生成入口
 from .gen_dga import ALGORITHMS, DgaRecord
 from .gen_dga import generate_dga_domains
 
 
+# 原始来源行：对应 data/raw 中的一行，域名尚未规范化
 @dataclass
 class SourceRow:
     raw_domain: str
@@ -35,6 +38,7 @@ class SourceRow:
     family: str | None = None
 
 
+# 规范化后的来源行：domain 已通过 IDNA、长度与字符集校验
 @dataclass
 class NormalizedSourceRow:
     domain: str
@@ -47,6 +51,7 @@ class NormalizedSourceRow:
     family: str | None = None
 
 
+# 被剔除的行：保留出处与剔除原因，供运行汇总追溯
 @dataclass
 class ExcludedRow:
     source_id: str
@@ -56,6 +61,7 @@ class ExcludedRow:
     reason: str
 
 
+# 合并后的域名记录：同一域名的所有来源行聚成一条，附带 eTLD+1 与划分结果
 @dataclass
 class DomainRecord:
     domain: str
@@ -67,6 +73,7 @@ class DomainRecord:
     sources: tuple[NormalizedSourceRow, ...]
 
 
+# 单个 DGA 算法的诊断信息：样本数、唯一域名数、碰撞重试次数与示例域名
 @dataclass
 class AlgorithmDiagnostics:
     count: int
@@ -75,6 +82,7 @@ class AlgorithmDiagnostics:
     example_domains: list[str]
 
 
+# 运行汇总：各来源计数、剔除明细、划分/标签/算法统计以及输入文件哈希
 @dataclass
 class RunSummary:
     source_counts: dict[str, dict[str, int]]
@@ -92,6 +100,7 @@ class RunSummary:
 
 
 def normalize_domain(value):
+    # 域名规范化：去首尾空白与末尾根点后做 IDNA 转 ASCII 并小写，再校验 IP、总长度与逐标签字符集
     if not isinstance(value, str):
         raise ValueError("domain must be a string")
 
@@ -134,6 +143,7 @@ def normalize_domain(value):
 
 
 def create_extractor(psl_path):
+    # 创建离线 tldextract 解析器：只加载本地 PSL 快照、关闭快照回退、包含私有后缀，并用 example.com 自检 com 规则可用
     path = Path(psl_path)
     if not path.is_file():
         raise ValueError(f"PSL file does not exist: {path}")
@@ -159,7 +169,9 @@ def create_extractor(psl_path):
 
 
 def load_source_rows(raw_dir):
+    # 遍历 data/raw 下三类来源文件并解析为 SourceRow：正常榜单与难负样本按行读 txt，公开 DGA 读 domain,family 两列 CSV
     root = Path(raw_dir).resolve()
+    # 每项为 (类别, 文件名通配模式, 文件名前缀)，前缀之后的部分用作 source_id
     patterns = (
         ("normal_list", "normal_list__*.txt", "normal_list__"),
         ("hard_negative", "hard_negative__*.txt", "hard_negative__"),
@@ -183,6 +195,7 @@ def load_source_rows(raw_dir):
             source_id = path.stem[len(prefix):]
             source_path = path.resolve()
             if category in ("normal_list", "hard_negative"):
+                # 正常榜单与难负样本：每行一个域名，label 恒为 0，无算法与 family
                 with path.open("r", encoding="utf-8", newline="") as stream:
                     for line_number, line in enumerate(stream, start=1):
                         rows.append(
@@ -200,6 +213,7 @@ def load_source_rows(raw_dir):
 
             with path.open("r", encoding="utf-8", newline="") as stream:
                 reader = csv.reader(stream, strict=True)
+                # 公开 DGA CSV 必须严格是 domain,family 两列，family 不能为空也不能是 legit
                 try:
                     header = next(reader)
                 except StopIteration:
@@ -254,6 +268,7 @@ def load_source_rows(raw_dir):
 
 
 def normalize_source_rows(rows):
+    # 逐行规范化域名，成功的转成 NormalizedSourceRow，失败的转成带原因的 ExcludedRow，返回 (有效行, 剔除行)
     valid_rows = []
     excluded_rows = []
     for row in rows:
@@ -286,6 +301,7 @@ def normalize_source_rows(rows):
 
 
 def select_public_dga(rows, limit, master_seed):
+    # 公开 DGA 抽样：先校验同一域名不跨 family，再按 family 分层等比抽样到 limit 条，并用 master_seed 保证结果可复现
     if isinstance(limit, bool) or not isinstance(limit, int) or limit <= 0:
         raise ValueError("limit must be a positive integer")
     if isinstance(master_seed, bool) or not isinstance(master_seed, int):
@@ -299,6 +315,7 @@ def select_public_dga(rows, limit, master_seed):
             row.family, []
         ).append(row)
 
+    # 标签冲突检查：同一域名出现在多个 DGA family 时报错，并列出全部出处
     for domain in sorted(grouped_by_domain):
         families = grouped_by_domain[domain]
         if len(families) > 1:
@@ -313,6 +330,7 @@ def select_public_dga(rows, limit, master_seed):
                 + "; ".join(provenance)
             )
 
+    # 每个域名在各自 family 内只保留出处排序最小的一行，作为唯一记录
     unique_rows = []
     for families in grouped_by_domain.values():
         for family_rows in families.values():
@@ -326,6 +344,7 @@ def select_public_dga(rows, limit, master_seed):
         selected = unique_rows
     else:
         total = len(unique_rows)
+        # 最大余数法：先按比例取整分配名额，剩余名额按余数从大到小（同余数按 family 名）依次补齐
         quotas = {}
         remainders = {}
         for family, family_rows in by_family.items():
@@ -349,6 +368,7 @@ def select_public_dga(rows, limit, master_seed):
 
 
 def _provenance_key(row):
+    # 出处排序键：由路径、行号、来源 ID、域名等组成，保证同一批数据下排序结果稳定
     return (
         str(row.source_path),
         row.line_number,
@@ -361,6 +381,7 @@ def _provenance_key(row):
 
 
 def _sampling_key(master_seed):
+    # 返回抽样排序函数：对 master_seed|public_dga|family|domain 求 SHA-256，固定种子下抽样顺序可复现
     def key(row):
         digest = hashlib.sha256(
             f"{master_seed}|public_dga|{row.family}|{row.domain}".encode(
@@ -372,10 +393,13 @@ def _sampling_key(master_seed):
     return key
 
 
+# 数据集划分标签
 _SPLITS = ("train", "val", "test")
+# 目标划分比例：训练 60%、验证 20%、测试 20%
 _SPLIT_RATIOS = {"train": 0.6, "val": 0.2, "test": 0.2}
 
 
+# 校验入参必须是序列（排除 str/bytes），返回原值便于链式使用
 def _require_sequence(value, name):
     if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
         raise ValueError(f"{name} must be a sequence")
@@ -383,10 +407,12 @@ def _require_sequence(value, name):
 
 
 def _source_location(row):
+    # 生成可读出处串，形如 source ID 'xxx' at 路径:行号，用于报错定位
     return f"source ID {row.source_id!r} at {row.source_path}:{row.line_number}"
 
 
 def _validate_normalized_source_row(row):
+    # 校验单条规范化来源行：类型、source_id、路径、行号、域名已规范化、标签取值，以及各来源的语义一致性
     if not isinstance(row, NormalizedSourceRow):
         raise ValueError("rows must contain NormalizedSourceRow values")
     if not isinstance(row.source_id, str) or not row.source_id.strip():
@@ -454,6 +480,7 @@ def _validate_normalized_source_row(row):
 
 
 def _validate_domain_record(record):
+    # 校验单条域名记录：域名规范化、标签取值、来源/标签/算法语义、eTLD+1 与 split 字段类型，以及来源行类型
     if not isinstance(record, DomainRecord):
         raise ValueError("records must contain DomainRecord values")
     try:
@@ -490,6 +517,7 @@ def _validate_domain_record(record):
 
 
 def merge_and_validate(rows: Sequence[NormalizedSourceRow]) -> list[DomainRecord]:
+    # 按域名合并来源行并做冲突检查：同一域名语义必须一致，公开 DGA 只能属于一个 family 且必须有 family
     rows = _require_sequence(rows, "rows")
     grouped = {}
     for row in rows:
@@ -534,6 +562,7 @@ def merge_and_validate(rows: Sequence[NormalizedSourceRow]) -> list[DomainRecord
             )
 
         first = domain_rows[0]
+        # 同一域名同时出现在正常榜单与难负样本时，合并记录的来源标记为 hard_negative
         source = (
             "hard_negative"
             if any(row.source == "hard_negative" for row in domain_rows)
@@ -554,6 +583,7 @@ def merge_and_validate(rows: Sequence[NormalizedSourceRow]) -> list[DomainRecord
 
 
 def manual_domain_records(records: Sequence[DgaRecord]) -> list[DomainRecord]:
+    # 把合成 DGA 记录转换为域名记录：校验算法/种子/参数类型，域名去重，统一标记 label=1、source=manual_dga
     records = _require_sequence(records, "records")
     domain_records = []
     seen_domains = set()
@@ -587,6 +617,7 @@ def manual_domain_records(records: Sequence[DgaRecord]) -> list[DomainRecord]:
 def assign_splits(
     records: Sequence[DomainRecord], extractor: tldextract.TLDExtract, master_seed: int
 ) -> list[DomainRecord]:
+    # 以 eTLD+1 为最小分组单位划分 train/val/test：同组不拆开，按目标比例与分层占比贪心分配，并校验同一 eTLD+1 只属于一个划分
     records = _require_sequence(records, "records")
     if not callable(extractor):
         raise ValueError("extractor must be callable")
@@ -595,6 +626,7 @@ def assign_splits(
 
     normalized_records = []
     seen_domains = set()
+    # 先规范化并去重，再按 eTLD+1 分组，使同一注册域名下的子域绑定到同一划分
     groups = {}
     for record in records:
         domain = _validate_domain_record(record)
@@ -617,6 +649,7 @@ def assign_splits(
     if not normalized_records:
         return []
 
+    # 分层维度为 (label, source, algorithm)，用于同时逼近各划分内的分层占比
     strata = sorted(
         {
             (record.label, record.source, record.algorithm)
@@ -633,6 +666,7 @@ def assign_splits(
     }
     group_splits = {}
 
+    # 大组优先处理，同规模组用 种子+eTLD+1 的 SHA-256 打乱，降低划分对输入顺序的依赖
     ordered_groups = sorted(
         groups.items(),
         key=lambda item: (
@@ -647,6 +681,7 @@ def assign_splits(
         group_by_stratum = Counter(
             (record.label, record.source, record.algorithm) for record in group
         )
+        # 对每个候选划分计算损失：总体样本偏差与各分层偏差的相对平方误差之和，取损失最小者（同分按 train/val/test 顺序）
         candidate_losses = []
         for candidate in _SPLITS:
             loss = 0.0
@@ -685,12 +720,14 @@ def assign_splits(
     ]
     assigned.sort(key=lambda record: (record.etld_plus_one, record.domain))
 
+    # 断言校验：同一 eTLD+1 组不能被拆到多个划分
     splits_by_etld = {}
     for record in assigned:
         splits_by_etld.setdefault(record.etld_plus_one, set()).add(record.split)
     if any(len(splits) != 1 for splits in splits_by_etld.values()):
         raise ValueError("an eTLD+1 group was assigned to multiple splits")
 
+    # 合成 DGA 覆盖检查：每种算法都必须出现在 train/val/test 三个划分中
     if any(record.source == "manual_dga" for record in assigned):
         missing_coverage = {
             algorithm: [
@@ -728,6 +765,7 @@ def assign_splits(
 
 
 def _deduplicated_source_counts(rows):
+    # 统计各来源文件中被去重的行数：同一 (域名, 标签, 来源, 算法, family) 只保留出处最小的一行，其余计入对应 source_id
     grouped = {}
     for row in rows:
         family = row.family if row.source == "public_dga" else None
@@ -743,6 +781,7 @@ def _deduplicated_source_counts(rows):
 
 
 def _public_dga_family_summary(rows, selected_rows, limit):
+    # 汇总公开 DGA 各 family 的可用数、配额与实际选中数，配额算法与 select_public_dga 保持一致
     unique_by_domain = {}
     for row in rows:
         existing = unique_by_domain.get(row.domain)
@@ -778,10 +817,12 @@ def _public_dga_family_summary(rows, selected_rows, limit):
 
 
 def _sha256_file(path):
+    # 计算文件内容的 SHA-256，用于运行汇总记录输入文件指纹
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 def _csv_bytes(fieldnames, rows):
+    # 在内存中生成 CSV 字节：统一 LF 换行、多余字段直接报错，供原子写出使用
     stream = io.StringIO(newline="")
     writer = csv.DictWriter(
         stream,
@@ -795,6 +836,7 @@ def _csv_bytes(fieldnames, rows):
 
 
 def _write_output_bundle(outputs):
+    # 原子写出多个输出文件：先把全部内容写入同目录临时文件，再备份旧文件后替换；任一步失败则回滚临时文件与备份
     temporary_paths = {}
     backup_paths = {}
     existing_targets = set()
@@ -805,6 +847,7 @@ def _write_output_bundle(outputs):
             for target in outputs
             if target.exists() or target.is_symlink()
         }
+        # 第一步：写入临时文件，此时不触碰任何已有产物
         for target, contents in outputs.items():
             with tempfile.NamedTemporaryFile(
                 mode="wb",
@@ -819,6 +862,7 @@ def _write_output_bundle(outputs):
         for target in outputs:
             if target not in existing_targets:
                 continue
+            # 第二步：把已有文件改名为备份，供失败时恢复
             with tempfile.NamedTemporaryFile(
                 mode="wb",
                 dir=target.parent,
@@ -831,9 +875,11 @@ def _write_output_bundle(outputs):
             backed_up_targets.add(target)
 
         for target, temporary_path in temporary_paths.items():
+            # 第三步：用临时文件替换目标文件
             temporary_path.replace(target)
 
     except Exception as exc:
+        # 失败时回滚：恢复已备份的旧文件，删除新建文件与残留临时文件
         rollback_errors = []
         for target in outputs:
             try:
@@ -879,6 +925,7 @@ def _write_output_bundle(outputs):
         raise
 
     cleanup_errors = []
+    # 成功替换后清理备份文件；仅清理失败时抛出 OSError，但不影响已写入的产物
     for backup_path in backup_paths.values():
         try:
             backup_path.unlink(missing_ok=True)
@@ -892,8 +939,10 @@ def _write_output_bundle(outputs):
 
 
 def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
+    # D2 主流程：读配置与 PSL，读取/规范化/合并来源数据，抽样公开 DGA，生成合成样本，划分数据集，汇总统计并原子写出三个产物
     root = Path(project_root).resolve()
     configuration_path = Path(config_path)
+    # 相对路径的配置文件以项目根为基准解析
     if not configuration_path.is_absolute():
         configuration_path = root / configuration_path
     configuration_path = configuration_path.resolve()
@@ -907,6 +956,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
     if not isinstance(config, dict):
         raise ValueError("configuration must be a JSON object")
     seed = config.get("seed")
+    # 种子固定为 20261101，保证抽样、生成与划分结果可复现
     if type(seed) is not int or seed != 20261101:
         raise ValueError("config seed must be the integer 20261101")
     paths = config.get("paths")
@@ -917,11 +967,13 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
         raise ValueError("configuration paths.psl_snapshot must be a non-empty path")
 
     psl_path = Path(psl_value)
+    # 相对路径的 PSL 快照同样以项目根为基准
     if not psl_path.is_absolute():
         psl_path = root / psl_path
     psl_path = psl_path.resolve()
     extractor = create_extractor(psl_path)
 
+    # 固定从项目下 data/raw 读取原始数据
     raw_dir = root / "data" / "raw"
     source_rows = load_source_rows(raw_dir)
     normalized_rows, excluded_rows = normalize_source_rows(source_rows)
@@ -932,6 +984,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
         (row.source_id, row.source_path.resolve(), row.line_number): row.raw_domain
         for row in source_rows
     }
+    # 逐个域名做 PSL 查询：解析不出 eTLD+1 的记为剔除项，其余进入候选集
     eligible_rows = []
     for row in normalized_rows:
         try:
@@ -958,6 +1011,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
             eligible_rows.append(row)
 
     eligible_domains = {row.domain for row in eligible_rows}
+    # 公开 DGA 只保留按 family 抽样命中的 300 条，正常榜单与难负样本全部保留
     public_rows = [row for row in eligible_rows if row.source == "public_dga"]
     selected_public_rows = select_public_dga(public_rows, limit=300, master_seed=seed)
     selected_public_domains = {row.domain for row in selected_public_rows}
@@ -970,6 +1024,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
             or record.domain in selected_public_domains
         )
     ]
+    # 统计同时出现在正常榜单中的难负样本数量，这些记录的来源会被提升为 hard_negative
     hard_negative_promoted = sum(
         1
         for record in output_records
@@ -977,6 +1032,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
         and any(row.source == "normal_list" for row in record.sources)
     )
 
+    # 合成 DGA 需避开全部真实域名（榜单、难负样本、抽样命中的公开 DGA），避免标签冲突
     reserved_domains = {
         record.domain
         for record in merged_records
@@ -990,16 +1046,19 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
         count_per_algorithm=100,
     )
     manual_records = manual_domain_records(generated_records)
+    # 真实来源记录与合成记录一起划分，保证同一 eTLD+1 不跨划分
     assigned_records = assign_splits(
         [*output_records, *manual_records], extractor=extractor, master_seed=seed
     )
 
     data_dir = root / "data"
+    # 正常域名列表：只取真实来源中的正常榜单与难负样本
     normal_domains = sorted(
         record.domain
         for record in output_records
         if record.source in ("normal_list", "hard_negative")
     )
+    # 合成 DGA 明细按 算法顺序、种子序号 排序，params 序列化为紧凑 JSON 便于复现
     dga_rows = [
         {
             "domain": record.domain,
@@ -1029,8 +1088,10 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
             "algorithm": record.algorithm,
             "split": record.split,
         }
+        # 划分表按域名排序，便于人工核对与版本比对
         for record in sorted(assigned_records, key=lambda record: record.domain)
     ]
+    # 三个产物先在内存组装，随后由 _write_output_bundle 原子落盘
     output_bundle = {
         data_dir / "normal_domains.txt": "".join(
             f"{domain}\n" for domain in normal_domains
@@ -1043,6 +1104,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
         ),
     }
 
+    # 汇总各来源文件的行数：原始、有效、剔除与去重
     raw_counts = Counter(row.source_id for row in source_rows)
     valid_counts = Counter(row.source_id for row in eligible_rows)
     excluded_counts = Counter(row.source_id for row in excluded_rows)
@@ -1057,6 +1119,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
         for source_id in sorted(raw_counts)
     }
 
+    # 统计各划分数量与实际比例，空集时比例记 0
     split_counts = Counter(record.split for record in assigned_records)
     split_counts = {split: split_counts[split] for split in _SPLITS}
     total_records = len(assigned_records)
@@ -1070,6 +1133,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
     }
     algorithm_diagnostics = {}
     collision_retries = 0
+    # 逐算法统计：重试次数 = 最大种子序号 - 实际产出条数（碰撞时序号会跳号）
     for algorithm in ALGORITHMS:
         algorithm_records = sorted(
             (record for record in generated_records if record.algorithm == algorithm),
@@ -1093,6 +1157,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
         for algorithm, diagnostics in algorithm_diagnostics.items()
     }
 
+    # 记录全部输入文件（来源文件、PSL、词根表、配置）的 SHA-256；路径尽量转为相对项目根的 POSIX 形式
     input_paths = {row.source_path for row in source_rows}
     input_paths.update({psl_path, word_roots_path.resolve(), configuration_path})
     input_hashes = {}
@@ -1103,6 +1168,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
             key = path.name
         input_hashes[key] = _sha256_file(path)
 
+    # 剔除明细转为可 JSON 序列化的字典，并按 来源 ID、路径、行号 排序
     exclusion_details = []
     for row in excluded_rows:
         try:
@@ -1122,6 +1188,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
         key=lambda row: (row["source_id"], row["source_path"], row["line_number"])
     )
 
+    # 先原子写出产物再返回汇总，保证调用方看到的统计与磁盘内容一致
     summary = RunSummary(
         source_counts=source_counts,
         excluded_rows=exclusion_details,
@@ -1143,6 +1210,7 @@ def run_data_preparation(project_root: Path, config_path: Path) -> RunSummary:
 
 
 def main() -> int:
+    # 命令行入口：以当前工作目录为项目根、根目录 config.json 为配置执行 D2 流程，成功时打印汇总 JSON 并返回 0，失败返回 1
     project_root = Path.cwd().resolve()
     config_path = project_root / "config.json"
     try:

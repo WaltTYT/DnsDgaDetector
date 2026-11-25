@@ -38,6 +38,7 @@ from rule_engine import (
 )
 
 
+# 香农熵基准用例：(字符串, 期望熵)；空串期望 NaN
 ENTROPY_CASES = [
     ("hello", 1.9219),
     ("aaa", 0.0),
@@ -52,6 +53,7 @@ ENTROPY_CASES = [
 class TestShannonEntropy:
     @pytest.mark.parametrize("s,expected", ENTROPY_CASES)
     def test_entropy_values(self, s, expected):
+        # 逐例校验熵值，容差 0.001；空串必须返回 NaN
         result = shannon_entropy(s)
         if math.isnan(expected):
             assert math.isnan(result), f"{s!r}: expected NaN, got {result}"
@@ -59,14 +61,17 @@ class TestShannonEntropy:
             assert abs(result - expected) < 0.001, f"{s!r}: expected {expected}, got {result}"
 
     def test_equal_chars_max_entropy(self):
+        # 10 个互异字符达到最大熵 log2(10)
         s = "abcdefghij"
         h = shannon_entropy(s)
         assert abs(h - math.log2(10)) < 0.001
 
     def test_empty_string(self):
+        # 空字符串熵为 NaN
         assert math.isnan(shannon_entropy(""))
 
 
+# 可注册标签抽取用例：(qname, 期望标签)，含多级后缀与单标签域名
 PSL_CASES = [
     ("mail.cctv.com", "cctv"),
     ("sub.example.co.uk", "example"),
@@ -80,31 +85,37 @@ PSL_CASES = [
 class TestPslExtraction:
     @pytest.mark.parametrize("qname,expected_label", PSL_CASES)
     def test_extract_label(self, qname, expected_label):
+        # 按固定 PSL 快照取可注册标签，状态均为 ok
         label, status = extract_label(qname)
         assert label == expected_label, f"{qname!r}: expected {expected_label}, got {label}"
         assert status == "ok"
 
     def test_ip_literal(self):
+        # IP 字面量不作为域名处理，返回空标签与 ip_literal
         label, status = extract_label("192.168.1.1")
         assert label == ""
         assert status == "ip_literal"
 
     def test_punycode(self):
+        # punycode 域名（xn-- 前缀）被拒绝，状态 punycode
         label, status = extract_label("xn--bcher-kva.ch")
         assert label == ""
         assert status == "punycode"
 
     def test_empty(self):
+        # 空 qname 返回空标签与 empty 状态
         label, status = extract_label("")
         assert label == ""
         assert status == "empty"
 
     def test_no_domain(self):
+        # 只有根点 "." 时没有可注册域，状态 no_domain
         label, status = extract_label(".")
         assert label == ""
         assert status == "no_domain"
 
     def test_tldextract_offline(self, monkeypatch):
+        # 阻断 socket/urlopen 后仍可解析，证明使用本地 PSL 快照且 tldextract 单例被复用
         import socket
         import urllib.request
 
@@ -131,6 +142,7 @@ class TestPslExtraction:
         assert _make_tldextract() is ext
 
     def test_private_suffix_enabled(self):
+        # 启用私有后缀：foo.github.io 的可注册标签是 foo
         label, status = extract_label("foo.github.io")
         assert label == "foo"
         assert status == "ok"
@@ -138,18 +150,23 @@ class TestPslExtraction:
 
 class TestQnameNormalization:
     def test_lowercase(self):
+        # 统一转小写
         assert normalize_qname("WWW.Example.COM") == "www.example.com"
 
     def test_trailing_dot(self):
+        # 去掉末尾根点
         assert normalize_qname("www.example.com.") == "www.example.com"
 
     def test_whitespace(self):
+        # 去掉首尾空白
         assert normalize_qname("  www.example.com  ") == "www.example.com"
 
     def test_empty(self):
+        # 空串归一化后仍为空串
         assert normalize_qname("") == ""
 
 
+# 窗口对齐用例：时间戳应向下取整到 UTC 整分钟
 WINDOW_CASES = [
     ("2026-11-01T12:05:45.123Z", "2026-11-01T12:05:00Z"),
     ("2026-11-01T12:05:59.999Z", "2026-11-01T12:05:00Z"),
@@ -163,10 +180,12 @@ WINDOW_CASES = [
 class TestWindowAlignment:
     @pytest.mark.parametrize("ts,expected", WINDOW_CASES)
     def test_window_start(self, ts, expected):
+        # 对齐到所在分钟起点：59.999s 仍归当前分钟，整分钟不跨窗
         result = align_to_window_start(ts)
         assert result == expected, f"{ts}: expected {expected}, got {result}"
 
 
+# 按日志契约列构造 DataFrame 并解析时间戳
 def _make_log_df(rows):
     df = pd.DataFrame(rows, columns=DNS_LOG_COLUMNS)
     df["timestamp"] = pd.to_datetime(df["timestamp"])
@@ -175,6 +194,7 @@ def _make_log_df(rows):
 
 class TestComputeFeatures:
     def _build_log(self, events):
+        # 由事件字典列表拼出日志行，缺失字段按默认值补齐（event_id 自增）
         rows = []
         for i, ev in enumerate(events, start=1):
             rows.append([
@@ -185,6 +205,7 @@ class TestComputeFeatures:
         return _make_log_df(rows)
 
     def test_interval_less_than_3_is_nan(self):
+        # 同窗口仅 2 次查询时间隔 I 为 NaN，但频次 F 仍为 2
         events = [
             {"ts": "2026-11-01T12:05:00.000Z", "client_ip": "10.0.0.1", "qname": "www.example.com", "label": 0, "split": "train"},
             {"ts": "2026-11-01T12:05:01.000Z", "client_ip": "10.0.0.1", "qname": "www.example.com", "label": 0, "split": "train"},
@@ -195,6 +216,7 @@ class TestComputeFeatures:
         assert features["F"].iloc[0] == 2
 
     def test_interval_median(self):
+        # 3 次查询间隔为 4s、6s，中位数 I=5s，F=3
         events = [
             {"ts": "2026-11-01T12:05:00.000Z", "client_ip": "10.0.0.1", "qname": "www.example.com", "label": 0, "split": "train"},
             {"ts": "2026-11-01T12:05:04.000Z", "client_ip": "10.0.0.1", "qname": "www.example.com", "label": 0, "split": "train"},
@@ -208,6 +230,7 @@ class TestComputeFeatures:
         assert abs(interval - 5.0) < 0.01
 
     def test_f_and_i_shared_across_qnames_same_window(self):
+        # F/I 按“客户端+窗口”聚合：同窗口 3 个不同 qname 共享 F=3 与同一 I
         events = [
             {"ts": "2026-11-01T12:05:00.000Z", "client_ip": "10.0.0.1", "qname": "www.example.com", "label": 0, "split": "train"},
             {"ts": "2026-11-01T12:05:04.000Z", "client_ip": "10.0.0.1", "qname": "www.google.com", "label": 0, "split": "train"},
@@ -221,6 +244,7 @@ class TestComputeFeatures:
         assert (features["I"].fillna(-1) == interval_val).all()
 
     def test_features_columns_contract(self):
+        # 输出列顺序严格等于 FEATURES_COLUMNS 契约
         events = [
             {"ts": "2026-11-01T12:05:00.000Z", "client_ip": "10.0.0.1", "qname": "www.example.com", "label": 0, "split": "train"},
         ]
@@ -229,6 +253,7 @@ class TestComputeFeatures:
         assert list(features.columns) == FEATURES_COLUMNS
 
     def test_entropy_computed_from_psl_label(self):
+        # 熵 H 由 PSL 可注册标签（cctv、example）计算，而非整条 qname
         events = [
             {"ts": "2026-11-01T12:05:00.000Z", "client_ip": "10.0.0.1", "qname": "mail.cctv.com", "label": 0, "split": "train"},
             {"ts": "2026-11-01T12:05:00.100Z", "client_ip": "10.0.0.1", "qname": "sub.example.co.uk", "label": 0, "split": "train"},
@@ -243,6 +268,7 @@ class TestComputeFeatures:
         assert row_example["H"] == shannon_entropy("example")
 
     def test_window_boundary(self):
+        # 12:05:59 与 12:06:01 分属两个不同窗口
         events = [
             {"ts": "2026-11-01T12:05:59.000Z", "client_ip": "10.0.0.1", "qname": "a.com", "label": 0, "split": "train"},
             {"ts": "2026-11-01T12:06:01.000Z", "client_ip": "10.0.0.1", "qname": "b.com", "label": 0, "split": "train"},
@@ -253,6 +279,7 @@ class TestComputeFeatures:
         assert len(windows) == 2, f"should be 2 distinct windows, got {windows.tolist()}"
 
     def test_log_columns_validation(self, tmp_path):
+        # 日志缺少契约列时 load_log 抛 ValueError
         bad = pd.DataFrame([[1, "2026-11-01T12:05:00Z", "10.0.0.1", "x.com", "A"]],
                           columns=["event_id", "timestamp", "client_ip", "qname", "qtype"])
         bad_path = tmp_path / "bad_log.csv"
@@ -264,6 +291,7 @@ class TestComputeFeatures:
 
 class TestBaselineFitting:
     def _make_features_df(self):
+        # 构造 train/val/test × 标签各 30 行的随机特征，部分 I 置空模拟缺失间隔
         rows = []
         c = 0
         for split in ["train", "val", "test"]:
@@ -287,18 +315,21 @@ class TestBaselineFitting:
         return pd.DataFrame(rows, columns=FEATURES_COLUMNS)
 
     def test_baseline_only_uses_train_label0(self):
+        # 基线只拟合 train 且 label=0 的正常样本
         np.random.seed(42)
         df = self._make_features_df()
         baseline = fit_baseline_from_features(df)
         assert baseline["fitted_on"] == {"split": "train", "label": 0}
 
     def test_baseline_version(self):
+        # 基线记录 schema 版本号 BASELINE_SCHEMA_VERSION
         np.random.seed(42)
         df = self._make_features_df()
         baseline = fit_baseline_from_features(df)
         assert baseline["version"] == BASELINE_SCHEMA_VERSION
 
     def test_baseline_has_all_features(self):
+        # H/F/I 三个特征都含 quantile/threshold/method/comparator 字段
         np.random.seed(42)
         df = self._make_features_df()
         baseline = fit_baseline_from_features(df)
@@ -309,6 +340,7 @@ class TestBaselineFitting:
                 assert key in inner, f"features.{feat} missing {key}"
 
     def test_baseline_comparators(self):
+        # 比较方向：H、F 用 >（越大越可疑），I 用 <（间隔越小越可疑）
         np.random.seed(42)
         df = self._make_features_df()
         baseline = fit_baseline_from_features(df)
@@ -317,6 +349,7 @@ class TestBaselineFitting:
         assert baseline["features"]["I"]["comparator"] == "<"
 
     def test_baseline_save_and_load(self, tmp_path):
+        # 保存后再加载，三个特征的阈值保持一致
         np.random.seed(42)
         df = self._make_features_df()
         baseline = fit_baseline_from_features(df)
@@ -328,10 +361,12 @@ class TestBaselineFitting:
         assert loaded["features"]["I"]["threshold"] == baseline["features"]["I"]["threshold"]
 
     def test_baseline_load_missing_file(self, tmp_path):
+        # 基线文件不存在时抛 FileNotFoundError
         with pytest.raises(FileNotFoundError):
             load_baseline(str(tmp_path / "nonexistent.json"))
 
     def test_baseline_no_train_normal(self):
+        # 没有 train+label=0 样本时拟合应报错
         df = pd.DataFrame([{
             "client_ip": "10.0.0.1", "window_start": "2026-11-01T12:05:00Z",
             "qname": "dga.com", "label": 1, "source": "manual_dga", "algorithm": "rand_alpha",
@@ -343,6 +378,7 @@ class TestBaselineFitting:
             fit_baseline_from_features(df)
 
     def test_h_threshold_uses_unique_labels(self):
+        # H 阈值按唯一标签统计：50 行重复 aaaa.com 只算一个标签，总唯一标签数为 2
         rows = []
         for i in range(50):
             rows.append({
@@ -368,8 +404,10 @@ class TestBaselineFitting:
         assert baseline["features"]["H"]["threshold"] > 3.0
 
     def test_f_and_i_use_pure_normal_windows_once(self):
+        # F/I 只统计纯正常窗口且每窗口一次：同窗多 qname 算 1 个，被 DGA 污染的窗口剔除
         rows = []
 
+        # 追加一行特征记录，label=1 时自动补 DGA 元数据
         def add(client_ip, window_start, qname, label, f, i):
             rows.append({
                 "client_ip": client_ip, "window_start": window_start,
@@ -397,6 +435,7 @@ class TestBaselineFitting:
 
 class TestRuleEngine:
     def _make_features_df(self):
+        # 固定 seed 构造 train/val/test × 标签各 20 行随机特征，部分 I 缺失
         rows = []
         np.random.seed(123)
         idx = 0
@@ -422,6 +461,7 @@ class TestRuleEngine:
         return pd.DataFrame(rows, columns=FEATURES_COLUMNS)
 
     def test_manual_rule_calculation(self):
+        # 逐行手算校验：E 为 H>阈值，B 为 F>阈值或 I<阈值，R=E or B
         df = self._make_features_df()
         baseline = fit_baseline_from_features(df)
         scored = compute_rules(df, baseline)
@@ -442,6 +482,7 @@ class TestRuleEngine:
             assert int(row["R"]) == expected_r
 
     def test_interval_missing_skips_interval_rule(self):
+        # I 全为 NaN 时跳过间隔规则，B 仅由频次 F 决定
         df = self._make_features_df()
         baseline = fit_baseline_from_features(df)
 
@@ -457,6 +498,7 @@ class TestRuleEngine:
         assert (scored["B"].values == expected_b_from_freq.values).all()
 
     def test_never_touch_test_in_candidates(self):
+        # 阈值候选评估只用 val，不读取 test；TP 与手工统计一致
         df = self._make_features_df()
         baseline = fit_baseline_from_features(df)
 
@@ -475,6 +517,7 @@ class TestRuleEngine:
         assert results[0]["TP"] == manual_tp
 
     def test_comparator_strict_not_ge(self):
+        # 严格大于：H 恰好等于阈值不触发 E，需明显大于阈值
         df = self._make_features_df()
         baseline = fit_baseline_from_features(df)
 
@@ -509,6 +552,7 @@ class TestRuleEngine:
         scored2 = compute_rules(edge_case2, temp_baseline)
 
     def test_contamination_summary(self):
+        # 污染汇总含 overall/by_split/note，各 split 正常样本 B 命中率在 [0,1]
         df = self._make_features_df()
         baseline = fit_baseline_from_features(df)
         summary = summarize_client_contamination(df, baseline)
@@ -522,6 +566,7 @@ class TestRuleEngine:
                 assert 0.0 <= stats["normal_B_hit_rate"] <= 1.0
 
     def test_baseline_missing_or_corrupt(self, tmp_path):
+        # 基线文件缺失时 load_baseline 抛 FileNotFoundError
         path = str(tmp_path / "missing.json")
         with pytest.raises(FileNotFoundError):
             load_baseline(path)
@@ -529,6 +574,7 @@ class TestRuleEngine:
 
 class TestDryRunIntegration:
     def test_dns_demo_dry_run(self):
+        # 以 dry-run 启动 dns_demo：退出码 0，输出声明未发送任何网络请求
         import subprocess
         result = subprocess.run(
             [sys.executable, "-m", "src.dns_demo", "--dry-run"],

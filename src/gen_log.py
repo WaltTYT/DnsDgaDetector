@@ -35,8 +35,11 @@ from . import prepare_data
 from .gen_dga import ALGORITHMS
 
 
+# 三个数据划分的固定顺序，全流程按此顺序遍历以保证结果确定
 _SPLIT_ORDER = ("train", "val", "test")
+# data/splits.csv 的契约表头，读取时须完全一致
 _SPLIT_HEADER = ("domain", "label", "source", "algorithm", "split")
+# data/dns_log.csv 的契约列顺序，序列化时按此顺序写出
 _LOG_HEADER = (
     "event_id",
     "timestamp",
@@ -48,13 +51,19 @@ _LOG_HEADER = (
     "algorithm",
     "split",
 )
+# 正常流量行为类别：日常访问与合法突发（顺序也是配额平局时的优先级）
 _NORMAL_BEHAVIOR_ORDER = ("routine", "burst")
+# DGA 行为类别：高频随机、低频随机、低熵词根拼接
 _DGA_BEHAVIOR_ORDER = ("high_frequency", "low_frequency", "word_digit")
+# 允许出现的 DNS 查询类型，也是 qtype 配额平局时的固定顺序
 _QTYPE_ORDER = ("A", "AAAA", "CNAME", "TXT", "NS")
+# 权重求和的容差（10^-9），用于吸收浮点转 Fraction 带来的误差
 _WEIGHT_SUM_TOLERANCE = Fraction(1, 1_000_000_000)
+# 校验 UTC 毫秒精度时间戳的规范格式：YYYY-MM-DDTHH:MM:SS.mmmZ
 _UTC_MILLISECOND_TIMESTAMP = re.compile(
     r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z"
 )
+# 各行为类别单个行为组的事件数上下界，供分组切分时使用
 _GROUP_SIZE_BOUNDS = MappingProxyType(
     {
         "routine": (1, 2),
@@ -64,6 +73,7 @@ _GROUP_SIZE_BOUNDS = MappingProxyType(
         "word_digit": (1, 4),
     }
 )
+# 客户端 IP 取自 RFC 5737 文档示例网段，避免指向真实主机
 _CLIENT_NETWORKS = tuple(
     ipaddress.ip_network(network)
     for network in ("192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24")
@@ -71,6 +81,7 @@ _CLIENT_NETWORKS = tuple(
 
 
 def _validate_split_record(record, location):
+    # 校验单条 DomainRecord：类型、域名已规范化、label 为 0/1、来源与标签语义一致、split 合法
     if not isinstance(record, prepare_data.DomainRecord):
         raise ValueError(f"{location} must be a DomainRecord")
     if not isinstance(record.domain, str):
@@ -95,6 +106,7 @@ def _validate_split_record(record, location):
         raise ValueError(
             f"invalid source or algorithm for {record.domain!r} in {location}"
         )
+    # 按来源约定校验 (label, algorithm) 组合：正常类为 0 且无算法，DGA 类为 1
     if record.source == "normal_list":
         valid_semantics = record.label == 0 and record.algorithm == ""
     elif record.source == "hard_negative":
@@ -117,6 +129,7 @@ def _validate_split_record(record, location):
 
 
 def read_split_records(splits_path: Path) -> list[prepare_data.DomainRecord]:
+    # 读取 data/splits.csv，逐行校验表头/字段数/label/来源语义与域名去重，返回 DomainRecord 列表
     if not isinstance(splits_path, Path):
         raise ValueError("splits_path must be a Path")
 
@@ -131,6 +144,7 @@ def read_split_records(splits_path: Path) -> list[prepare_data.DomainRecord]:
                 raise ValueError(
                     "splits CSV is empty; expected the contract header"
                 ) from exc
+            # 表头必须与契约完全一致，否则立即判为数据错误
             if tuple(header) != _SPLIT_HEADER:
                 raise ValueError(
                     "splits CSV header must be exactly " + ",".join(_SPLIT_HEADER)
@@ -159,6 +173,7 @@ def read_split_records(splits_path: Path) -> list[prepare_data.DomainRecord]:
                     sources=(),
                 )
                 _validate_split_record(record, f"row {row_number}")
+                # 域名在全表内唯一，重复即报错
                 if record.domain in seen_domains:
                     raise ValueError(
                         f"duplicate domain {record.domain!r} in row {row_number}"
@@ -174,6 +189,7 @@ def read_split_records(splits_path: Path) -> list[prepare_data.DomainRecord]:
 
 
 def validate_domain_pools(records, psl_path: Path) -> None:
+    # 校验整个域名池：每个 split 都含 label 0/1 与 word_digit 池，且同一 eTLD+1 不得跨 split
     if not isinstance(records, Sequence) or isinstance(records, (str, bytes)):
         raise ValueError("records must be a sequence of DomainRecord values")
 
@@ -202,6 +218,7 @@ def validate_domain_pools(records, psl_path: Path) -> None:
         if split not in has_word_digit:
             raise ValueError(f"split {split!r} has no manual_dga word_digit pool")
 
+    # 用离线 PSL 快照解析可注册域（eTLD+1），检查是否存在跨 split 泄漏
     extractor = prepare_data.create_extractor(psl_path)
     split_by_etld_plus_one = {}
     for record in records:
@@ -231,6 +248,7 @@ def validate_domain_pools(records, psl_path: Path) -> None:
 
 @dataclass(frozen=True, slots=True)
 class GeneratorConfig:
+    # 生成器全部可调参数（来自 config.json），字段冻结以防运行期被修改
     seed: int
     window_seconds: int
     psl_snapshot: str
@@ -247,6 +265,7 @@ class GeneratorConfig:
     qtype_weights: Mapping[str, float]
 
     def __post_init__(self):
+        # 把三个权重映射转为只读 MappingProxyType，避免外部篡改影响复现
         for name in (
             "normal_behavior_ratio",
             "dga_behavior_ratio",
@@ -258,6 +277,7 @@ class GeneratorConfig:
 
 
 def _require_integer(value, name, minimum=None):
+    # 校验整数参数（排除 bool），可选下限校验
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"{name} must be an integer")
     if minimum is not None and value < minimum:
@@ -266,6 +286,7 @@ def _require_integer(value, name, minimum=None):
 
 
 def _require_number(value, name, minimum=None, maximum=None, exclusive_min=False):
+    # 校验数值参数：排除 bool、要求有限值，并按需检查开/闭区间上下界
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError(f"{name} must be a number")
     try:
@@ -285,6 +306,7 @@ def _require_number(value, name, minimum=None, maximum=None, exclusive_min=False
 
 
 def _validate_weight_keys(weights, tie_order):
+    # 校验权重键与平局顺序 tie_order 一一对应且无重复，返回规范化后的键顺序
     if not isinstance(weights, Mapping) or not weights:
         raise ValueError("weights must be a non-empty mapping")
     if any(not isinstance(key, str) for key in weights):
@@ -302,6 +324,7 @@ def _validate_weight_keys(weights, tie_order):
 
 
 def _fraction_weights(weights, tie_order):
+    # 将 float/int 权重转成精确 Fraction，并校验每项在 [0,1] 且总和为 1
     ordered_keys = _validate_weight_keys(weights, tie_order)
     fraction_weights = {}
     for key, value in weights.items():
@@ -324,6 +347,7 @@ def _fraction_weights(weights, tie_order):
 
 
 def _exact_largest_remainder(total, weights, tie_order):
+    # 最大余额法：按权重把 total 拆成整数配额，余数按余额降序、同余额按 tie_order 补齐
     total = _require_integer(total, "total", minimum=0)
     ordered_keys = _validate_weight_keys(weights, tie_order)
     fraction_weights = {}
@@ -365,6 +389,7 @@ def _exact_largest_remainder(total, weights, tie_order):
 def largest_remainder(
     total: int, weights: Mapping[str, float], tie_order: Sequence[str]
 ) -> dict[str, int]:
+    # 对外入口：float 权重版最大余额配额分配，保证各部分整数之和等于 total
     total = _require_integer(total, "total", minimum=0)
     fraction_weights = _fraction_weights(weights, tie_order)
     return _exact_largest_remainder(total, fraction_weights, tie_order)
@@ -373,6 +398,7 @@ def largest_remainder(
 def allocate_event_quotas(
     split_domain_counts: Mapping[str, int], total_rows: int, dga_ratio: float
 ) -> dict[str, dict[str, int]]:
+    # 把总行数按各 split 域名数占比分配到 train/val/test，再按 dga_ratio 拆出正常/DGA 事件数
     total_rows = _require_integer(total_rows, "total_rows", minimum=1)
     if not isinstance(split_domain_counts, Mapping):
         raise ValueError("split_domain_counts must be a mapping")
@@ -392,6 +418,7 @@ def allocate_event_quotas(
     ratio = _require_number(dga_ratio, "dga_ratio", minimum=0, maximum=1)
     split_totals = _exact_largest_remainder(total_rows, counts, _SPLIT_ORDER)
     ratio_fraction = Fraction(str(ratio))
+    # 用 Fraction 做四舍五入（加半个分母后整除）计算 DGA 总行数，避免浮点误差
     dga_total = (
         2 * total_rows * ratio_fraction.numerator + ratio_fraction.denominator
     ) // (2 * ratio_fraction.denominator)
@@ -408,18 +435,21 @@ def allocate_event_quotas(
 
 
 def _require_object(value, name):
+    # 要求 JSON 值为 dict（对象），否则视为配置错误
     if not isinstance(value, dict):
         raise ValueError(f"{name} must be an object")
     return value
 
 
 def _required(mapping, key, name):
+    # 从配置映射取必填键，缺失时给出字段级错误信息
     if key not in mapping:
         raise ValueError(f"missing configuration value: {name}")
     return mapping[key]
 
 
 def _load_weights(value, name, expected_keys):
+    # 加载并校验一个权重对象：键集合精确匹配、值在 [0,1]、总和为 1，返回只读映射
     value = _require_object(value, name)
     if set(value) != set(expected_keys):
         raise ValueError(f"{name} must contain exactly {', '.join(expected_keys)}")
@@ -433,10 +463,12 @@ def _load_weights(value, name, expected_keys):
 
 
 def _reject_json_constant(_value):
+    # 传给 json.load 的钩子：拒绝 NaN/Infinity 等非标准数值常量
     raise ValueError("config contains a non-standard numeric value")
 
 
 def _load_simulation_start(value):
+    # 解析 simulation_start_utc：要求规范 UTC 毫秒格式且对齐到整分钟
     if not isinstance(value, str) or not _UTC_MILLISECOND_TIMESTAMP.fullmatch(value):
         raise ValueError(
             "simulation_start_utc must use canonical UTC millisecond precision"
@@ -451,6 +483,7 @@ def _load_simulation_start(value):
 
 
 def load_config(config_path: Path) -> GeneratorConfig:
+    # 读取 config.json 并逐项校验，组装成 GeneratorConfig；窗口固定为 60 秒
     if not isinstance(config_path, Path):
         raise ValueError("config_path must be a Path")
     try:
@@ -469,6 +502,7 @@ def load_config(config_path: Path) -> GeneratorConfig:
         "window_seconds",
         1,
     )
+    # D3 日志生成的窗口固定 60 秒，与后续特征聚合口径一致
     if window_seconds != 60:
         raise ValueError("window_seconds must be 60 for D3 log generation")
 
@@ -557,6 +591,7 @@ def load_config(config_path: Path) -> GeneratorConfig:
 
 @dataclass(frozen=True, slots=True)
 class EventDraft:
+    # 事件草稿：尚未定 timestamp/qtype 的中间态，保留组归属与窗口内毫秒偏移
     record: prepare_data.DomainRecord
     split: str
     label: int
@@ -574,6 +609,7 @@ class EventDraft:
 
 @dataclass(frozen=True, slots=True)
 class QueryEvent:
+    # 最终查询事件：含 UTC 毫秒时间戳与 qtype，stable_order 用于同刻事件的稳定排序
     timestamp: datetime
     client_ip: str
     qname: str
@@ -588,6 +624,7 @@ class QueryEvent:
 
 @dataclass(frozen=True, slots=True)
 class BehaviorGroup:
+    # 行为组：同一域名/客户端/分钟窗口下的一组事件，并记录配对组与放置单元
     domain: prepare_data.DomainRecord
     split: str
     label: int
@@ -605,6 +642,7 @@ class BehaviorGroup:
 
 @dataclass(slots=True)
 class _GroupSpec:
+    # 可变的行为组构造规格：先确定大小与配对关系，放置阶段再回填客户端与窗口起点
     record: prepare_data.DomainRecord
     behavior: str
     group_id: str
@@ -618,18 +656,21 @@ class _GroupSpec:
 
 @dataclass(frozen=True, slots=True)
 class _PlacementUnit:
+    # 放置单元：共享同一客户端与分钟窗口的一组行为组（混窗时由 routine 与 high_frequency 配对）
     split: str
     unit_id: str
     groups: tuple[_GroupSpec, ...]
 
     @property
     def row_count(self):
+        # 该放置单元包含的事件总数，用于活跃客户端行数占比计算
         return sum(group.size for group in self.groups)
 
 
 def derive_rng(
     seed: int, split: str, label: int, behavior: str, purpose: str
 ) -> random.Random:
+    # 由 seed+split+label+behavior+purpose 经 SHA-256 派生独立随机源，保证可复现且各用途互不干扰
     seed = _require_integer(seed, "seed", minimum=0)
     if split not in _SPLIT_ORDER:
         raise ValueError(f"unknown split: {split!r}")
@@ -651,6 +692,7 @@ def partition_event_groups(
     max_size: int,
     rng: random.Random,
 ) -> list[int]:
+    # 把 event_count 切成若干组，每组大小落在 [min_size,max_size]，并保证总数守恒
     event_count = _require_integer(event_count, "event_count", minimum=0)
     min_size = _require_integer(min_size, "min_size", minimum=1)
     max_size = _require_integer(max_size, "max_size", minimum=1)
@@ -668,6 +710,7 @@ def partition_event_groups(
             f"[{min_size}, {max_size}]"
         )
 
+    # 逐个确定组大小：为剩余组预留 [min,max] 的可行区间，避免最后无法分配
     sizes = []
     remaining = event_count
     for index in range(group_count):
@@ -690,6 +733,7 @@ def allocate_behavior_quotas(
     normal_behavior_ratio: Mapping[str, float],
     dga_behavior_ratio: Mapping[str, float],
 ) -> dict[str, dict[str, dict[str, int]]]:
+    # 把每个 split 的正常/DGA 事件数按行为权重拆成各行为类别的事件配额
     if not isinstance(event_quotas, Mapping) or set(event_quotas) != set(_SPLIT_ORDER):
         raise ValueError("event_quotas must contain train, val, and test")
     quotas = {}
@@ -723,6 +767,7 @@ def allocate_qtype_quotas(
     split_label_counts: Mapping[str, Mapping[int, int]],
     qtype_weights: Mapping[str, float],
 ) -> dict[str, dict[int, dict[str, int]]]:
+    # 按各 (split,label) 的事件数与 qtype 权重分配 A/AAAA/CNAME/TXT/NS 配额
     if not isinstance(split_label_counts, Mapping) or set(split_label_counts) != set(
         _SPLIT_ORDER
     ):
@@ -756,6 +801,7 @@ def allocate_qtype_quotas(
 def assign_qtypes(
     events: Sequence[EventDraft], config: GeneratorConfig
 ) -> list[str]:
+    # 为每个 EventDraft 分配 qtype：按配额展开列表后，按 (group_id, sequence_index) 稳定顺序对应
     if not isinstance(events, Sequence) or isinstance(events, (str, bytes)):
         raise ValueError("events must be a sequence of EventDraft values")
     if not isinstance(config, GeneratorConfig):
@@ -799,6 +845,7 @@ def assign_qtypes(
             derive_rng(config.seed, split, label, "qtype", "assignment").shuffle(
                 qtypes
             )
+            # 用稳定排序键(order 由组 id 与序号决定)保证同 seed 下 qtype 分配结果不变
             stable_indexes = sorted(
                 indexes,
                 key=lambda index: (
@@ -812,6 +859,7 @@ def assign_qtypes(
 
 
 def _client_pool(pool_size: int) -> tuple[str, ...]:
+    # 从 RFC 5737 示例网段展开可用主机地址，取前 pool_size 个作为客户端池
     pool_size = _require_integer(pool_size, "client_pool_size", minimum=1)
     available = tuple(str(address) for network in _CLIENT_NETWORKS for address in network.hosts())
     if pool_size > len(available):
@@ -820,14 +868,17 @@ def _client_pool(pool_size: int) -> tuple[str, ...]:
 
 
 def _fraction_floor(value: Fraction) -> int:
+    # Fraction 向下取整
     return value.numerator // value.denominator
 
 
 def _fraction_ceil(value: Fraction) -> int:
+    # Fraction 向上取整
     return -(-value.numerator // value.denominator)
 
 
 def _active_client_count(pool_size: int, active_client_fraction: float) -> int:
+    # 按比例四舍五入算出活跃客户端数量（乘比例后加 1/2 再向下取整）
     pool_size = _require_integer(pool_size, "client_pool_size", minimum=0)
     fraction = Fraction(
         str(
@@ -845,6 +896,7 @@ def _active_client_count(pool_size: int, active_client_fraction: float) -> int:
 def _active_event_share_within_tolerance(
     active_rows: int, total_rows: int, active_event_fraction: float
 ) -> bool:
+    # 判断活跃客户端事件占比与目标值的偏差是否在 2 个百分点以内
     active_rows = _require_integer(active_rows, "active_rows", minimum=0)
     total_rows = _require_integer(total_rows, "total_rows", minimum=1)
     if active_rows > total_rows:
@@ -867,6 +919,7 @@ def _active_unit_ids(
     active_event_fraction: float,
     rng: random.Random,
 ) -> set[str]:
+    # 以整组为单位挑选活跃放置单元：动态规划记录可达行数，再按与目标的最短距离选总量
     row_count = sum(unit.row_count for unit in units)
     fraction = Fraction(str(active_event_fraction))
     tolerance = Fraction(2, 100)
@@ -877,6 +930,7 @@ def _active_unit_ids(
     target_count = _fraction_floor(fraction * row_count + Fraction(1, 2))
 
     buckets = {}
+    # 按行数分桶，桶内打乱后以 1,2,4,... 捆绑，减少动态规划的状态数量
     for unit in units:
         buckets.setdefault(unit.row_count, []).append(unit)
     reachable = 1
@@ -896,6 +950,7 @@ def _active_unit_ids(
             bundle_size *= 2
 
     chosen_count = None
+    # 从目标值向两侧搜索，取落在可行区间内且可达、距离最近的活跃行数
     max_distance = max(target_count - lower_count, upper_count - target_count)
     for distance in range(max_distance + 1):
         below = target_count - distance
@@ -925,6 +980,7 @@ def _active_unit_ids(
         raise ValueError("could not reconstruct active-client row total")
 
     selected = set()
+    # 按记录下的捆绑回溯，确定每种行数的单元要取多少个
     for weight, bucket in buckets.items():
         selected.update(unit.unit_id for unit in bucket[: selected_by_weight.get(weight, 0)])
     return selected
@@ -939,6 +995,7 @@ def _place_units(
     client_rng: random.Random,
     window_rng: random.Random,
 ) -> None:
+    # 为放置单元分配客户端与分钟窗口：优先最少占用的客户端，窗口冲突时顺延，并写入 split 时段偏移
     if units and not clients:
         raise ValueError("no clients available for behavior-group placement")
     if len(units) > len(clients) * window_count:
@@ -963,6 +1020,7 @@ def _place_units(
         else:
             raise ValueError(f"client {client} has no free minute window")
         occupied[client].add(window_index)
+        # 各 split 依次错开 split_period_hours 小时，窗口按分钟对齐到整分
         window_start = config.simulation_start_utc + timedelta(
             hours=split_index * config.split_period_hours,
             minutes=window_index,
@@ -973,6 +1031,7 @@ def _place_units(
 
 
 def _draw_adjacent_gaps(rng: random.Random, gap_count: int) -> tuple[int, ...]:
+    # 生成相邻事件间隔（1~5 秒），并重跳到总和不超过 55 秒以留在同一分钟内
     while True:
         gaps = tuple(rng.randint(1000, 5000) for _ in range(gap_count))
         if sum(gaps) <= 55000:
@@ -982,6 +1041,8 @@ def _draw_adjacent_gaps(rng: random.Random, gap_count: int) -> tuple[int, ...]:
 def _assign_unit_offsets(
     unit: _PlacementUnit, config: GeneratorConfig
 ) -> None:
+    # 为组内事件分配窗口内毫秒偏移：突发/高频相邻分布，低频/词根组随机分散
+    # 混合窗口：高频组与 routine 单事件同分钟，routine 取高频末尾事件之后的偏移
     if len(unit.groups) == 2:
         high_group = next(group for group in unit.groups if group.behavior == "high_frequency")
         routine_group = next(group for group in unit.groups if group.behavior == "routine")
@@ -1021,6 +1082,7 @@ def _assign_unit_offsets(
 def build_behavior_groups(
     records: Sequence[prepare_data.DomainRecord], config: GeneratorConfig
 ) -> list[BehaviorGroup]:
+    # 核心生成流程：按配额构造正常/DGA 行为组，配对混窗、放置客户端与分钟窗口、分配偏移并校验行数守恒
     if not isinstance(records, Sequence) or isinstance(records, (str, bytes)):
         raise ValueError("records must be a sequence of DomainRecord values")
     if not isinstance(config, GeneratorConfig):
@@ -1086,6 +1148,7 @@ def build_behavior_groups(
             pool = records_by_pool[(split, label)]
             if not pool:
                 raise ValueError(f"split {split!r} has no label {label} domain pool")
+            # 池内按域名排序，使 choice 的索引映射与输入行序无关，保证复现
             pool.sort(key=lambda record: record.domain)
         if not word_digit_pools[split]:
             raise ValueError(f"split {split!r} has no manual_dga word_digit pool")
@@ -1126,6 +1189,7 @@ def build_behavior_groups(
         )
         if not high_sizes:
             raise ValueError(f"split {split!r} cannot form a mixed-label window")
+        # 选取一部分高频组与 routine 事件配成混合标签窗口，按比例向上取整且至少 1 个
         mixed_count = _fraction_ceil(
             Fraction(len(high_sizes)) * Fraction(str(mixed_window_fraction))
         )
@@ -1230,6 +1294,7 @@ def build_behavior_groups(
                     )
                 )
 
+        # 按行为类别固定顺序与 group_id 排序，确保放置与 RNG 消费顺序稳定
         group_specs.sort(
             key=lambda group: (
                 (_NORMAL_BEHAVIOR_ORDER + _DGA_BEHAVIOR_ORDER).index(group.behavior),
@@ -1245,6 +1310,7 @@ def build_behavior_groups(
         ]
         split_event_count = sum(unit.row_count for unit in units)
         client_rng = derive_rng(config.seed, split, 0, "client_assignment", "client")
+        # 三种情形：无活跃客户端 / 全部为活跃客户端 / 需按占比挑选活跃放置单元
         if active_client_count == 0:
             if not _active_event_share_within_tolerance(
                 0, split_event_count, active_event_fraction
@@ -1293,6 +1359,7 @@ def build_behavior_groups(
             _assign_unit_offsets(unit, config)
         all_groups_by_split[split] = group_specs
 
+    # 把已放置的组展开为 EventDraft/BehaviorGroup，并校验事件总数守恒
     result = []
     for split in _SPLIT_ORDER:
         for group in all_groups_by_split[split]:
@@ -1343,6 +1410,7 @@ def build_behavior_groups(
 def build_events(
     records: Sequence[prepare_data.DomainRecord], config: GeneratorConfig
 ) -> list[QueryEvent]:
+    # 由行为组展开事件草稿，补齐 qtype 并合成毫秒时间戳，最后按 (timestamp, stable_order) 排序
     groups = build_behavior_groups(records, config)
     drafts = [event for group in groups for event in group.events]
     qtypes = assign_qtypes(drafts, config)
@@ -1366,6 +1434,7 @@ def build_events(
 
 
 def _validate_query_event(event, location):
+    # 校验单条 QueryEvent：UTC 毫秒时间戳、规范 IPv4/域名、qtype、label 与来源语义、split 与行为
     if not isinstance(event, QueryEvent):
         raise ValueError(f"{location} must be a QueryEvent")
     if (
@@ -1431,6 +1500,7 @@ def _validate_query_event(event, location):
 
 
 def serialize_log(events: Sequence[QueryEvent]) -> bytes:
+    # 校验后按 (timestamp, stable_order) 排序，序列化为 UTF-8 CSV 字节，event_id 从 1 递增
     if not isinstance(events, Sequence) or isinstance(events, (str, bytes)):
         raise ValueError("events must be a sequence of QueryEvent values")
     for index, event in enumerate(events, start=1):
@@ -1448,6 +1518,7 @@ def serialize_log(events: Sequence[QueryEvent]) -> bytes:
     )
     writer.writeheader()
     for event_id, event in enumerate(ordered_events, start=1):
+        # 输出 UTC 毫秒级时间戳（保留到毫秒后追加 Z）
         timestamp = event.timestamp.astimezone(timezone.utc).strftime(
             "%Y-%m-%dT%H:%M:%S.%f"
         )[:-3] + "Z"
@@ -1469,6 +1540,7 @@ def serialize_log(events: Sequence[QueryEvent]) -> bytes:
 
 @dataclass(frozen=True, slots=True)
 class RunSummary:
+    # 运行摘要：记录 seed、输入/输出哈希、各维度计数与时间范围，用于复现与生成统计表
     seed: int
     input_sha256: Mapping[str, str]
     output_sha256: str
@@ -1488,15 +1560,18 @@ class RunSummary:
 
 
 def _format_summary_timestamp(value: datetime) -> str:
+    # 按与 CSV 一致的 UTC 毫秒格式输出时间字符串
     return value.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
 
 def _counter_dict(counter: Counter, order=None) -> dict:
+    # Counter 转 dict，可指定键顺序，并过滤计数为 0 的键
     keys = order if order is not None else sorted(counter)
     return {key: counter[key] for key in keys if counter[key]}
 
 
 def _empty_summary_counters():
+    # 为每个 split 初始化统计容器：标签/来源/类型/行为计数、时间列表、域名集合、聚合键集合
     return {
         split: {
             "label_counts": Counter(),
@@ -1512,6 +1587,7 @@ def _empty_summary_counters():
 
 
 def _finish_summary_counts(counts, window_labels):
+    # 汇总统计：各 split 行数、时间范围、混合标签窗口数、唯一域名数与聚合样本数，并合并全局计数
     split_counts = {}
     mixed_window_counts = {}
     counts_by_split = {}
@@ -1521,6 +1597,7 @@ def _finish_summary_counts(counts, window_labels):
     for split in _SPLIT_ORDER:
         bucket = counts[split]
         split_counts[split] = len(bucket["times"])
+        # 同一 (client, minute) 窗口内同时出现 label 0 和 1 即记为混合窗口
         mixed_window_counts[split] = sum(
             1
             for (window_split, _client, _minute), labels in window_labels.items()
@@ -1575,6 +1652,7 @@ def _finish_summary_counts(counts, window_labels):
 
 
 def _summarize_events(events):
+    # 遍历事件累加各维度统计，并按 (split, client_ip, 分钟) 记录窗口内出现的标签集合
     counts = _empty_summary_counters()
     window_labels = {}
     for index, event in enumerate(events, start=1):
@@ -1595,6 +1673,7 @@ def _summarize_events(events):
 
 
 def _summarize_csv(csv_bytes):
+    # 反解析序列化 CSV 并逐行校验，统计结果用于与内存事件交叉比对
     if not isinstance(csv_bytes, bytes):
         raise ValueError("csv_bytes must be bytes")
     try:
@@ -1643,11 +1722,13 @@ def _summarize_csv(csv_bytes):
         raise ValueError(f"could not validate serialized CSV: {exc}") from exc
 
     result = _finish_summary_counts(counts, window_labels)
+    # 统计结果附带输出字节的 SHA-256，用于校验写盘内容
     result["output_sha256"] = hashlib.sha256(csv_bytes).hexdigest()
     return result
 
 
 def _validate_events_sequence(events):
+    # 仅逐条校验事件序列，不做修改
     if not isinstance(events, Sequence) or isinstance(events, (str, bytes)):
         raise ValueError("events must be a sequence of QueryEvent values")
     for index, event in enumerate(events, start=1):
@@ -1655,6 +1736,7 @@ def _validate_events_sequence(events):
 
 
 def _expected_input_hash_keys(config):
+    # 计算摘要期望的输入哈希键：config.json、data/splits.csv 与 PSL 快照的相对路径
     psl_path = Path(config.psl_snapshot)
     if psl_path.is_absolute() or ".." in psl_path.parts:
         raise ValueError("paths.psl_snapshot must be a project-relative path")
@@ -1670,6 +1752,7 @@ def build_summary(
     output_sha256: str,
     config: GeneratorConfig,
 ) -> RunSummary:
+    # 校验参数与哈希格式后统计事件并组装 RunSummary，synthetic=True 标记为合成数据
     if not isinstance(config, GeneratorConfig):
         raise ValueError("config must be a GeneratorConfig")
     _validate_events_sequence(events)
@@ -1711,6 +1794,7 @@ def build_summary(
 def validate_summary(
     summary: RunSummary, events: Sequence[QueryEvent], csv_bytes: bytes
 ) -> None:
+    # 交叉校验：CSV 字节须与内存事件序列化一致，摘要各字段须与 CSV 及事件统计一致
     if not isinstance(summary, RunSummary):
         raise ValueError("summary must be a RunSummary")
     _validate_events_sequence(events)
@@ -1751,6 +1835,7 @@ def validate_summary(
 
 
 def write_log(csv_bytes: bytes, target: Path) -> str:
+    # 原子写日志：先写同目录临时文件并 fsync、校验 SHA-256，再替换目标文件，失败时清理临时文件
     if not isinstance(csv_bytes, bytes):
         raise ValueError("csv_bytes must be bytes")
     if not isinstance(target, Path):
@@ -1785,6 +1870,7 @@ def write_log(csv_bytes: bytes, target: Path) -> str:
 
 
 def _project_relative_input(project_root: Path, relative_path: str, name: str) -> Path:
+    # 解析项目内相对路径：拒绝绝对路径与 .. 越界，并确认解析结果仍在项目根目录内
     path = Path(relative_path)
     if path.is_absolute() or ".." in path.parts:
         raise ValueError(f"{name} must be a project-relative path")
@@ -1797,6 +1883,7 @@ def _project_relative_input(project_root: Path, relative_path: str, name: str) -
 def run_log_generation(
     project_root: Path, config_path: Path | None = None
 ) -> RunSummary:
+    # 端到端入口：加载配置、读划分、校验域名池、生成事件、核对配额与摘要，最终写入 data/dns_log.csv
     root = Path(project_root).resolve()
     if config_path is None:
         config_file = root / "config.json"
@@ -1859,6 +1946,7 @@ def run_log_generation(
             if actual_qtypes != expected_qtype_quotas[split][label]:
                 raise ValueError("generated qtype counts do not match allocated quotas")
 
+    # 序列化后计算输入/输出哈希，构建并校验摘要，最后落盘
     csv_bytes = serialize_log(events)
     input_bytes = {
         "config.json": config_file.read_bytes(),
@@ -1877,6 +1965,7 @@ def run_log_generation(
 
 
 def main() -> int:
+    # 命令行入口：以当前工作目录为项目根执行生成，成功打印 JSON 摘要，失败返回 1
     try:
         summary = run_log_generation(Path.cwd())
     except Exception as exc:

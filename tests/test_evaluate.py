@@ -13,6 +13,7 @@ PROMPT_PATH = PROJECT_ROOT / "prompts" / "dga_judge_prompt.md"
 ENDPOINT = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 
 
+# 构造一行特征记录，默认视为正常来源；E/B/R 由调用方指定
 def _row(qname, label, e, b, r, source="normal_list", algorithm=None,
          split="test", client_ip="10.0.0.1", window_start="2026-11-01T00:00:00Z"):
     return {
@@ -35,10 +36,12 @@ def _row(qname, label, e, b, r, source="normal_list", algorithm=None,
     }
 
 
+# 按 FEATURES_COLUMNS 契约列顺序把字典列表转成 DataFrame
 def _features(rows):
     return pd.DataFrame(rows, columns=FEATURES_COLUMNS)
 
 
+# 按混淆矩阵数量生成 label/pred 明细，供指标函数统计
 def _metrics_df(tp, fp, fn, tn):
     rows = []
     for _ in range(tp):
@@ -52,6 +55,7 @@ def _metrics_df(tp, fp, fn, tn):
     return pd.DataFrame(rows)
 
 
+# 依据 config.json 的模型配置构造缓存条目，保证缓存键与生产逻辑一致
 def _cache_entry(qname, label, verdict, config):
     return llm_judge._cache_entry(
         qname, label, config["model"]["name"],
@@ -64,6 +68,7 @@ def _cache_entry(qname, label, verdict, config):
 
 
 def test_apply_hybrid_truth_table():
+    # 真值表：R=0 不请求 LLM；E=1 且 B=0 仅 normal 撤销；DGA/uncertain 与 B=1 均保留
     df = _features([
         _row("q0.com", 0, 0, 0, 0),
         _row("q1.com", 0, 1, 0, 1),
@@ -91,6 +96,7 @@ def test_apply_hybrid_truth_table():
 
 
 def test_apply_hybrid_rejects_fail_with_normal():
+    # fail_reason 与 normal 结论互斥，同时出现应抛 ValueError（must be uncertain）
     df = _features([_row("q1.com", 0, 1, 0, 1)])
     with pytest.raises(ValueError, match="must be uncertain"):
         evaluate.apply_hybrid(df, {
@@ -99,6 +105,7 @@ def test_apply_hybrid_rejects_fail_with_normal():
 
 
 def test_compute_metrics_hand_calc():
+    # 手算基准 TP=8/FP=2/FN=2/TN=18：FPR=10%、FNR=20%、Precision=80%、Recall=80%
     df = _metrics_df(tp=8, fp=2, fn=2, tn=18)
     metrics = evaluate.compute_metrics(df, "pred", "test")
     assert (metrics["tp"], metrics["fp"], metrics["fn"], metrics["tn"]) == (8, 2, 2, 18)
@@ -111,6 +118,7 @@ def test_compute_metrics_hand_calc():
 
 
 def test_compute_metrics_zero_denominator():
+    # 分母为 0 的指标返回 None（如全负样本的 FNR），空子集 total=0
     negatives = pd.DataFrame({
         "label": [0, 0, 0, 0], "pred": [0, 0, 0, 0], "split": ["test"] * 4,
     })
@@ -136,6 +144,7 @@ def test_compute_metrics_zero_denominator():
 
 
 def test_unique_domain_metrics_collapses_by_qname():
+    # 双口径按 qname 去重：同一域名多客户端只算一次，共 2 个唯一域
     df = _features([
         _row("a.com", 0, 1, 0, 1),
         _row("a.com", 0, 1, 0, 0, client_ip="10.0.0.2"),
@@ -151,6 +160,7 @@ def test_unique_domain_metrics_collapses_by_qname():
 
 
 def test_assert_subset_property_reports_counterexample_keys():
+    # hybrid 必须是 rule 的子集；注入 c.com 反例后应抛 not subset 断言
     rule = _features([
         _row("a.com", 0, 1, 0, 1, window_start="2026-11-01T00:00:00Z"),
         _row("b.com", 0, 1, 0, 1, window_start="2026-11-01T00:00:01Z"),
@@ -170,6 +180,7 @@ def test_assert_subset_property_reports_counterexample_keys():
 
 
 def test_assert_subset_property_dict_mode():
+    # 字典口径下 hybrid 的 FP/TP 不得超过 rule（撤销告警会让 TN 增加，属正常）
     rule = {"fp": 2, "tp": 8, "tn": 18}
     assert evaluate.assert_subset_property(rule, {"fp": 1, "tp": 7, "tn": 19}, "test")
     with pytest.raises(AssertionError):
@@ -179,6 +190,7 @@ def test_assert_subset_property_dict_mode():
 
 
 def test_reversal_detail_counts_and_samples():
+    # 改判明细四类计数：正确撤销 FP、错误释放 TP、保留 uncertain、无改判；外部样本不暴露 qname
     df = _features([
         _row("fp.com", 0, 1, 0, 1),
         _row("wrong.com", 1, 1, 0, 1),
@@ -206,6 +218,7 @@ def test_reversal_detail_counts_and_samples():
 
 
 def test_grouped_metrics_by_source_algorithm_and_rule_hit():
+    # 分组统计来源/算法/规则命中类型（E_only、B_only；本例无 E 与 B 同时命中）
     df = _features([
         _row("n0.com", 0, 0, 0, 0, source="normal_list"),
         _row("n1.com", 0, 1, 0, 1, source="normal_list"),
@@ -243,6 +256,7 @@ def test_grouped_metrics_by_source_algorithm_and_rule_hit():
 
 
 def test_plot_metric_comparison_writes_png(tmp_path):
+    # 指标对比图落盘：PNG 文件存在且非空
     metrics = {
         "rule": {"test": {
             "fpr": 0.1, "fnr": 0.2, "precision": 0.8, "recall": 0.8,
@@ -257,6 +271,7 @@ def test_plot_metric_comparison_writes_png(tmp_path):
 
 
 def test_evaluate_all_end_to_end(tmp_path):
+    # 端到端：只读特征与缓存、输出 metrics.json 与运行清单，覆盖率与指标可复算且不泄漏域名
     config = json.loads((PROJECT_ROOT / "config.json").read_text(encoding="utf-8"))
     config_path = tmp_path / "config.json"
     config_path.write_text(json.dumps(config), encoding="utf-8")
@@ -268,8 +283,10 @@ def test_evaluate_all_end_to_end(tmp_path):
         _row("n1.com", 0, 1, 0, 1),
         _row("d2.com", 1, 0, 1, 1, split="val"),
     ]).to_csv(features_path, index=False)
+    # 记录输入特征文件哈希，用于验证评估只读不改写
     features_before = hashlib.sha256(features_path.read_bytes()).hexdigest()
 
+    # 只给 d1.com、f1.com 写缓存，n1.com 保持未覆盖以验证 no_cache 路径
     cache_path = tmp_path / "llm_cache.jsonl"
     with cache_path.open("w", encoding="utf-8") as handle:
         handle.write(json.dumps(_cache_entry("d1.com", "d1", "normal", config)) + "\n")
@@ -322,6 +339,7 @@ def test_evaluate_all_end_to_end(tmp_path):
 
 
 def test_evaluate_main_cli(tmp_path, capsys):
+    # CLI 入口返回 0，并在标准输出打印含 split 列表与子集断言结果的 JSON 摘要
     config = json.loads((PROJECT_ROOT / "config.json").read_text(encoding="utf-8"))
     (tmp_path / "config.json").write_text(json.dumps(config), encoding="utf-8")
     features_path = tmp_path / "features.csv"

@@ -34,6 +34,7 @@ import dns.rcode
 import dns.resolver
 
 
+# 演示用域名与查询类型：5 个正常域名，外加 1 个刻意不存在的域名用于观察 NXDOMAIN
 DEFAULT_DOMAINS: list[tuple[str, str]] = [
     ("www.baidu.com", "A"),
     ("www.qq.com", "A"),
@@ -43,6 +44,7 @@ DEFAULT_DOMAINS: list[tuple[str, str]] = [
     ("this-domain-should-not-exist-xyz12345.example", "A"),
 ]
 
+# 常见 RCODE 数值到名称的映射，未列出的取值回退为 RCODE<数值>
 RCODE_NAMES: dict[int, str] = {
     0: "NOERROR",
     1: "FORMERR",
@@ -55,6 +57,7 @@ RCODE_NAMES: dict[int, str] = {
 
 @dataclass
 class SectionRecord:
+    # 资源记录节中的单条记录：名称、类型、TTL 与 rdata 文本
     name: str
     rtype: str
     ttl: Optional[int]
@@ -63,6 +66,7 @@ class SectionRecord:
 
 @dataclass
 class QueryResult:
+    # 单次查询的结构化结果：查询信息、Header 标志位、四个资源记录节以及原始报文的 Base64
     domain: str
     qtype: str
     nameservers: list[str]
@@ -88,11 +92,13 @@ class QueryResult:
 
 
 def get_system_nameservers() -> list[str]:
+    # 读取系统默认递归解析器地址列表
     resolver = dns.resolver.Resolver()
     return list(resolver.nameservers)
 
 
 def build_resolver(nameserver_override: Optional[str] = None) -> dns.resolver.Resolver:
+    # 构造 Resolver：可用命令行指定的 nameserver 覆盖系统配置，并设置单次超时 3 秒、总生存期 5 秒
     resolver = dns.resolver.Resolver()
     if nameserver_override:
         resolver.nameservers = [nameserver_override]
@@ -102,6 +108,7 @@ def build_resolver(nameserver_override: Optional[str] = None) -> dns.resolver.Re
 
 
 def decode_flags(flags) -> dict:
+    # 把 16 位 flags 字段按位拆解为 QR/OPCODE/AA/TC/RD/RA 六项
     f = int(flags)
     return {
         "QR": bool(f & 0x8000),
@@ -114,6 +121,7 @@ def decode_flags(flags) -> dict:
 
 
 def rtype_name(rdtype: int) -> str:
+    # 记录类型数值转文本（如 1 转 A），转换异常时回退为 TYPE<数值>
     try:
         import dns.rdatatype
         return dns.rdatatype.to_text(rdtype)
@@ -122,6 +130,7 @@ def rtype_name(rdtype: int) -> str:
 
 
 def rclass_name(rclass: int) -> str:
+    # 记录类别数值转文本（如 1 转 IN），转换异常时回退为 CLASS<数值>
     try:
         import dns.rdataclass
         return dns.rdataclass.to_text(rclass)
@@ -130,6 +139,7 @@ def rclass_name(rclass: int) -> str:
 
 
 def _decode_rdata(rrset) -> str:
+    # 把一个 RRset 内各条 rdata 转字符串后用逗号拼接
     parts = []
     for rdata in rrset:
         parts.append(str(rdata))
@@ -137,6 +147,7 @@ def _decode_rdata(rrset) -> str:
 
 
 def make_section_records(rrset_list) -> list[SectionRecord]:
+    # 把 RRset 列表展开成逐条 SectionRecord（一个 RRset 可能包含多条 rdata）
     records = []
     for rrset in rrset_list:
         for rdata in rrset:
@@ -150,9 +161,11 @@ def make_section_records(rrset_list) -> list[SectionRecord]:
 
 
 def _fill_response_fields(result: QueryResult, response) -> None:
+    # 用响应报文填充结果对象：Header 标志位、RCODE、Question 与 Answer/Authority/Additional 三节，并保存原始报文
     result.id = response.id
     flags = response.flags
     fd = decode_flags(flags)
+    # QR 位为 1 表示响应，为 0 表示查询
     result.qr = "response" if fd["QR"] else "query"
     result.opcode = ["QUERY", "IQUERY", "STATUS", None, "NOTIFY", "UPDATE"][fd["OPCODE"]] if fd["OPCODE"] < 6 else str(fd["OPCODE"])
     result.aa = fd["AA"]
@@ -171,12 +184,14 @@ def _fill_response_fields(result: QueryResult, response) -> None:
     result.additional = make_section_records(response.additional)
 
     try:
+        # 保存线上原始报文（Base64），便于后续离线复查
         result.raw_response_b64 = base64.b64encode(response.to_wire()).decode("ascii")
     except Exception:
         result.raw_response_b64 = None
 
 
 def perform_query(domain: str, qtype: str, resolver: dns.resolver.Resolver) -> QueryResult:
+    # 执行一次查询：正常应答与 NXDOMAIN/无应答都算已收到响应（success=True），超时、无可用服务器及其他异常记入 error
     result = QueryResult(
         domain=domain,
         qtype=qtype,
@@ -184,6 +199,7 @@ def perform_query(domain: str, qtype: str, resolver: dns.resolver.Resolver) -> Q
         success=False,
     )
 
+    # 用单调时钟计时，避免系统时间调整影响耗时统计
     start = time.monotonic()
     try:
         answer = resolver.resolve(domain, qtype)
@@ -191,6 +207,7 @@ def perform_query(domain: str, qtype: str, resolver: dns.resolver.Resolver) -> Q
         _fill_response_fields(result, answer.response)
 
     except dns.resolver.NXDOMAIN as e:
+        # NXDOMAIN 同样携带响应报文，尽量解析出来，便于观察 RCODE 与权威节
         result.success = True
         try:
             qnames_list = list(e.qnames()) if callable(e.qnames) else list(e.qnames)
@@ -202,6 +219,7 @@ def perform_query(domain: str, qtype: str, resolver: dns.resolver.Resolver) -> Q
         result.error = "NXDOMAIN"
 
     except dns.resolver.NoAnswer as e:
+        # 域名存在但没有所请求类型的记录，响应报文同样尽量解析
         result.success = True
         try:
             qnames_list = list(e.qnames()) if callable(e.qnames) else list(e.qnames)
@@ -224,6 +242,7 @@ def perform_query(domain: str, qtype: str, resolver: dns.resolver.Resolver) -> Q
 
 
 def print_result(r: QueryResult) -> None:
+    # 按教材字段逐节打印一次查询结果：Header/Question/Answer/Authority/Additional，并说明递归与迭代查询的区别
     print("=" * 72)
     print(f"Query : {r.domain}  type={r.qtype}")
     print(f"NS    : {', '.join(r.nameservers)}")
@@ -270,6 +289,7 @@ def print_result(r: QueryResult) -> None:
 
 
 def save_json(results: list[QueryResult], out_dir: str) -> str:
+    # 把结果序列化为 JSON 写入输出目录：文件名按 UTC 日期命名，并附 stub 与递归解析器观测范围的说明，返回文件路径
     os.makedirs(out_dir, exist_ok=True)
     ts = datetime.now(timezone.utc).strftime("%Y%m%d")
     path = os.path.join(out_dir, f"dns_demo_{ts}.json")
@@ -291,6 +311,7 @@ def save_json(results: list[QueryResult], out_dir: str) -> str:
 
 
 def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
+    # 解析命令行参数：--dry-run 只打印、--nameserver 指定解析器、--save 与 --output-dir 控制 JSON 落盘
     parser = argparse.ArgumentParser(description="DNS 教材原理复现演示")
     parser.add_argument("--dry-run", action="store_true",
                         help="仅打印将要查询的域名和 nameserver，不实际发送请求")
@@ -304,6 +325,7 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
+    # 演示入口：打印观测范围说明后逐域名查询并输出结果，dry-run 时不发请求，可选保存 JSON，最终返回 0
     args = parse_args(argv)
 
     system_ns = get_system_nameservers()
@@ -323,6 +345,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     print()
 
     if args.dry_run:
+        # dry-run 只列出待查询域名与 nameserver，不接触网络
         print("--- DRY RUN ---")
         print(f"将查询 {len(DEFAULT_DOMAINS)} 个域名：")
         for d, qt in DEFAULT_DOMAINS:
@@ -334,6 +357,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     resolver = build_resolver(args.nameserver)
     results = []
 
+    # 逐个域名串行查询并立即打印，便于对照报文与请求
     for domain, qtype in DEFAULT_DOMAINS:
         r = perform_query(domain, qtype, resolver)
         results.append(r)

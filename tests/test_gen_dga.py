@@ -8,9 +8,11 @@ import pytest
 from src import gen_dga
 
 
+# 三种 DGA 算法标识，生成结果按此顺序分组
 ALGORITHMS = ("rand_alpha", "word_digit", "md5_date")
 
 
+# 提供临时词根文件（三行），供 word_digit 算法使用
 @pytest.fixture
 def word_roots_path(tmp_path):
     path = tmp_path / "manual_word_roots.txt"
@@ -19,6 +21,7 @@ def word_roots_path(tmp_path):
 
 
 def test_generates_one_hundred_unique_domains_per_algorithm(word_roots_path):
+    # 每种算法生成 100 条、共 300 条且域名互不重复，顺序按算法分组
     records = gen_dga.generate_dga_domains(20261101, word_roots_path)
 
     assert len(records) == 300
@@ -29,6 +32,7 @@ def test_generates_one_hundred_unique_domains_per_algorithm(word_roots_path):
 
 
 def test_generation_is_deterministic_for_a_fixed_seed(word_roots_path):
+    # 同 seed 可完全复现，换 seed 后至少一条结果不同
     first = gen_dga.generate_dga_domains(20261101, word_roots_path)
     second = gen_dga.generate_dga_domains(20261101, word_roots_path)
     other_seed = gen_dga.generate_dga_domains(20261102, word_roots_path)
@@ -38,6 +42,7 @@ def test_generation_is_deterministic_for_a_fixed_seed(word_roots_path):
 
 
 def test_records_can_be_rebuilt_from_seed_and_params(word_roots_path):
+    # 记录只含 domain/algorithm/seed/params 四字段，且能由 seed+params 重建出原域名
     records = gen_dga.generate_dga_domains(20261101, word_roots_path)
 
     for record in records:
@@ -50,6 +55,7 @@ def test_records_can_be_rebuilt_from_seed_and_params(word_roots_path):
 
 
 def test_generated_domains_follow_each_algorithm_contract(word_roots_path):
+    # 校验各算法域名格式契约：rand_alpha 12-18 位小写字母、word_digit 词根+2-4 位数字、md5_date 为 md5(date|seed) 截断
     records = gen_dga.generate_dga_domains(20261101, word_roots_path)
 
     for record in records:
@@ -76,6 +82,7 @@ def test_generated_domains_follow_each_algorithm_contract(word_roots_path):
 
 
 def test_rebuild_rejects_unknown_algorithm_and_inconsistent_params(word_roots_path):
+    # 未知算法或参数与域名不一致时，重建抛 ValueError
     record = gen_dga.generate_dga_domains(20261101, word_roots_path, count_per_algorithm=1)[0]
     invalid_params = dict(record.params, length=record.params["length"] + 1)
 
@@ -88,6 +95,7 @@ def test_rebuild_rejects_unknown_algorithm_and_inconsistent_params(word_roots_pa
 
 
 def test_rebuild_rejects_a_changed_wordlist(word_roots_path, tmp_path):
+    # 词表变化导致重建不可复现时应报错
     record = gen_dga.generate_dga_domains(20261101, word_roots_path, count_per_algorithm=1)[1]
     changed_roots = tmp_path / "changed_roots.txt"
     changed_roots.write_text("different\nroots\n", encoding="utf-8", newline="")
@@ -99,6 +107,7 @@ def test_rebuild_rejects_a_changed_wordlist(word_roots_path, tmp_path):
 
 
 def test_collision_retries_advance_sample_index(word_roots_path):
+    # 命中预留域名时重试并推进样本序号，seed 后缀变为 :0002
     initial = gen_dga.generate_dga_domains(
         20261101, word_roots_path, count_per_algorithm=1
     )
@@ -113,6 +122,7 @@ def test_collision_retries_advance_sample_index(word_roots_path):
 
 
 def test_collision_limit_and_invalid_value_fail_without_partial_records(word_roots_path):
+    # 重试超限报 collision；非法重试上限（101）报 collision_retry_limit
     first_two = gen_dga.generate_dga_domains(
         20261101, word_roots_path, count_per_algorithm=2
     )[:2]
@@ -135,6 +145,7 @@ def test_collision_limit_and_invalid_value_fail_without_partial_records(word_roo
 def test_csv_writer_uses_stable_contract_and_preserves_target_on_error(
     word_roots_path, tmp_path
 ):
+    # CSV 表头固定、无 BOM、重复写入字节一致；异常时保留原目标文件且不留 .tmp 临时文件
     records = gen_dga.generate_dga_domains(
         20261101, word_roots_path, count_per_algorithm=1
     )
@@ -165,6 +176,7 @@ def test_csv_writer_uses_stable_contract_and_preserves_target_on_error(
 def test_csv_writer_rejects_domain_inconsistent_with_seed_and_params(
     word_roots_path, tmp_path
 ):
+    # 域名与 seed/params 不匹配时拒绝写入，目标文件保持不变
     generated = gen_dga.generate_dga_domains(
         20261101, word_roots_path, count_per_algorithm=1
     )[0]

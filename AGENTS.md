@@ -76,9 +76,28 @@ DnsDgaDetector/
 ├── run_all.py           # 一键流水线（组长，D11）
 ├── data/                # 域名数据、划分、日志（组员A）
 │   └── raw/             # 榜单、公开 DGA、PSL 快照
-├── src/                 # 九个模块，见 docs/specs/project-roadmap.md 7.1 分工
-├── prompts/             # LLM 提示模板（版本化）
-├── tests/               # pytest 三组测试
+├── src/                 # 九个流程模块，分工见 docs/specs/project-roadmap.md 7.1
+│   ├── prepare_data.py  # D2 数据准备：规范化/去重/冲突检查/难负样本，按 eTLD+1 划分 train/val/test（组员A）
+│   ├── gen_dga.py       # D2 教学 DGA 生成：rand_alpha / word_digit / md5_date，seed 可复现（组员A）
+│   ├── gen_log.py       # D3 日志生成：约 5 万条，正常/DGA 行为分布、UTC 窗口放置、统计摘要（组员A）
+│   ├── dns_demo.py      # D4 教材原理：真实 DNS 查询与报文逐字段解码，--dry-run 可离线（组员B）
+│   ├── features.py      # D5 特征：离线 PSL 解析、香农熵 H、60 秒窗口频率 F、间隔中位数 I（组员B）
+│   ├── baseline.py      # D5 基线：仅 train 正常样本拟合 P99/P99/P1，输出 baseline.json 与分布图（组员B）
+│   ├── rule_engine.py   # D6 规则：E = H 超阈、B = 频率或间隔、R = E OR B，候选阈值仅在 val 比较（组员B）
+│   ├── llm_judge.py     # D7–D9 LLM 复核：仅送 E=1 且 B=0，JSON 校验、缓存、重试、离线回放（组长）
+│   └── evaluate.py      # D10–D12 评估：聚合样本/唯一域名双口径、混淆矩阵、指标图与 metrics.json（组长）
+├── prompts/             # LLM 提示模板（版本化，唯一来源）
+├── tests/               # pytest 测试，与 src 模块一一对应
+│   ├── conftest.py          # 把 src/ 注入 sys.path，使测试可直接导入源码模块
+│   ├── test_features.py     # 熵值基准、PSL 后缀、窗口对齐、缺失间隔、基线 schema 与阈值运算（组员B）
+│   ├── test_decisions.py    # 改判表：R=0 不请求、B=1 保留、verdict=normal 才撤回、失败按 uncertain（组长+B）
+│   ├── test_evaluate.py     # 混淆矩阵、零分母 N/A、双口径集合关系、指标复算（组长）
+│   ├── test_run_all.py      # 流水线参数、seed 校验、冻结阈值/输入哈希校验、清单合并（组长）
+│   ├── test_llm_judge.py    # 缓存键构造、JSON 枚举校验、重试退避与预算抽样（组长）
+│   ├── test_llm_smoke.py    # 冒烟测试：伪造响应覆盖超时/限流/非法 JSON 等降级路径（组长）
+│   ├── test_gen_dga.py      # DGA 三算法确定性、seed 复现、CSV 契约（组员A）
+│   ├── test_gen_log.py      # 配额分配、客户端与窗口放置、序列化、摘要复算与原子写（组员A）
+│   └── test_prepare_data.py # 来源解析、去重与冲突、PSL 抽样、划分与原子写入（组员A）
 ├── results/             # 基线/特征/缓存/指标/运行清单
 └── report/              # 实习报告与证据截图
 ```
